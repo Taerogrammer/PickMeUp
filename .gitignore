@@ -136,6 +136,6 @@ iOSInjectionProject/
 
 # API-KEY plist
 SecureKey-Info.plist
-Bundle.swift
+**/Bundle.swift
 
 Package.resolved
