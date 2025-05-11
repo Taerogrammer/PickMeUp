@@ -9,23 +9,20 @@ import SwiftUI
 import Combine
 
 final class LandingViewModel: ObservableObject {
-    @Published var isShowingRegister = false
+    @Published private(set) var state: LandingState
 
-    // 사용자 Intent를 명확하게 선언
-    func handleIntent(_ intent: Intent) {
+    init(initialState: LandingState = LandingState()) {
+        self.state = initialState
+    }
+
+    func handleIntent(_ intent: LandingIntent) {
         switch intent {
         case .registerTapped:
-            isShowingRegister = true
+            state.isShowingRegister = true
         case .appleLoginTapped:
             print("애플 로그인 처리")
         case .kakaoLoginTapped:
             print("카카오 로그인 처리")
         }
-    }
-
-    enum Intent {
-        case registerTapped
-        case appleLoginTapped
-        case kakaoLoginTapped
     }
 }

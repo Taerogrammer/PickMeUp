@@ -24,7 +24,10 @@ struct LandingView: View {
             Spacer()
         }
         .background(Color(white: 0.95).ignoresSafeArea())
-        .sheet(isPresented: $viewModel.isShowingRegister) {
+        .sheet(isPresented: Binding(
+            get: { viewModel.state.isShowingRegister },
+            set: { _ in } // ViewModel에서만 상태를 바꾸므로 Set은 비워둠
+        )) {
             RegisterView()
         }
     }
@@ -53,7 +56,6 @@ struct LandingView: View {
 }
 
 #Preview {
-    let viewModel = LandingViewModel()
-    viewModel.isShowingRegister = true
+    let viewModel = LandingViewModel(initialState: LandingState(isShowingRegister: true))
     return LandingView(viewModel: viewModel)
 }
