@@ -6,18 +6,12 @@
 //
 
 import SwiftUI
-import ComposableArchitecture
 
 @main
 struct PickMeUpApp: App {
     var body: some Scene {
         WindowGroup {
-            LandingView(
-                store: Store(
-                    initialState: LandingFeature.State(),
-                    reducer: { LandingFeature() }
-                )
-            )
+            LandingView()
         }
     }
 }
