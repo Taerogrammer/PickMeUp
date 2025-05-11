@@ -19,6 +19,13 @@ struct LandingView: View {
             Spacer()
             Text("Pick Me Up")
                 .font(.title)
+
+            // ✅ 결과 메시지 표시
+            if let message = viewModel.resultMessage {
+                Text(message)
+                    .padding()
+            }
+        
             Spacer()
             loginRegisterButtons()
             Spacer()
@@ -29,6 +36,10 @@ struct LandingView: View {
             set: { _ in } // ViewModel에서만 상태를 바꾸므로 Set은 비워둠
         )) {
             RegisterView()
+        }
+        // ✅ 여기에 task 추가
+        .task {
+            await viewModel.onAppear()
         }
     }
 
@@ -57,6 +68,6 @@ struct LandingView: View {
 
 #Preview {
     let dummyRouter = AppRouter()
-    let viewModel = LandingViewModel(initialState: LandingState(isShowingRegister: true), router: dummyRouter)
+    let viewModel = LandingViewModel(initialState: LandingState(isShowingRegister: false), router: dummyRouter)
     LandingView(viewModel: viewModel)
 }
