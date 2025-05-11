@@ -33,6 +33,16 @@
 		164E9A5F2DCE545400C348AB /* PickMeUpUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PickMeUpUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		16F1011D2DD0B380001562D9 /* Exceptions for "Resources" folder in "PickMeUp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 164E9A442DCE545200C348AB /* PickMeUp */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		164E9A472DCE545200C348AB /* App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -61,6 +71,9 @@
 		};
 		164E9ACD2DD083C500C348AB /* Resources */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				16F1011D2DD0B380001562D9 /* Exceptions for "Resources" folder in "PickMeUp" target */,
+			);
 			path = Resources;
 			sourceTree = "<group>";
 		};
@@ -443,6 +456,7 @@
 				DEVELOPMENT_TEAM = 49256BK4G3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -477,6 +491,7 @@
 				DEVELOPMENT_TEAM = 49256BK4G3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

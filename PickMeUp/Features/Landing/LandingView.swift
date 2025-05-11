@@ -16,7 +16,7 @@ struct LandingView: View {
             Spacer()
 
             Text("Pick Me Up")
-                .font(.largeTitle.bold())
+                .font(.jalnanTitle1)
 
             Spacer()
 
