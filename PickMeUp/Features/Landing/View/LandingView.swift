@@ -10,7 +10,7 @@ import SwiftUI
 struct LandingView: View {
     @StateObject private var viewModel: LandingViewModel
 
-    init(viewModel: LandingViewModel = LandingViewModel()) {
+    init(viewModel: LandingViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
@@ -56,6 +56,7 @@ struct LandingView: View {
 }
 
 #Preview {
-    let viewModel = LandingViewModel(initialState: LandingState(isShowingRegister: true))
-    return LandingView(viewModel: viewModel)
+    let dummyRouter = AppRouter()
+    let viewModel = LandingViewModel(initialState: LandingState(isShowingRegister: true), router: dummyRouter)
+    LandingView(viewModel: viewModel)
 }

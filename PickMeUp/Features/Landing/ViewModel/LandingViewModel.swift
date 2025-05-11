@@ -10,15 +10,17 @@ import Combine
 
 final class LandingViewModel: ObservableObject {
     @Published private(set) var state: LandingState
+    private let router: AppRouter
 
-    init(initialState: LandingState = LandingState()) {
+    init(initialState: LandingState = LandingState(), router: AppRouter) {
         self.state = initialState
+        self.router = router
     }
 
     func handleIntent(_ intent: LandingIntent) {
         switch intent {
         case .registerTapped:
-            state.isShowingRegister = true
+            router.navigate(to: .register)
         case .appleLoginTapped:
             print("애플 로그인 처리")
         case .kakaoLoginTapped:

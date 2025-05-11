@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct PickMeUpApp: App {
+    let container = DIContainer()
+
     var body: some Scene {
         WindowGroup {
-            LandingView()
+            AppRootView(container: container)
         }
     }
 }
