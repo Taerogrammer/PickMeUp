@@ -21,20 +21,31 @@ struct PrimaryButton<Content: View>: View {
             content()
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44)
-                .padding(.horizontal, 20)
-                .background(Color.blue)
+                .background(Color.black)
                 .cornerRadius(8)
         }
+        .padding(.horizontal, 20)
     }
 }
 
 #Preview {
-    PrimaryButton(action: {
-        print("Tapped")
-    }) {
-        HStack {
-            Image(systemName: "person.fill")
-            Text("Apple 로그인")
+    VStack {
+        PrimaryButton(action: {
+            print("Tapped")
+        }) {
+            HStack {
+                Image("apple")
+                Text("Sign in with Apple")
+            }
+        }
+
+        PrimaryButton(action: {
+            print("Tapped")
+        }) {
+            HStack {
+                Image("kakao_login_button")
+                    .resizable()
+            }
         }
     }
 }
