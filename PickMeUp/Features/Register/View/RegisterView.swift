@@ -8,24 +8,103 @@
 import SwiftUI
 
 struct RegisterView: View {
-    @State private var username: String = ""
+    @StateObject private var viewModel: RegisterViewModel
+
+    init(viewModel: RegisterViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
 
     var body: some View {
         VStack(spacing: 16) {
-            Text("회원가입")
-                .font(.title)
 
-            TextField("사용자 이름", text: $username)
-                .textFieldStyle(.roundedBorder)
-                .padding()
+            EmailVerificationField(viewModel: viewModel)
 
-            Button("완료") {
-                print("회원가입 완료: \(username)")
+            ValidatedTextField(
+                title: "Nickname",
+                text: Binding(
+                    get: { viewModel.state.nickname },
+                    set: { viewModel.handleIntent(.updateNickname($0)) }
+                ),
+                message: viewModel.state.nicknameValidationMessage,
+                isSuccess: viewModel.state.isNicknameValid
+            )
+
+            ValidatedTextField(
+                title: "Password",
+                text: Binding(
+                    get: { viewModel.state.password },
+                    set: { viewModel.handleIntent(.updatePassword($0)) }
+                ),
+                message: viewModel.state.passwordValidationMessage,
+                isSuccess: viewModel.state.isPasswordValid
+            )
+
+            Button(action: { viewModel.handleIntent(.submit) }) {
+                Text("Register")
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(viewModel.state.isFormValid ? Color.blue : Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
             }
+            .disabled(!viewModel.state.isFormValid)
+
+            Spacer()
         }
         .padding()
+        .navigationTitle("회원가입")
     }
 }
+
+struct EmailVerificationField: View {
+    @ObservedObject var viewModel: RegisterViewModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                TextField("Email", text: Binding(
+                    get: { viewModel.state.email },
+                    set: { viewModel.handleIntent(.updateEmail($0)) }
+                ))
+                .autocapitalization(.none)
+                .textFieldStyle(.roundedBorder)
+                .frame(minWidth: 0, maxWidth: .infinity)
+                .disabled(viewModel.state.isEmailValid)
+
+                PrimaryButton(action: { viewModel.handleIntent(.validateEmail) }) {
+                    Text("중복 확인")
+                        .padding(.horizontal)
+                }
+                .fixedSize()
+                .disabled(viewModel.state.isEmailValid)
+            }
+
+            Text(viewModel.state.emailValidationMessage ?? " ")
+                .foregroundColor(viewModel.state.isEmailValid ? .green : .red)
+                .font(.footnote)
+        }
+    }
+}
+
+struct ValidatedTextField: View {
+    let title: String
+    @Binding var text: String
+    let message: String?
+    let isSuccess: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            TextField(title, text: $text)
+                .autocapitalization(.none)
+                .textFieldStyle(.roundedBorder)
+
+            Text(message ?? " ")
+                .foregroundColor(isSuccess ? .green : .red)
+                .font(.footnote)
+        }
+    }
+}
+
 #Preview {
-    RegisterView()
+    RegisterView(viewModel: RegisterViewModel(router: AppRouter()))
 }

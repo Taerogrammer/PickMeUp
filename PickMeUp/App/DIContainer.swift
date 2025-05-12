@@ -11,10 +11,10 @@ final class DIContainer {
     let router = AppRouter()
 
     func makeLandingView() -> some View {
-        LandingView(viewModel: LandingViewModel(router: router))
+        LandingView(viewModel: LandingViewModel(router: router), container: self)
     }
 
     func makeRegisterView() -> some View {
-        RegisterView()
+        RegisterView(viewModel: RegisterViewModel(router: router))
     }
 }

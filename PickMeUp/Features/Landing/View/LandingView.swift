@@ -9,9 +9,11 @@ import SwiftUI
 
 struct LandingView: View {
     @StateObject private var viewModel: LandingViewModel
+    private let container: DIContainer
 
-    init(viewModel: LandingViewModel) {
+    init(viewModel: LandingViewModel, container: DIContainer) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        self.container = container
     }
 
     var body: some View {
@@ -20,12 +22,6 @@ struct LandingView: View {
             Text("Pick Me Up")
                 .font(.title)
 
-            // ✅ 결과 메시지 표시
-            if let message = viewModel.resultMessage {
-                Text(message)
-                    .padding()
-            }
-        
             Spacer()
             loginRegisterButtons()
             Spacer()
@@ -35,12 +31,9 @@ struct LandingView: View {
             get: { viewModel.state.isShowingRegister },
             set: { _ in } // ViewModel에서만 상태를 바꾸므로 Set은 비워둠
         )) {
-            RegisterView()
+            container.makeRegisterView()
         }
-        // ✅ 여기에 task 추가
-        .task {
-            await viewModel.onAppear()
-        }
+
     }
 
     @ViewBuilder
@@ -69,5 +62,5 @@ struct LandingView: View {
 #Preview {
     let dummyRouter = AppRouter()
     let viewModel = LandingViewModel(initialState: LandingState(isShowingRegister: false), router: dummyRouter)
-    LandingView(viewModel: viewModel)
+    LandingView(viewModel: viewModel, container: DIContainer())
 }

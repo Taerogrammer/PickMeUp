@@ -6,3 +6,11 @@
 //
 
 import Foundation
+
+enum RegisterIntent {
+    case updateEmail(String)
+    case updateNickname(String)
+    case updatePassword(String)
+    case validateEmail
+    case submit
+}
