@@ -58,6 +58,9 @@ final class LandingViewModel: ObservableObject {
                 print("[DEBUG] failure: \(String(describing: result.failure))")
                 await MainActor.run {
                     if let success = result.success {
+                        TokenManager.shared.save(success.accessToken, for: .accessToken)
+                        TokenManager.shared.save(success.refreshToken, for: .refreshToken)
+                        TokenManager.shared.printStoredTokens()
                         // 로그인 성공 시 홈 화면으로 이동
                         router.navigate(to: .home)
                         resultMessage = "로그인 성공!"
