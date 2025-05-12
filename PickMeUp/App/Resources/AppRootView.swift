@@ -23,6 +23,8 @@ struct AppRootView: View {
                     switch route {
                     case .register:
                         container.makeRegisterView()
+                    case .home:
+                        container.makeHomeView()
                     }
                 }
         }

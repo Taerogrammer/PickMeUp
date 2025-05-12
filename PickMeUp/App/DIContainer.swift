@@ -17,4 +17,8 @@ final class DIContainer {
     func makeRegisterView() -> some View {
         RegisterView(viewModel: RegisterViewModel(router: router))
     }
+
+    func makeHomeView() -> some View {
+        HomeView(viewModel: HomeViewModel(router: router))
+    }
 }
