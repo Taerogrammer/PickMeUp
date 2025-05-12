@@ -33,4 +33,6 @@ struct RegisterState: Equatable {
         }
         return emailValidationFeedback
     }
+
+    var isPasswordVisible: Bool = false
 }

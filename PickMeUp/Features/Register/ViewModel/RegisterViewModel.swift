@@ -32,6 +32,8 @@ final class RegisterViewModel: ObservableObject {
             state.nickname = nickname
         case .updatePassword(let password):
             state.password = password
+        case .togglePasswordVisibility:
+            state.isPasswordVisible.toggle()
         case .validateEmail:
             Task { await validateEmail() }
         case .submit:
@@ -42,12 +44,15 @@ final class RegisterViewModel: ObservableObject {
 
     private func validateForm() {
         state.isNicknameValid = validator.validateNicknameFormat(state.nickname)
-        state.nicknameValidationMessage = state.isNicknameValid ? nil : "닉네임에 . , ,, ?, *, -, @ 문자는 사용할 수 없습니다."
+        state.nicknameValidationMessage = state.nickname.isEmpty
+            ? nil
+            : (state.isNicknameValid ? nil : "닉네임에 . , ,, ?, *, -, @ 문자는 사용할 수 없습니다.")
 
         state.isPasswordValid = validator.validatePasswordFormat(state.password)
-        state.passwordValidationMessage = state.isPasswordValid ? nil : "비밀번호는 8자 이상, 영문, 숫자, 특수문자를 포함해야 합니다."
+        state.passwordValidationMessage = state.password.isEmpty
+            ? nil
+            : (state.isPasswordValid ? nil : "비밀번호는 8자 이상, 영문, 숫자, 특수문자를 포함해야 합니다.")
 
-        // ✅ 이메일 메시지는 건드리지 않고, 유효 상태만 종합
         state.isFormValid = state.isEmailValid && state.isNicknameValid && state.isPasswordValid
     }
 

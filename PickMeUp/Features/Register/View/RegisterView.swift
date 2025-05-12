@@ -29,15 +29,34 @@ struct RegisterView: View {
                 isSuccess: viewModel.state.isNicknameValid
             )
 
-            ValidatedTextField(
-                title: "Password",
-                text: Binding(
-                    get: { viewModel.state.password },
-                    set: { viewModel.handleIntent(.updatePassword($0)) }
-                ),
-                message: viewModel.state.passwordValidationMessage,
-                isSuccess: viewModel.state.isPasswordValid
-            )
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    if viewModel.state.isPasswordVisible {
+                        TextField("Password", text: Binding(
+                            get: { viewModel.state.password },
+                            set: { viewModel.handleIntent(.updatePassword($0)) }
+                        ))
+                    } else {
+                        SecureField("Password", text: Binding(
+                            get: { viewModel.state.password },
+                            set: { viewModel.handleIntent(.updatePassword($0)) }
+                        ))
+                    }
+
+                    Button(action: {
+                        viewModel.handleIntent(.togglePasswordVisibility)
+                    }) {
+                        Image(systemName: viewModel.state.isPasswordVisible ? "eye.slash" : "eye")
+                            .foregroundColor(.gray)
+                    }
+                }
+                .textFieldStyle(.roundedBorder)
+
+                Text(viewModel.state.passwordValidationMessage ?? " ")
+                    .foregroundColor(.red)
+                    .font(.footnote)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
 
             Button(action: { viewModel.handleIntent(.submit) }) {
                 Text("Register")
@@ -53,6 +72,7 @@ struct RegisterView: View {
         }
         .padding()
         .navigationTitle("회원가입")
+        .scrollDismissesKeyboard(.interactively)
     }
 }
 
