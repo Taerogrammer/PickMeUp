@@ -45,6 +45,12 @@ struct LandingView: View {
                     onToggleVisibility: { viewModel.handleIntent(.togglePasswordVisibility) }
                 )
 
+                Toggle("자동 로그인", isOn: Binding(
+                    get: { viewModel.state.isAutoLoginEnabled },
+                    set: { viewModel.handleIntent(.toggleAutoLogin($0)) }
+                ))
+                .padding(.horizontal, 20)
+
                 if let error = viewModel.state.loginErrorMessage {
                     Text(error).foregroundColor(.red).font(.footnote)
                 }
@@ -63,7 +69,7 @@ struct LandingView: View {
         .background(Color(white: 0.95).ignoresSafeArea())
         .sheet(isPresented: Binding(
             get: { viewModel.state.isShowingRegister },
-            set: { _ in } // ViewModel에서만 상태를 바꾸므로 Set은 비워둠
+            set: { _ in }
         )) {
             container.makeRegisterView()
         }
@@ -88,6 +94,7 @@ struct LandingView: View {
         }
     }
 }
+
 
 #Preview {
     let dummyRouter = AppRouter()

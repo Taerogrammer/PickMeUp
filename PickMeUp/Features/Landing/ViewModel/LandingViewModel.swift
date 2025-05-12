@@ -35,6 +35,9 @@ final class LandingViewModel: ObservableObject {
             print("애플 로그인 처리")
         case .kakaoLoginTapped:
             print("카카오 로그인 처리")
+        case .toggleAutoLogin(let enabled):
+            state.isAutoLoginEnabled = enabled
+            UserDefaultsManager.isAutoLoginEnabled = enabled
         }
     }
 
