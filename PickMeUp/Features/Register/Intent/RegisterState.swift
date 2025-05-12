@@ -23,7 +23,6 @@ struct RegisterState: Equatable {
 
     var isFormValid: Bool = false
 
-    /// ✅ 사용자에게 보여줄 이메일 메시지
     var emailValidationMessage: String? {
         if !didRequestEmailValidation {
             return "이메일 인증을 진행해주세요"
@@ -35,4 +34,6 @@ struct RegisterState: Equatable {
     }
 
     var isPasswordVisible: Bool = false
+    var alertMessage: String? = nil
+    var isRegisterSuccess: Bool = false
 }

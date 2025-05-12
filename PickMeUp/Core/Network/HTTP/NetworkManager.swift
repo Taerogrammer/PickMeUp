@@ -11,7 +11,12 @@ final class NetworkManager {
     static let shared = NetworkManager()
     private init() {}
 
-    func fetch<T: Decodable>(_ router: APIRouter, responseType: T.Type) async throws -> (statusCode: Int, response: T) {
+    /// 상태 코드에 따라 성공/실패를 구분해 디코딩
+    func fetch<Success: Decodable, Failure: Decodable>(
+        _ router: APIRouter,
+        successType: Success.Type,
+        failureType: Failure.Type
+    ) async throws -> (statusCode: Int, success: Success?, failure: Failure?) {
         guard let urlRequest = router.urlRequest else { throw APIError.unknown }
 
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
@@ -20,7 +25,14 @@ final class NetworkManager {
             throw APIError.unknown
         }
 
-        let decodedResponse = try JSONDecoder().decode(T.self, from: data)
-        return (statusCode: httpResponse.statusCode, response: decodedResponse)
+        let statusCode = httpResponse.statusCode
+
+        if (200...299).contains(statusCode) {
+            let decodedSuccess = try? JSONDecoder().decode(Success.self, from: data)
+            return (statusCode, decodedSuccess, nil)
+        } else {
+            let decodedFailure = try? JSONDecoder().decode(Failure.self, from: data)
+            return (statusCode, nil, decodedFailure)
+        }
     }
 }

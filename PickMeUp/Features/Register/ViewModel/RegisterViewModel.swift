@@ -10,7 +10,7 @@ import Foundation
 
 final class RegisterViewModel: ObservableObject {
     @Published var state: RegisterState
-    private let router: AppRouter
+    let router: AppRouter
     private let validator: RegisterValidator
 
     init(initialState: RegisterState = RegisterState(), router: AppRouter, validator: RegisterValidator = .init()) {
@@ -73,23 +73,27 @@ final class RegisterViewModel: ObservableObject {
         do {
             let result = try await NetworkManager.shared.fetch(
                 PickupRouter.validateEmail(email: state.email),
-                responseType: CommonMessageResponse.self
+                successType: CommonMessageResponse.self,
+                failureType: CommonMessageResponse.self
             )
 
             await MainActor.run {
-                if result.statusCode == 200 {
+                if let success = result.success {
                     state.isEmailValid = true
-                    state.emailValidationFeedback = nil
+                    state.emailValidationFeedback = success.message
+                } else if let failure = result.failure {
+                    state.isEmailValid = false
+                    state.emailValidationFeedback = failure.message
                 } else {
                     state.isEmailValid = false
-                    state.emailValidationFeedback = result.response.message
+                    state.emailValidationFeedback = "이메일 중복 확인 중 알 수 없는 오류 발생."
                 }
                 validateForm()
             }
 
         } catch {
             await MainActor.run {
-                state.emailValidationFeedback = "이메일 중복 확인 중 오류 발생."
+                state.emailValidationFeedback = "이메일 중복 확인 중 네트워크 오류 발생: \(error.localizedDescription)"
                 state.isEmailValid = false
                 validateForm()
             }
@@ -98,6 +102,48 @@ final class RegisterViewModel: ObservableObject {
 
     private func validateAndRegister() {
         guard state.isFormValid else { return }
-        router.reset()
+
+        Task {
+            let request = JoinRequest(
+                email: state.email,
+                password: state.password,
+                nick: state.nickname,
+                phoneNum: "01012341234",
+                deviceToken: ""
+            )
+
+            do {
+                let result = try await NetworkManager.shared.fetch(
+                    PickupRouter.join(request: request),
+                    successType: JoinResponse.self,
+                    failureType: CommonMessageResponse.self
+                )
+
+                await MainActor.run {
+                    if let success = result.success {
+                        print("가입 성공, 유저 ID: \(success.userId)")
+                        print("AccessToken: \(success.accessToken)")
+                        print("RefreshToken: \(success.refreshToken)")
+
+                        state.alertMessage = "회원가입이 완료되었습니다."
+                        state.isRegisterSuccess = true
+
+                    } else if let failure = result.failure {
+                        state.alertMessage = failure.message
+                        state.isRegisterSuccess = false
+
+                    } else {
+                        state.alertMessage = "회원가입 중 알 수 없는 오류가 발생했습니다."
+                        state.isRegisterSuccess = false
+                    }
+                }
+
+            } catch {
+                await MainActor.run {
+                    state.alertMessage = "회원가입 중 네트워크 오류가 발생했습니다. 네트워크 상태를 확인해주세요."
+                    state.isRegisterSuccess = false
+                }
+            }
+        }
     }
 }

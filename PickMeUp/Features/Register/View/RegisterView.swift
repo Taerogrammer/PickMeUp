@@ -45,6 +45,24 @@ struct RegisterView: View {
         .padding()
         .navigationTitle("회원가입")
         .scrollDismissesKeyboard(.interactively)
+        .alert("알림", isPresented: Binding<Bool>(
+            get: { viewModel.state.alertMessage != nil },
+            set: { _ in
+                if viewModel.state.isRegisterSuccess {
+                    viewModel.router.reset()
+                }
+                viewModel.state.alertMessage = nil
+            }
+        )) {
+            Button("확인") {
+                if viewModel.state.isRegisterSuccess {
+                    viewModel.router.reset()
+                }
+                viewModel.state.alertMessage = nil
+            }
+        } message: {
+            Text(viewModel.state.alertMessage ?? "")
+        }
     }
 }
 
