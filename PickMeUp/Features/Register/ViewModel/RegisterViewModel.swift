@@ -71,20 +71,22 @@ final class RegisterViewModel: ObservableObject {
         }
 
         do {
-            let response: CommonMessageResponse = try await NetworkManager.shared.request(
+            let result = try await NetworkManager.shared.fetch(
                 PickupRouter.validateEmail(email: state.email),
                 responseType: CommonMessageResponse.self
             )
+
             await MainActor.run {
-                if response.message.contains("가능") {
+                if result.statusCode == 200 {
                     state.isEmailValid = true
-                    state.emailValidationFeedback = nil // ✅ 성공 시 개별 메시지 제거
+                    state.emailValidationFeedback = nil
                 } else {
                     state.isEmailValid = false
-                    state.emailValidationFeedback = response.message
+                    state.emailValidationFeedback = result.response.message
                 }
                 validateForm()
             }
+
         } catch {
             await MainActor.run {
                 state.emailValidationFeedback = "이메일 중복 확인 중 오류 발생."
