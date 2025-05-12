@@ -18,7 +18,7 @@ enum PickupRouter: APIRouter {
     // 사용자
     case validateEmail(email: String)
     case join(request: JoinRequest)
-    case login(email: String, password: String)
+    case login(request: LoginRequest)
     case loginWithKakao(token: String)
     case loginWithApple(token: String)
     case getProfile
@@ -67,8 +67,12 @@ enum PickupRouter: APIRouter {
                 "phoneNum": request.phoneNum,
                 "deviceToken": request.deviceToken
             ]
-        case .login(let email, let password):
-            return ["email": email, "password": password]
+        case .login(let request):
+            return [
+                "email": request.email,
+                "password": request.password,
+                "deviceToken": request.deviceToken
+            ]
         case .loginWithKakao(let token), .loginWithApple(let token):
             return ["token": token]
         default:

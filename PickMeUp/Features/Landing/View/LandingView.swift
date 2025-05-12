@@ -23,6 +23,40 @@ struct LandingView: View {
                 .font(.title)
 
             Spacer()
+            VStack(spacing: 16) {
+                TextField("Email", text: Binding(
+                    get: { viewModel.state.email },
+                    set: { viewModel.handleIntent(.updateEmail($0)) }
+                ))
+                .autocapitalization(.none)
+                .textFieldStyle(.roundedBorder)
+
+                PasswordField(
+                    title: "Password",
+                    text: Binding(
+                        get: { viewModel.state.password },
+                        set: { viewModel.handleIntent(.updatePassword($0)) }
+                    ),
+                    isPasswordVisible: Binding(
+                        get: { viewModel.state.isPasswordVisible },
+                        set: { _ in viewModel.handleIntent(.togglePasswordVisibility) }
+                    ),
+                    validationMessage: nil,
+                    onToggleVisibility: { viewModel.handleIntent(.togglePasswordVisibility) }
+                )
+
+                if let error = viewModel.state.loginErrorMessage {
+                    Text(error).foregroundColor(.red).font(.footnote)
+                }
+
+                PrimaryButton(action: { viewModel.handleIntent(.login) }) {
+                    Text("로그인")
+                }
+                .disabled(viewModel.state.isLoading)
+            }
+            .padding(.horizontal, 20)
+
+            Spacer()
             loginRegisterButtons()
             Spacer()
         }
@@ -33,14 +67,13 @@ struct LandingView: View {
         )) {
             container.makeRegisterView()
         }
-
     }
 
     @ViewBuilder
     private func loginRegisterButtons() -> some View {
         VStack(spacing: 12) {
             PrimaryButton(action: { viewModel.handleIntent(.registerTapped) }) {
-                Text("로그인")
+                Text("회원가입")
             }
             PrimaryButton(action: { viewModel.handleIntent(.appleLoginTapped) }) {
                 HStack {
@@ -51,9 +84,6 @@ struct LandingView: View {
             PrimaryButton(action: { viewModel.handleIntent(.kakaoLoginTapped) }) {
                 Image("kakao_login_button")
                     .resizable()
-            }
-            PrimaryButton(action: { viewModel.handleIntent(.registerTapped) }) {
-                Text("회원가입")
             }
         }
     }
