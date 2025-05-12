@@ -16,7 +16,6 @@ struct RegisterView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-
             EmailVerificationField(viewModel: viewModel)
 
             ValidatedTextField(
@@ -29,34 +28,7 @@ struct RegisterView: View {
                 isSuccess: viewModel.state.isNicknameValid
             )
 
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    if viewModel.state.isPasswordVisible {
-                        TextField("Password", text: Binding(
-                            get: { viewModel.state.password },
-                            set: { viewModel.handleIntent(.updatePassword($0)) }
-                        ))
-                    } else {
-                        SecureField("Password", text: Binding(
-                            get: { viewModel.state.password },
-                            set: { viewModel.handleIntent(.updatePassword($0)) }
-                        ))
-                    }
-
-                    Button(action: {
-                        viewModel.handleIntent(.togglePasswordVisibility)
-                    }) {
-                        Image(systemName: viewModel.state.isPasswordVisible ? "eye.slash" : "eye")
-                            .foregroundColor(.gray)
-                    }
-                }
-                .textFieldStyle(.roundedBorder)
-
-                Text(viewModel.state.passwordValidationMessage ?? " ")
-                    .foregroundColor(.red)
-                    .font(.footnote)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
+            PasswordField(title: "Password", viewModel: viewModel)
 
             Button(action: { viewModel.handleIntent(.submit) }) {
                 Text("Register")
@@ -121,6 +93,42 @@ struct ValidatedTextField: View {
             Text(message ?? " ")
                 .foregroundColor(isSuccess ? .green : .red)
                 .font(.footnote)
+        }
+    }
+}
+
+struct PasswordField: View {
+    let title: String
+    @ObservedObject var viewModel: RegisterViewModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                if viewModel.state.isPasswordVisible {
+                    TextField(title, text: Binding(
+                        get: { viewModel.state.password },
+                        set: { viewModel.handleIntent(.updatePassword($0)) }
+                    ))
+                } else {
+                    SecureField(title, text: Binding(
+                        get: { viewModel.state.password },
+                        set: { viewModel.handleIntent(.updatePassword($0)) }
+                    ))
+                }
+
+                Button(action: {
+                    viewModel.handleIntent(.togglePasswordVisibility)
+                }) {
+                    Image(systemName: viewModel.state.isPasswordVisible ? "eye.slash" : "eye")
+                        .foregroundColor(.gray)
+                }
+            }
+            .textFieldStyle(.roundedBorder)
+
+            Text(viewModel.state.passwordValidationMessage ?? "")
+                .foregroundColor(.red)
+                .font(.footnote)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
