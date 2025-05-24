@@ -5,7 +5,7 @@ enum UserRouter: APIRouter {
     case join(request: JoinRequest)
     case login(request: LoginRequest)
     case loginWithKakao(token: String)
-    case loginWithApple(token: String)
+    case loginWithApple(request: AppleLoginRequest)
     case getProfile
     
     var environment: APIEnvironment { .production }
@@ -54,8 +54,14 @@ enum UserRouter: APIRouter {
                 APIConstants.Parameters.password: request.password,
                 APIConstants.Parameters.deviceToken: request.deviceToken
             ]
-        case .loginWithKakao(let token), .loginWithApple(let token):
+        case .loginWithKakao(let token):
             return [APIConstants.Parameters.token: token]
+        case .loginWithApple(let request):
+            return [
+                APIConstants.Parameters.idToken: request.idToken,
+                APIConstants.Parameters.deviceToken: request.deviceToken,
+                APIConstants.Parameters.nickname: request.nick
+            ]
         case .getProfile:
             return nil
         }

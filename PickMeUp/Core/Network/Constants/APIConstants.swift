@@ -78,6 +78,7 @@ enum APIConstants {
         static let deviceToken = "deviceToken"
         static let token = "token"
         static let key = "key"
+        static let idToken = "idToken"
     }
     
     // MARK: - Error Messages
