@@ -81,6 +81,27 @@ enum PickupRouter: APIRouter {
     }
 
     var headers: [String: String]? {
-        ["SeSACKey": Bundle.value(forKey: "SeSACKey")]
+        var baseHeaders: [String: String] = [
+            "SeSACKey": Bundle.value(forKey: "SeSACKey")
+        ]
+
+        switch self {
+        case .validateEmail,
+             .join,
+             .login,
+             .loginWithKakao,
+             .loginWithApple:
+            // 로그인 관련 요청은 Authorization 없음
+            return baseHeaders
+
+        default:
+            // Authorization 헤더 추가
+            if let refreshToken = TokenManager.shared.load(for: .refreshToken) {
+                baseHeaders["Authorization"] = refreshToken
+            } else {
+                print("⚠️ [PickupRouter] RefreshToken이 없습니다. Authorization 헤더가 누락됩니다.")
+            }
+            return baseHeaders
+        }
     }
 }
