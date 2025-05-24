@@ -1,61 +1,38 @@
-//
-//  TokenManager.swift
-//  PickMeUp
-//
-//  Created by 김태형 on 5/13/25.
-//
-
 import Foundation
 
 final class TokenManager {
     static let shared = TokenManager()
     private init() {}
 
-    // MARK: - 메모리 캐시 (AccessToken 전용)
-    private var accessTokenCache: String?
+    private let userDefaults = UserDefaults.standard
 
-    // MARK: - Save
-    func save(_ value: String, for type: TokenType) {
-        switch type {
-        case .accessToken:
-            accessTokenCache = value  // 메모리에만 저장
-        case .refreshToken, .deviceToken:
-            KeychainManager.shared.save(key: type.rawValue, value: value)
-        }
+    // 토큰 저장
+    func save(_ token: String, for type: TokenType) {
+        userDefaults.set(token, forKey: type.rawValue)
     }
 
-    // MARK: - Load
+    // 토큰 불러오기
     func load(for type: TokenType) -> String? {
-        switch type {
-        case .accessToken:
-            return accessTokenCache
-        case .refreshToken, .deviceToken:
-            return KeychainManager.shared.load(key: type.rawValue)
-        }
+        userDefaults.string(forKey: type.rawValue)
     }
 
-    // MARK: - Delete
-    func clear(for type: TokenType) {
-        switch type {
-        case .accessToken:
-            accessTokenCache = nil
-        case .refreshToken, .deviceToken:
-            KeychainManager.shared.delete(key: type.rawValue)
-        }
-    }
-
-    // MARK: - 전체 삭제
-    func clearAll() {
-        accessTokenCache = nil
-        KeychainManager.shared.delete(key: TokenType.refreshToken.rawValue)
-        KeychainManager.shared.delete(key: TokenType.deviceToken.rawValue)
+    // 토큰 삭제
+    func remove(for type: TokenType) {
+        userDefaults.removeObject(forKey: type.rawValue)
     }
 
     func printStoredTokens() {
-        let accessToken = accessTokenCache ?? "없음"
-        let refreshToken = KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) ?? "없음"
+        let access = load(for: .accessToken) ?? "(없음)"
+        let refresh = load(for: .refreshToken) ?? "(없음)"
 
-        print("[DEBUG] AccessToken: \(accessToken)")
-        print("[DEBUG] RefreshToken: \(refreshToken)")
+        print("🔐 [TokenManager] 저장된 토큰 정보:")
+        print("  - Access Token: \(access)")
+        print("  - Refresh Token: \(refresh)")
     }
+
+//    // 모든 토큰 삭제
+//    func clearAll() {
+//        TokenType.allCases.forEach { remove(for: $0) }
+//    }
+
 }
