@@ -1,107 +1,84 @@
-//
-//  PickupRouter.swift
-//  PickMeUp
-//
-//  Created by 김태형 on 5/11/25.
-//
-
 import Foundation
 
-enum PickupRouter: APIRouter {
-
-    // 공통사항
-    case getCommon
-
-    // 인증
-    case refreshToken
-
-    // 사용자
+enum UserRouter: APIRouter {
     case validateEmail(email: String)
     case join(request: JoinRequest)
     case login(request: LoginRequest)
     case loginWithKakao(token: String)
     case loginWithApple(token: String)
     case getProfile
-
+    
     var environment: APIEnvironment { .production }
-
+    
     var path: String {
         switch self {
-        case .getCommon:
-            return "/common"
-        case .refreshToken:
-            return "/v1/auth/refresh"
         case .validateEmail:
-            return "/v1/users/validation/email"
+            return APIConstants.Endpoints.User.validateEmail
         case .join:
-            return "/v1/users/join"
+            return APIConstants.Endpoints.User.join
         case .login:
-            return "/v1/users/login"
+            return APIConstants.Endpoints.User.login
         case .loginWithKakao:
-            return "/v1/users/login/kakao"
+            return APIConstants.Endpoints.User.loginKakao
         case .loginWithApple:
-            return "/v1/users/login/apple"
+            return APIConstants.Endpoints.User.loginApple
         case .getProfile:
-            return "/v1/users/me/profile"
+            return APIConstants.Endpoints.User.profile
         }
     }
-
+    
     var method: HTTPMethod {
         switch self {
-        case .getCommon, .refreshToken, .getProfile:
+        case .getProfile:
             return .get
         case .validateEmail, .join, .login, .loginWithKakao, .loginWithApple:
             return .post
         }
     }
-
+    
     var parameters: [String: Any]? {
         switch self {
         case .validateEmail(let email):
-            return ["email": email]
+            return [APIConstants.Parameters.email: email]
         case .join(let request):
             return [
-                "email": request.email,
-                "password": request.password,
-                "nick": request.nick,
-                "phoneNum": request.phoneNum,
-                "deviceToken": request.deviceToken
+                APIConstants.Parameters.email: request.email,
+                APIConstants.Parameters.password: request.password,
+                APIConstants.Parameters.nickname: request.nick,
+                APIConstants.Parameters.phoneNumber: request.phoneNum,
+                APIConstants.Parameters.deviceToken: request.deviceToken
             ]
         case .login(let request):
             return [
-                "email": request.email,
-                "password": request.password,
-                "deviceToken": request.deviceToken
+                APIConstants.Parameters.email: request.email,
+                APIConstants.Parameters.password: request.password,
+                APIConstants.Parameters.deviceToken: request.deviceToken
             ]
         case .loginWithKakao(let token), .loginWithApple(let token):
-            return ["token": token]
-        default:
+            return [APIConstants.Parameters.token: token]
+        case .getProfile:
             return nil
         }
     }
-
+    
     var headers: [String: String]? {
         var baseHeaders: [String: String] = [
-            "SeSACKey": Bundle.value(forKey: "SeSACKey")
+            APIConstants.Headers.sesacKey: APIConstants.Headers.Values.sesacKeyValue()
         ]
-
+        
         switch self {
-        case .validateEmail,
-             .join,
-             .login,
-             .loginWithKakao,
-             .loginWithApple:
+        case .validateEmail, .join, .login, .loginWithKakao, .loginWithApple:
             // 로그인 관련 요청은 Authorization 없음
             return baseHeaders
-
+            
         default:
             // Authorization 헤더 추가
             if let refreshToken = TokenManager.shared.load(for: .refreshToken) {
-                baseHeaders["Authorization"] = refreshToken
+                baseHeaders[APIConstants.Headers.authorization] = refreshToken
             } else {
-                print("⚠️ [PickupRouter] RefreshToken이 없습니다. Authorization 헤더가 누락됩니다.")
+                print(APIConstants.ErrorMessages.missingRefreshToken)
             }
             return baseHeaders
         }
     }
-}
+} 

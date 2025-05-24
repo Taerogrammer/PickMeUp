@@ -1,0 +1,42 @@
+import Foundation
+
+enum AuthRouter: APIRouter {
+    case refreshToken
+    
+    var environment: APIEnvironment { .production }
+    
+    var path: String {
+        switch self {
+        case .refreshToken:
+            return APIConstants.Endpoints.Auth.refresh
+        }
+    }
+    
+    var method: HTTPMethod {
+        switch self {
+        case .refreshToken:
+            return .get
+        }
+    }
+    
+    var parameters: [String: Any]? {
+        switch self {
+        case .refreshToken:
+            return nil
+        }
+    }
+    
+    var headers: [String: String]? {
+        var baseHeaders: [String: String] = [
+            APIConstants.Headers.sesacKey: APIConstants.Headers.Values.sesacKeyValue()
+        ]
+        
+        // Authorization 헤더 추가
+        if let refreshToken = TokenManager.shared.load(for: .refreshToken) {
+            baseHeaders[APIConstants.Headers.authorization] = refreshToken
+        } else {
+            print(APIConstants.ErrorMessages.missingRefreshToken)
+        }
+        return baseHeaders
+    }
+} 

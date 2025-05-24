@@ -72,7 +72,7 @@ final class RegisterViewModel: ObservableObject {
 
         do {
             let result = try await NetworkManager.shared.fetch(
-                PickupRouter.validateEmail(email: state.email),
+                UserRouter.validateEmail(email: state.email),
                 successType: CommonMessageResponse.self,
                 failureType: CommonMessageResponse.self
             )
@@ -114,7 +114,7 @@ final class RegisterViewModel: ObservableObject {
 
             do {
                 let result = try await NetworkManager.shared.fetch(
-                    PickupRouter.join(request: request),
+                    UserRouter.join(request: request),
                     successType: JoinResponse.self,
                     failureType: CommonMessageResponse.self
                 )

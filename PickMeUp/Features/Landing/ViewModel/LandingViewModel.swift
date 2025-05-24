@@ -52,7 +52,7 @@ final class LandingViewModel: ObservableObject {
         Task {
             do {
                 let result = try await NetworkManager.shared.fetch(
-                    PickupRouter.login(request: request),
+                    UserRouter.login(request: request),
                     successType: LoginResponse.self,
                     failureType: CommonMessageResponse.self
                 )
