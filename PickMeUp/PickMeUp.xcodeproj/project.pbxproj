@@ -27,6 +27,7 @@
 		164E9A452DCE545200C348AB /* PickMeUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PickMeUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		164E9A552DCE545400C348AB /* PickMeUpTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PickMeUpTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		164E9A5F2DCE545400C348AB /* PickMeUpUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PickMeUpUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		165FE7B32DE1904100BD15BD /* PickMeUp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PickMeUp.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -113,6 +114,7 @@
 		164E9A3C2DCE545200C348AB = {
 			isa = PBXGroup;
 			children = (
+				165FE7B32DE1904100BD15BD /* PickMeUp.entitlements */,
 				164E9A472DCE545200C348AB /* App */,
 				164E9A762DCE5F7000C348AB /* Core */,
 				164E9ACE2DD085D900C348AB /* Components */,
@@ -443,6 +445,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PickMeUp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"App/Resources/Preview Content\"";
@@ -478,6 +481,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PickMeUp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"App/Resources/Preview Content\"";
