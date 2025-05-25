@@ -24,7 +24,7 @@ struct AppRootView: View {
                     case .register:
                         container.makeRegisterView()
                     case .home:
-                        container.makeHomeView()
+                        container.makeTabbarView()
                     }
                 }
         }

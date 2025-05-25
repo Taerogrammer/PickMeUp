@@ -18,7 +18,7 @@ final class DIContainer {
         RegisterView(viewModel: RegisterViewModel(router: router))
     }
 
-    func makeHomeView() -> some View {
-        HomeView(viewModel: HomeViewModel(router: router))
+    func makeTabbarView() -> some View {
+        TabbarView(viewModel: TabbarViewModel(router: router), container: self)
     }
 }
