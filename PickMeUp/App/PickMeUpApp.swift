@@ -9,28 +9,28 @@ import SwiftUI
 
 @main
 struct PickMeUpApp: App {
+    @StateObject private var launchState = AppLaunchState()
     let container = DIContainer()
-    @State private var isSessionValid = false
-    @State private var didCheckSession = false
 
     var body: some Scene {
         WindowGroup {
             Group {
-                if !didCheckSession {
+                if !launchState.didCheckSession {
                     ProgressView("세션 확인 중...")
                 } else {
-                    if isSessionValid {
+                    if launchState.isSessionValid {
                         container.makeTabbarView()
                     } else {
                         AppRootView(container: container)
                     }
                 }
             }
+            .environmentObject(launchState)
             .task {
-                if !didCheckSession {
+                if !launchState.didCheckSession {
                     let isValid = await AuthService.shared.validateSession()
-                    isSessionValid = isValid
-                    didCheckSession = true
+                    launchState.isSessionValid = isValid
+                    launchState.didCheckSession = true
                 }
             }
         }

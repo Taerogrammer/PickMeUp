@@ -90,8 +90,8 @@ struct LandingView: View {
 }
 
 
-#Preview {
-    let dummyRouter = AppRouter()
-    let viewModel = LandingViewModel(initialState: LandingState(isShowingRegister: false), router: dummyRouter)
-    LandingView(viewModel: viewModel, container: DIContainer())
-}
+//#Preview {
+//    let dummyRouter = AppRouter()
+//    let viewModel = LandingViewModel(initialState: LandingState(isShowingRegister: false), router: dummyRouter, appLaunchState: <#AppLaunchState#>)
+//    LandingView(viewModel: viewModel, container: DIContainer())
+//}

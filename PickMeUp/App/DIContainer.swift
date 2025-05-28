@@ -10,8 +10,9 @@ import SwiftUI
 final class DIContainer {
     let router = AppRouter()
 
-    func makeLandingView() -> some View {
-        LandingView(viewModel: LandingViewModel(router: router), container: self)
+    func makeLandingView(appLaunchState: AppLaunchState) -> some View {
+        let viewModel = LandingViewModel(router: self.router, appLaunchState: appLaunchState)
+        return LandingView(viewModel: viewModel, container: self)
     }
 
     func makeRegisterView() -> some View {

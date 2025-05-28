@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct AppRootView: View {
+    @EnvironmentObject var launchState: AppLaunchState
     @ObservedObject var router: AppRouter
     let container: DIContainer
 
@@ -18,13 +19,11 @@ struct AppRootView: View {
 
     var body: some View {
         NavigationStack(path: $router.path) {
-            container.makeLandingView()
+            container.makeLandingView(appLaunchState: launchState)
                 .navigationDestination(for: AppRoute.self) { route in
                     switch route {
                     case .register:
                         container.makeRegisterView()
-                    case .home:
-                        container.makeTabbarView()
                     }
                 }
         }

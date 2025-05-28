@@ -30,6 +30,7 @@ enum AuthRouter: APIRouter {
         var baseHeaders: [String: String] = [
             APIConstants.Headers.accept: APIConstants.Headers.Values.applicationJson,
             APIConstants.Headers.sesacKey: APIConstants.Headers.Values.sesacKeyValue(),
+            // MARK: - 로그인 실패
             APIConstants.Headers.refreshToken: KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) ?? ""
 //            APIConstants.Headers.refreshToken: ""
         ]
