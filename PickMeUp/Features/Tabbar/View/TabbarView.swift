@@ -18,42 +18,50 @@ struct TabbarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 선택된 탭에 따라 메인 화면 변경
-            Group {
-                switch viewModel.state.selectedTab {
-                case .home:
-                    HomeView()
-                case .orders:
-                    OrderView()
-                case .friends:
-                    CommunityView()
-                case .profile:
-                    ProfileView()
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(.systemBackground))
+            tabContentView(for: viewModel.state.selectedTab)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(.systemBackground))
 
-            // 하단 탭바
             HStack {
                 ForEach(TabItem.allCases, id: \.self) { item in
-                    VStack(spacing: 4) {
-                        Image(systemName: item.iconName)
-                            .font(.body)
-                        Text(item.title)
-                            .font(.caption2)
-                    }
-                    .foregroundColor(viewModel.state.selectedTab == item ? .orange : .gray)
-                    .frame(maxWidth: .infinity)
-                    .onTapGesture {
-                        viewModel.handle(.selectTab(item))
-                    }
+                    tabBarButton(for: item)
                 }
             }
-            .padding(.top, 10)
-            .padding(.bottom, 24)
-            .background(Color(.systemGray6).ignoresSafeArea(edges: .bottom))
+            .padding(.horizontal, 16)
+            .background(
+                Color(.systemGray6)
+                    .clipShape(RoundedCorner(radius: 24, corners: [.topLeft, .topRight]))
+                    .ignoresSafeArea(edges: .bottom)
+            )
         }
+    }
+
+    @ViewBuilder
+    private func tabContentView(for tab: TabItem) -> some View {
+        switch tab {
+        case .home:
+            HomeView()
+        case .orders:
+            OrderView()
+        case .friends:
+            CommunityView()
+        case .profile:
+            ProfileView()
+        }
+    }
+
+    private func tabBarButton(for item: TabItem) -> some View {
+        Button {
+            viewModel.handle(.selectTab(item))
+        } label: {
+            VStack(spacing: 6) {
+                Image(systemName: item.iconName)
+                    .font(.system(size: 32))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+        }
+        .foregroundColor(viewModel.state.selectedTab == item ? .orange : .gray)
     }
 }
 

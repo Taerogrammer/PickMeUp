@@ -22,13 +22,4 @@ enum TabItem: Hashable, CaseIterable {
         case .profile: return "person.crop.circle"
         }
     }
-
-    var title: String {
-        switch self {
-        case .home: return "홈"
-        case .orders: return "주문내역"
-        case .friends: return "친구"
-        case .profile: return "내정보"
-        }
-    }
 }
