@@ -12,7 +12,7 @@ final class AuthService {
     private init() {}
 
     func validateSession() async -> Bool {
-        guard let refreshToken = KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) else {
+        guard KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) != nil else {
             print("❌ [AuthService] 리프레시 토큰이 없습니다.")
             return false
         }
