@@ -22,4 +22,13 @@ final class DIContainer {
     func makeTabbarView() -> some View {
         TabbarView(viewModel: TabbarViewModel(router: router), container: self)
     }
+
+    // TODO: - 프로토콜
+    func makeProfileView() -> some View {
+        ProfileView(viewModel: ProfileViewModel(router: router, user: MeProfileResponse.mock))
+    }
+
+    func makeProfileEditView() -> some View {
+        ProfileEditView()
+    }
 }

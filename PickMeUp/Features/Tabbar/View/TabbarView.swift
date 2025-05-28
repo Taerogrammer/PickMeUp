@@ -46,7 +46,7 @@ struct TabbarView: View {
         case .friends:
             CommunityView()
         case .profile:
-            ProfileView()
+            container.makeProfileView()
         }
     }
 
