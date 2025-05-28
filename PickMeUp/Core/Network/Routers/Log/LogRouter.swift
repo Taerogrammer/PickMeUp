@@ -32,7 +32,7 @@ enum LogRouter: APIRouter {
         ]
         
         // Authorization 헤더 추가
-        if let refreshToken = TokenManager.shared.load(for: .refreshToken) {
+        if let refreshToken = KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) {
             baseHeaders[APIConstants.Headers.authorization] = refreshToken
         } else {
             print(APIConstants.ErrorMessages.missingRefreshToken)

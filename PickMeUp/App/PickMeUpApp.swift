@@ -9,11 +9,13 @@ import SwiftUI
 
 @main
 struct PickMeUpApp: App {
+    @StateObject private var launchState = AppLaunchState()
     let container = DIContainer()
 
     var body: some Scene {
         WindowGroup {
             AppRootView(container: container)
+                .environmentObject(launchState)
         }
     }
 }

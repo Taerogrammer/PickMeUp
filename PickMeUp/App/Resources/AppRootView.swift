@@ -8,25 +8,27 @@
 import SwiftUI
 
 struct AppRootView: View {
-    @ObservedObject var router: AppRouter
+    @EnvironmentObject var launchState: AppLaunchState
     let container: DIContainer
 
-    init(container: DIContainer) {
-        self.container = container
-        self.router = container.router
-    }
-
     var body: some View {
-        NavigationStack(path: $router.path) {
-            container.makeLandingView()
-                .navigationDestination(for: AppRoute.self) { route in
-                    switch route {
-                    case .register:
-                        container.makeRegisterView()
-                    case .home:
-                        container.makeTabbarView()
+        Group {
+            if !launchState.didCheckSession {
+                ProgressView("세션 확인 중...")
+                    .task {
+                        let isValid = await AuthService.shared.validateSession()
+                        await MainActor.run {
+                            launchState.isSessionValid = isValid
+                            launchState.didCheckSession = true
+                        }
                     }
+            } else {
+                if launchState.isSessionValid {
+                    container.makeTabbarView()
+                } else {
+                    container.makeLandingView(appLaunchState: launchState)
                 }
+            }
         }
     }
 }

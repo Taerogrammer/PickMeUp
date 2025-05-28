@@ -45,12 +45,6 @@ struct LandingView: View {
                     onToggleVisibility: { viewModel.handleIntent(.togglePasswordVisibility) }
                 )
 
-                Toggle("자동 로그인", isOn: Binding(
-                    get: { viewModel.state.isAutoLoginEnabled },
-                    set: { viewModel.handleIntent(.toggleAutoLogin($0)) }
-                ))
-                .padding(.horizontal, 20)
-
                 if let error = viewModel.state.loginErrorMessage {
                     Text(error).foregroundColor(.red).font(.footnote)
                 }
@@ -96,8 +90,8 @@ struct LandingView: View {
 }
 
 
-#Preview {
-    let dummyRouter = AppRouter()
-    let viewModel = LandingViewModel(initialState: LandingState(isShowingRegister: false), router: dummyRouter)
-    LandingView(viewModel: viewModel, container: DIContainer())
-}
+//#Preview {
+//    let dummyRouter = AppRouter()
+//    let viewModel = LandingViewModel(initialState: LandingState(isShowingRegister: false), router: dummyRouter, appLaunchState: <#AppLaunchState#>)
+//    LandingView(viewModel: viewModel, container: DIContainer())
+//}

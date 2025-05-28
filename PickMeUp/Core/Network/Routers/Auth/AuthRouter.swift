@@ -28,11 +28,15 @@ enum AuthRouter: APIRouter {
     
     var headers: [String: String]? {
         var baseHeaders: [String: String] = [
-            APIConstants.Headers.sesacKey: APIConstants.Headers.Values.sesacKeyValue()
+            APIConstants.Headers.accept: APIConstants.Headers.Values.applicationJson,
+            APIConstants.Headers.sesacKey: APIConstants.Headers.Values.sesacKeyValue(),
+            APIConstants.Headers.refreshToken: KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) ?? ""
+            // MARK: - 로그인 실패
+//            APIConstants.Headers.refreshToken: ""
         ]
         
         // Authorization 헤더 추가
-        if let refreshToken = TokenManager.shared.load(for: .refreshToken) {
+        if let refreshToken = KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) {
             baseHeaders[APIConstants.Headers.authorization] = refreshToken
         } else {
             print(APIConstants.ErrorMessages.missingRefreshToken)

@@ -15,5 +15,4 @@ struct LandingState {
     var isShowingRegister: Bool = false
     var loginErrorMessage: String? = nil
     var isLoading: Bool = false
-    var isAutoLoginEnabled: Bool = UserDefaultsManager.isAutoLoginEnabled
 }
