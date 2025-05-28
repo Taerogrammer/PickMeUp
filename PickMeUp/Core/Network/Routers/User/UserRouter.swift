@@ -7,7 +7,8 @@ enum UserRouter: APIRouter {
     case loginWithKakao(request: KakaoLoginRequest)
     case loginWithApple(request: AppleLoginRequest)
     case getProfile
-    
+    case putProfile(request: MeProfileRequest)
+
     var environment: APIEnvironment { .production }
     
     var path: String {
@@ -24,6 +25,8 @@ enum UserRouter: APIRouter {
             return APIConstants.Endpoints.User.loginApple
         case .getProfile:
             return APIConstants.Endpoints.User.profile
+        case .putProfile:
+            return APIConstants.Endpoints.User.profile
         }
     }
     
@@ -33,6 +36,8 @@ enum UserRouter: APIRouter {
             return .get
         case .validateEmail, .join, .login, .loginWithKakao, .loginWithApple:
             return .post
+        case .putProfile:
+            return .put
         }
     }
     
@@ -67,6 +72,12 @@ enum UserRouter: APIRouter {
             ]
         case .getProfile:
             return nil
+        case .putProfile(let request):
+            return [
+                APIConstants.Parameters.nickname: request.nick,
+                APIConstants.Parameters.phoneNumber: request.phoneNum,
+                APIConstants.Parameters.profileImage: request.profileImage
+            ]
         }
     }
     

@@ -83,6 +83,7 @@ enum APIConstants {
         static let key = "key"
         static let idToken = "idToken"
         static let oauthToken = "oauthToken"
+        static let profileImage = "profileImage"
     }
     
     // MARK: - Error Messages
