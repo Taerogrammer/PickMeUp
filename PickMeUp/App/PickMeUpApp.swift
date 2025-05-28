@@ -14,25 +14,8 @@ struct PickMeUpApp: App {
 
     var body: some Scene {
         WindowGroup {
-            Group {
-                if !launchState.didCheckSession {
-                    ProgressView("세션 확인 중...")
-                } else {
-                    if launchState.isSessionValid {
-                        container.makeTabbarView()
-                    } else {
-                        AppRootView(container: container)
-                    }
-                }
-            }
-            .environmentObject(launchState)
-            .task {
-                if !launchState.didCheckSession {
-                    let isValid = await AuthService.shared.validateSession()
-                    launchState.isSessionValid = isValid
-                    launchState.didCheckSession = true
-                }
-            }
+            AppRootView(container: container)
+                .environmentObject(launchState)
         }
     }
 }
