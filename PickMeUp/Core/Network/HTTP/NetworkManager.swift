@@ -30,12 +30,36 @@ final class NetworkManager {
 
         let statusCode = httpResponse.statusCode
 
+        debugCurlWithResponse(request: urlRequest, response: response, data: data)
+
         if (200...299).contains(statusCode) {
             let decodedSuccess = try? JSONDecoder().decode(Success.self, from: data)
             return (statusCode, decodedSuccess, nil)
         } else {
             let decodedFailure = try? JSONDecoder().decode(Failure.self, from: data)
             return (statusCode, nil, decodedFailure)
+        }
+    }
+
+    func debugCurlWithResponse(
+        request: URLRequest,
+        response: URLResponse?,
+        data: Data?
+    ) {
+        print("📡 [cURL 요청]")
+        print(request.curlString)
+
+        if let httpResponse = response as? HTTPURLResponse {
+            print("\n📩 [응답 상태 코드]: \(httpResponse.statusCode)")
+            print("📩 [응답 헤더]:")
+            httpResponse.allHeaderFields.forEach { key, value in
+                print("  \(key): \(value)")
+            }
+        }
+
+        if let data = data,
+           let body = String(data: data, encoding: .utf8) {
+            print("📦 [응답 바디]:\n\(body)")
         }
     }
 }

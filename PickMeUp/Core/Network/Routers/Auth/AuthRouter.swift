@@ -31,6 +31,7 @@ enum AuthRouter: APIRouter {
             APIConstants.Headers.accept: APIConstants.Headers.Values.applicationJson,
             APIConstants.Headers.sesacKey: APIConstants.Headers.Values.sesacKeyValue(),
             APIConstants.Headers.refreshToken: KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) ?? ""
+//            APIConstants.Headers.refreshToken: ""
         ]
         
         // Authorization 헤더 추가
