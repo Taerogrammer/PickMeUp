@@ -19,6 +19,9 @@ final class NetworkManager {
     ) async throws -> (statusCode: Int, success: Success?, failure: Failure?) {
         guard let urlRequest = router.urlRequest else { throw APIError.unknown }
 
+        print("📡 [cURL 요청]")
+        print(urlRequest.curlString) // <- 여기에 추가
+
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
 
         guard let httpResponse = response as? HTTPURLResponse else {
@@ -34,5 +37,26 @@ final class NetworkManager {
             let decodedFailure = try? JSONDecoder().decode(Failure.self, from: data)
             return (statusCode, nil, decodedFailure)
         }
+    }
+}
+
+extension URLRequest {
+    var curlString: String {
+        var components = ["curl -X \(httpMethod ?? "GET")"]
+
+        if let url = url {
+            components.append("\"\(url.absoluteString)\"")
+        }
+
+        allHTTPHeaderFields?.forEach { key, value in
+            components.append("-H \"\(key): \(value)\"")
+        }
+
+        if let httpBody,
+           let bodyString = String(data: httpBody, encoding: .utf8) {
+            components.append("-d '\(bodyString)'")
+        }
+
+        return components.joined(separator: " \\\n\t")
     }
 }
