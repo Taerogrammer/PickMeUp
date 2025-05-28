@@ -16,5 +16,4 @@ enum LandingIntent {
     case registerTapped
     case appleLoginTapped
     case kakaoLoginTapped
-    case toggleAutoLogin(Bool)
 }

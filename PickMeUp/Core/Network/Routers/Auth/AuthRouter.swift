@@ -28,7 +28,9 @@ enum AuthRouter: APIRouter {
     
     var headers: [String: String]? {
         var baseHeaders: [String: String] = [
-            APIConstants.Headers.sesacKey: APIConstants.Headers.Values.sesacKeyValue()
+            APIConstants.Headers.accept: APIConstants.Headers.Values.applicationJson,
+            APIConstants.Headers.sesacKey: APIConstants.Headers.Values.sesacKeyValue(),
+            APIConstants.Headers.refreshToken: KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) ?? ""
         ]
         
         // Authorization 헤더 추가

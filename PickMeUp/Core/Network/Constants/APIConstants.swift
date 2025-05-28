@@ -60,12 +60,15 @@ enum APIConstants {
     enum Headers {
         static let sesacKey = "SeSACKey"
         static let authorization = "Authorization"
-        
-        // Header Values
+        static let refreshToken = "RefreshToken"
+        static let accept = "accept"
+
         enum Values {
             static func sesacKeyValue() -> String {
                 Bundle.value(forKey: "SeSACKey")
             }
+
+            static let applicationJson = "application/json"
         }
     }
     
