@@ -62,9 +62,8 @@ final class LandingViewModel: NSObject, ObservableObject {
                 print("[DEBUG] failure: \(String(describing: result.failure))")
                 await MainActor.run {
                     if let success = result.success {
-                        TokenManager.shared.save(success.accessToken, for: .accessToken)
-                        TokenManager.shared.save(success.refreshToken, for: .refreshToken)
-                        TokenManager.shared.printStoredTokens()
+                        KeychainManager.shared.save(key: TokenType.accessToken.rawValue, value: success.accessToken)
+                        KeychainManager.shared.save(key: TokenType.refreshToken.rawValue, value: success.refreshToken)
                         // 로그인 성공 시 홈 화면으로 이동
                         router.navigate(to: .home)
                         resultMessage = "로그인 성공!"
@@ -109,9 +108,11 @@ final class LandingViewModel: NSObject, ObservableObject {
 
                 await MainActor.run {
                     if let success = success {
-                        TokenManager.shared.save(success.accessToken, for: .accessToken)
-                        TokenManager.shared.save(success.refreshToken, for: .refreshToken)
-                        TokenManager.shared.printStoredTokens()
+                        KeychainManager.shared.save(key: TokenType.accessToken.rawValue, value: success.accessToken)
+                        KeychainManager.shared.save(key: TokenType.refreshToken.rawValue, value: success.refreshToken)
+
+                        print("accessToken:", KeychainManager.shared.load(key: TokenType.accessToken.rawValue))
+                        print("refrshToken", KeychainManager.shared.load(key: TokenType.refreshToken.rawValue))
 
                         router.navigate(to: .home)
                         resultMessage = "Apple 로그인 성공!"
