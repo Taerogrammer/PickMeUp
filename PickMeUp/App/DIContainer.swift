@@ -29,6 +29,6 @@ final class DIContainer {
     }
 
     func makeProfileEditView() -> some View {
-        ProfileEditView()
+        ProfileEditView(viewModel: ProfileEditViewModel(router: router))
     }
 }

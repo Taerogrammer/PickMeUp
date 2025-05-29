@@ -24,18 +24,32 @@ struct ProfileView: View {
         .background(Color.black.ignoresSafeArea())
         .navigationTitle("설정")
         .navigationBarTitleDisplayMode(.inline)
+        .task { await viewModel.fetchProfile() }
     }
 }
 
 private extension ProfileView {
     var profileCard: some View {
         VStack(spacing: 16) {
-            AsyncImage(url: URL(string: "https://yourdomain.com\(viewModel.user.profileImage)")) { image in
-                image.resizable()
-            } placeholder: {
-                ProgressView()
+            // ✅ profileImage가 있을 경우 → AsyncImage, 없을 경우 → 기본 person 아이콘
+            Group {
+                if let imagePath = viewModel.user.profileImage,
+                   let url = URL(string: "https://yourdomain.com\(imagePath)") {
+                    AsyncImage(url: url) { image in
+                        image.resizable()
+                    } placeholder: {
+                        ProgressView()
+                    }
+                } else {
+                    Image(systemName: "person")
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundColor(.gray)
+                        .padding(20) // 아이콘이 너무 작지 않도록 패딩
+                }
             }
             .frame(width: 100, height: 100)
+            .background(Color.white)
             .clipShape(Circle())
             .overlay(Circle().stroke(Color.white, lineWidth: 2))
             .shadow(radius: 4)
@@ -62,6 +76,8 @@ private extension ProfileView {
         .padding(.horizontal)
     }
 }
+
+
 
 private extension ProfileView {
     var editProfileButton: some View {

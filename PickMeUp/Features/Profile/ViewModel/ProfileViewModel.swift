@@ -31,3 +31,30 @@ final class ProfileViewModel: NSObject, ObservableObject {
         router.navigate(to: .editProfile)
     }
 }
+
+extension ProfileViewModel {
+    func fetchProfile() async {
+        do {
+            let result = try await NetworkManager.shared.fetch(
+                UserRouter.getProfile,
+                successType: MeProfileResponse.self,
+                failureType: CommonMessageResponse.self
+            )
+
+            await MainActor.run {
+                if let success = result.success {
+                    self.user = success
+                } else if let failure = result.failure {
+                    print("❌ [프로필 조회 실패]: \(failure.message)")
+                } else {
+                    print("❌ [프로필 조회 실패]: 알 수 없는 오류 발생")
+                }
+            }
+
+        } catch {
+            await MainActor.run {
+                print("❌ [네트워크 오류]: \(error.localizedDescription)")
+            }
+        }
+    }
+}

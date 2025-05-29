@@ -7,11 +7,11 @@
 
 import Foundation
 
-struct MeProfileResponse: Encodable {
+struct MeProfileResponse: Decodable {
     let user_id: String
     let email: String
     let nick: String
-    let profileImage: String
+    let profileImage: String?
     let phoneNum: String
 }
 

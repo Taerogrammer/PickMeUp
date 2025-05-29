@@ -10,11 +10,11 @@ import SwiftUI
 final class AppRouter: ObservableObject {
     @Published var path = NavigationPath()
 
-    func navigate(to route: AppRoute) {
-        path.append(route)
-    }
+    func navigate(to route: AppRoute) { path.append(route) }
 
-    func reset() {
-        path = NavigationPath()
+    func reset() { path = NavigationPath() }
+
+    func pop() {
+        if !path.isEmpty { path.removeLast() }
     }
 }
