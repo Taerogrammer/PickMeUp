@@ -8,101 +8,91 @@
 import SwiftUI
 
 struct RegisterView: View {
-    @StateObject private var viewModel: RegisterViewModel
+    @StateObject private var store: RegisterStore
 
-    init(viewModel: RegisterViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+    init(store: RegisterStore) {
+        _store = StateObject(wrappedValue: store)
     }
 
     var body: some View {
         VStack(spacing: 16) {
-            EmailVerificationField(viewModel: viewModel)
+            EmailVerificationField(state: store.state) { intent in
+                store.send(intent)
+            }
 
             ValidatedTextField(
                 title: "Nickname",
-                text: Binding(
-                    get: { viewModel.state.nickname },
-                    set: { viewModel.handleIntent(.updateNickname($0)) }
-                ),
-                message: viewModel.state.nicknameValidationMessage,
-                isSuccess: viewModel.state.isNicknameValid
+                text: store.state.nickname,
+                message: store.state.nicknameValidationMessage,
+                isSuccess: store.state.isNicknameValid,
+                onChange: { store.send(.updateNickname($0)) }
             )
 
             PasswordField(
                 title: "Password",
-                text: Binding(
-                    get: { viewModel.state.password },
-                    set: { viewModel.handleIntent(.updatePassword($0)) }
-                ),
-                isPasswordVisible: Binding(
-                    get: { viewModel.state.isPasswordVisible },
-                    set: { _ in viewModel.handleIntent(.togglePasswordVisibility) }
-                ),
-                validationMessage: viewModel.state.passwordValidationMessage,
-                onToggleVisibility: { viewModel.handleIntent(.togglePasswordVisibility) }
+                text: store.state.password,
+                isPasswordVisible: store.state.isPasswordValid,
+                validationMessage: store.state.passwordValidationMessage,
+                onChange: { store.send(.updatePassword($0)) },
+                onToggleVisibility: { store.send(.togglePasswordVisibility) }
             )
 
-            Button(action: { viewModel.handleIntent(.submit) }) {
+            Button(action: {
+                store.send(.submit)
+            }) {
                 Text("Register")
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .background(viewModel.state.isFormValid ? Color.blue : Color.gray)
+                    .background(store.state.isFormValid ? Color.blue : Color.gray)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
-            .disabled(!viewModel.state.isFormValid)
+            .disabled(!store.state.isFormValid)
 
             Spacer()
         }
         .padding()
         .navigationTitle("회원가입")
         .scrollDismissesKeyboard(.interactively)
-        .alert("알림", isPresented: Binding<Bool>(
-            get: { viewModel.state.alertMessage != nil },
-            set: { _ in
-                if viewModel.state.isRegisterSuccess {
-                    viewModel.router.reset()
-                }
-                viewModel.state.alertMessage = nil
-            }
-        )) {
+        .alert("알림", isPresented: .constant(store.state.alertMessage != nil)) {
             Button("확인") {
-                if viewModel.state.isRegisterSuccess {
-                    viewModel.router.reset()
+                if store.state.isRegisterSuccess {
+                    store.resetNavigation()
                 }
-                viewModel.state.alertMessage = nil
+                store.clearAlert()
             }
         } message: {
-            Text(viewModel.state.alertMessage ?? "")
+            Text(store.state.alertMessage ?? "")
         }
     }
 }
 
 struct EmailVerificationField: View {
-    @ObservedObject var viewModel: RegisterViewModel
+    let state: RegisterState
+    let onSend: (RegisterIntent) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 TextField("Email", text: Binding(
-                    get: { viewModel.state.email },
-                    set: { viewModel.handleIntent(.updateEmail($0)) }
+                    get: { state.email },
+                    set: { onSend(.updateEmail($0)) }
                 ))
                 .autocapitalization(.none)
                 .textFieldStyle(.roundedBorder)
                 .frame(minWidth: 0, maxWidth: .infinity)
-                .disabled(viewModel.state.isEmailValid)
+                .disabled(state.isEmailValid)
 
-                PrimaryButton(action: { viewModel.handleIntent(.validateEmail) }) {
+                PrimaryButton(action: { onSend(.validateEmail) }) {
                     Text("중복 확인")
                         .padding(.horizontal)
                 }
                 .fixedSize()
-                .disabled(viewModel.state.isEmailValid)
+                .disabled(state.isEmailValid)
             }
 
-            Text(viewModel.state.emailValidationMessage ?? " ")
-                .foregroundColor(viewModel.state.isEmailValid ? .green : .red)
+            Text(state.emailValidationMessage ?? " ")
+                .foregroundColor(state.isEmailValid ? .green : .red)
                 .font(.footnote)
         }
     }
@@ -110,15 +100,19 @@ struct EmailVerificationField: View {
 
 struct ValidatedTextField: View {
     let title: String
-    @Binding var text: String
+    let text: String
     let message: String?
     let isSuccess: Bool
+    let onChange: (String) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            TextField(title, text: $text)
-                .autocapitalization(.none)
-                .textFieldStyle(.roundedBorder)
+            TextField(title, text: Binding<String>(
+                get: { text },
+                set: { onChange($0) }
+            ))
+            .autocapitalization(.none)
+            .textFieldStyle(.roundedBorder)
 
             Text(message ?? " ")
                 .foregroundColor(isSuccess ? .green : .red)
@@ -128,5 +122,5 @@ struct ValidatedTextField: View {
 }
 
 #Preview {
-    RegisterView(viewModel: RegisterViewModel(router: AppRouter()))
+    RegisterView(store: RegisterStore(router: AppRouter()))
 }

@@ -23,8 +23,8 @@ final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding {
     }
 
     func makeRegisterView() -> AnyView {
-        let viewModel = RegisterViewModel(router: router)
-        return AnyView(RegisterView(viewModel: viewModel))
+        let store = RegisterStore(router: router)
+        return AnyView(RegisterView(store: store))
     }
 
     // MARK: - ProfileViewProviding

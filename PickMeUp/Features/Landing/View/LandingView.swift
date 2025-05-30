@@ -33,15 +33,10 @@ struct LandingView: View {
 
                 PasswordField(
                     title: "Password",
-                    text: Binding(
-                        get: { viewModel.state.password },
-                        set: { viewModel.handleIntent(.updatePassword($0)) }
-                    ),
-                    isPasswordVisible: Binding(
-                        get: { viewModel.state.isPasswordVisible },
-                        set: { _ in viewModel.handleIntent(.togglePasswordVisibility) }
-                    ),
+                    text: viewModel.state.password,
+                    isPasswordVisible: viewModel.state.isPasswordVisible,
                     validationMessage: nil,
+                    onChange: { viewModel.handleIntent(.updatePassword($0)) },
                     onToggleVisibility: { viewModel.handleIntent(.togglePasswordVisibility) }
                 )
 
