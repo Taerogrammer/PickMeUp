@@ -7,31 +7,35 @@
 
 import SwiftUI
 
-final class DIContainer {
+final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding {
     let router = AppRouter()
 
-    func makeLandingView(appLaunchState: AppLaunchState) -> some View {
-        let viewModel = LandingViewModel(router: self.router, appLaunchState: appLaunchState)
-        return LandingView(viewModel: viewModel, container: self)
-    }
-
-    func makeRegisterView() -> some View {
-        RegisterView(viewModel: RegisterViewModel(router: router))
-    }
-
-    func makeTabbarView() -> some View {
+    // MARK: - TabProviding
+    func makeTabbarView() -> AnyView {
         let store = TabbarStore(router: router)
-        return TabbarView(store: store, container: self)
+        return AnyView(TabbarView(store: store, container: self))
     }
 
-    // TODO: - 프로토콜
-    func makeProfileView() -> some View {
-        ProfileView(viewModel: ProfileViewModel(router: router, user: MeProfileResponse.mock))
+    // MARK: - AuthViewProviding
+    func makeLandingView(appLaunchState: AppLaunchState) -> AnyView {
+        let viewModel = LandingViewModel(router: self.router, appLaunchState: appLaunchState)
+        return AnyView(LandingView(viewModel: viewModel, container: self))
     }
 
-    func makeProfileEditView(user: ProfileEntity) -> some View {
+    func makeRegisterView() -> AnyView {
+        let viewModel = RegisterViewModel(router: router)
+        return AnyView(RegisterView(viewModel: viewModel))
+    }
+
+    // MARK: - ProfileViewProviding
+    func makeProfileView() -> AnyView {
+        let viewModel = ProfileViewModel(router: router, user: MeProfileResponse.mock)
+        return AnyView(ProfileView(viewModel: viewModel))
+    }
+
+    func makeProfileEditView(user: ProfileEntity) -> AnyView {
         let state = ProfileEditState(profile: user)
         let viewModel = ProfileEditViewModel(initialState: state, router: router)
-        return ProfileEditView(viewModel: viewModel)
+        return AnyView(ProfileEditView(viewModel: viewModel))
     }
 }

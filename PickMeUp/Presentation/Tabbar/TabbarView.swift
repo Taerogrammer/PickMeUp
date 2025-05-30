@@ -8,17 +8,17 @@
 import SwiftUI
 
 struct TabbarView: View {
-    @StateObject private var viewModel: TabbarViewModel
+    @StateObject private var store: TabbarStore
     private let container: DIContainer
 
-    init(viewModel: TabbarViewModel, container: DIContainer) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+    init(store: TabbarStore, container: DIContainer) {
+        _store = StateObject(wrappedValue: store)
         self.container = container
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            tabContentView(for: viewModel.state.selectedTab)
+            tabContentView(for: store.state.selectedTab)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color(.systemBackground))
 
@@ -52,7 +52,7 @@ struct TabbarView: View {
 
     private func tabBarButton(for item: TabItem) -> some View {
         Button {
-            viewModel.handle(.selectTab(item))
+            store.send(.selectTab(item))
         } label: {
             VStack(spacing: 6) {
                 Image(systemName: item.iconName)
@@ -61,12 +61,12 @@ struct TabbarView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
         }
-        .foregroundColor(viewModel.state.selectedTab == item ? .orange : .gray)
+        .foregroundColor(store.state.selectedTab == item ? .orange : .gray)
     }
 }
 
 #Preview {
     let dummyRouter = AppRouter()
-    let viewModel = TabbarViewModel(initialState: TabbarState(selectedTab: .home), router: dummyRouter)
-    TabbarView(viewModel: viewModel, container: DIContainer())
+    let store = TabbarStore(router: dummyRouter)
+    TabbarView(store: store, container: DIContainer())
 }
