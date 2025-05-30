@@ -20,7 +20,8 @@ final class DIContainer {
     }
 
     func makeTabbarView() -> some View {
-        TabbarView(viewModel: TabbarViewModel(router: router), container: self)
+        let store = TabbarStore(router: router)
+        return TabbarView(store: store, container: self)
     }
 
     // TODO: - 프로토콜
