@@ -2,43 +2,55 @@ import SwiftUI
 
 public struct PasswordField: View {
     public let title: String
-    @Binding public var text: String
-    @Binding public var isPasswordVisible: Bool
-    public var validationMessage: String?
-    public var onToggleVisibility: () -> Void
+    public let text: String
+    public let isPasswordVisible: Bool
+    public let validationMessage: String?
+    public let onChange: (String) -> Void
+    public let onToggleVisibility: () -> Void
 
     public init(
         title: String,
-        text: Binding<String>,
-        isPasswordVisible: Binding<Bool>,
+        text: String,
+        isPasswordVisible: Bool,
         validationMessage: String? = nil,
+        onChange: @escaping (String) -> Void,
         onToggleVisibility: @escaping () -> Void
     ) {
         self.title = title
-        self._text = text
-        self._isPasswordVisible = isPasswordVisible
+        self.text = text
+        self.isPasswordVisible = isPasswordVisible
         self.validationMessage = validationMessage
+        self.onChange = onChange
         self.onToggleVisibility = onToggleVisibility
     }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                if isPasswordVisible {
-                    TextField(title, text: $text)
-                        .autocapitalization(.none)
-                } else {
-                    SecureField(title, text: $text)
-                        .autocapitalization(.none)
+                Group {
+                    if isPasswordVisible {
+                        TextField(title, text: Binding(
+                            get: { text },
+                            set: { onChange($0) }
+                        ))
+                    } else {
+                        SecureField(title, text: Binding(
+                            get: { text },
+                            set: { onChange($0) }
+                        ))
+                    }
                 }
+                .textInputAutocapitalization(.never)
+
                 Button(action: onToggleVisibility) {
                     Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
                         .foregroundColor(.gray)
+                        .accessibilityLabel(Text(isPasswordVisible ? "비밀번호 숨기기" : "비밀번호 보기"))
                 }
             }
             .textFieldStyle(.roundedBorder)
 
-            Text(validationMessage ?? "")
+            Text(validationMessage ?? " ")
                 .foregroundColor(.red)
                 .font(.footnote)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -48,18 +60,26 @@ public struct PasswordField: View {
 
 #if DEBUG
 struct PasswordField_Previews: PreviewProvider {
-    @State static var password = ""
-    @State static var isVisible = false
+    struct PreviewContainer: View {
+        @State private var password = ""
+        @State private var isVisible = false
+
+        var body: some View {
+            PasswordField(
+                title: "Password",
+                text: password,
+                isPasswordVisible: isVisible,
+                validationMessage: "비밀번호는 8자 이상, 영문, 숫자, 특수문자를 포함해야 합니다.",
+                onChange: { password = $0 },
+                onToggleVisibility: { isVisible.toggle() }
+            )
+            .padding()
+        }
+    }
+
     static var previews: some View {
-        PasswordField(
-            title: "Password",
-            text: $password,
-            isPasswordVisible: $isVisible,
-            validationMessage: "비밀번호는 8자 이상, 영문, 숫자, 특수문자를 포함해야 합니다.",
-            onToggleVisibility: { isVisible.toggle() }
-        )
-        .padding()
-        .previewLayout(.sizeThatFits)
+        PreviewContainer()
+            .previewLayout(.sizeThatFits)
     }
 }
-#endif 
+#endif
