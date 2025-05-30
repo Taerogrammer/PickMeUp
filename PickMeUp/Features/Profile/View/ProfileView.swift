@@ -34,18 +34,21 @@ private extension ProfileView {
             // ✅ profileImage가 있을 경우 → AsyncImage, 없을 경우 → 기본 person 아이콘
             Group {
                 if let imagePath = viewModel.user.profileImage,
-                   let url = URL(string: "https://yourdomain.com\(imagePath)") {
+                   !imagePath.isEmpty,
+                   let url = URL(string: "\(APIEnvironment.production.baseURL)/\(imagePath)") {
+
                     AsyncImage(url: url) { image in
                         image.resizable()
                     } placeholder: {
                         ProgressView()
                     }
+
                 } else {
                     Image(systemName: "person")
                         .resizable()
                         .scaledToFit()
                         .foregroundColor(.gray)
-                        .padding(20) // 아이콘이 너무 작지 않도록 패딩
+                        .padding(20)
                 }
             }
             .frame(width: 100, height: 100)

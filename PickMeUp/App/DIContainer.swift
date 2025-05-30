@@ -28,7 +28,9 @@ final class DIContainer {
         ProfileView(viewModel: ProfileViewModel(router: router, user: MeProfileResponse.mock))
     }
 
-    func makeProfileEditView() -> some View {
-        ProfileEditView(viewModel: ProfileEditViewModel(router: router))
+    func makeProfileEditView(user: ProfileEntity) -> some View {
+        let state = ProfileEditState(profile: user)
+        let viewModel = ProfileEditViewModel(initialState: state, router: router)
+        return ProfileEditView(viewModel: viewModel)
     }
 }

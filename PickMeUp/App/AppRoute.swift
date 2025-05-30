@@ -9,5 +9,5 @@ import Foundation
 
 enum AppRoute: Hashable {
     case register
-    case editProfile
+    case editProfile(user: ProfileEntity)
 }

@@ -16,6 +16,16 @@ struct MeProfileResponse: Decodable {
 }
 
 extension MeProfileResponse {
+    func toEntity() -> ProfileEntity {
+        return ProfileEntity(
+            nick: self.nick,
+            email: self.email,
+            phone: self.phoneNum,
+            profileImageURL: self.profileImage)
+    }
+}
+
+extension MeProfileResponse {
     static let mock = MeProfileResponse(
         user_id: "65c9aa6932b0964405117d97",
         email: "sesac@sesac.com",

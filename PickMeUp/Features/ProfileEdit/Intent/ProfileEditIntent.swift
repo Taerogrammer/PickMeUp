@@ -9,7 +9,7 @@ import Foundation
 
 enum ProfileEditIntent {
     case updateNick(String)
-    case updateEmail(String)
-    case updatePhone(String)
-    case saveChanges
+    case updatePhoneNum(String)
+    case updateProfileImage(String)
+    case saveTapped
 }

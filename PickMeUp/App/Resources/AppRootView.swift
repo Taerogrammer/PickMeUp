@@ -41,8 +41,8 @@ struct AppRootView: View {
                 switch route {
                 case .register:
                     container.makeRegisterView()
-                case .editProfile:
-                    container.makeProfileEditView()
+                case .editProfile(let user):
+                    container.makeProfileEditView(user: user)
                 }
             }
         }
