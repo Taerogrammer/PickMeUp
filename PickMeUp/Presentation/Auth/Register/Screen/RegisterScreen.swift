@@ -16,9 +16,21 @@ struct RegisterScreen: View {
 
     var body: some View {
         RegisterView(store: store)
+            .navigationTitle("회원가입")
+            .alert("알림", isPresented: .constant(store.state.alertMessage != nil)) {
+                Button("확인") {
+                    if store.state.isRegisterSuccess {
+                        store.resetNavigation()
+                    }
+                    store.clearAlert()
+                }
+            } message: {
+                Text(store.state.alertMessage ?? "")
+            }
     }
 }
 
-//#Preview {
-//    RegisterScreen()
-//}
+#Preview {
+    let container = RegisterStore(router: AppRouter())
+    RegisterScreen(store: container)
+}

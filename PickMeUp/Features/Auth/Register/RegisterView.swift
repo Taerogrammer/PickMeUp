@@ -10,7 +10,7 @@ import SwiftUI
 struct RegisterView: View {
     @StateObject private var store: RegisterStore
 
-    public init(store: RegisterStore) {
+    init(store: RegisterStore) {
         _store = StateObject(wrappedValue: store)
     }
 
@@ -52,18 +52,7 @@ struct RegisterView: View {
             Spacer()
         }
         .padding()
-        .navigationTitle("회원가입")
         .scrollDismissesKeyboard(.interactively)
-        .alert("알림", isPresented: .constant(store.state.alertMessage != nil)) {
-            Button("확인") {
-                if store.state.isRegisterSuccess {
-                    store.resetNavigation()
-                }
-                store.clearAlert()
-            }
-        } message: {
-            Text(store.state.alertMessage ?? "")
-        }
     }
 }
 
