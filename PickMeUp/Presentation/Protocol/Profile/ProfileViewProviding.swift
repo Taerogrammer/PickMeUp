@@ -8,6 +8,6 @@
 import SwiftUI
 
 protocol ProfileViewProviding {
-    func makeProfileView() -> AnyView
+    func makeProfileScreen() -> AnyView
     func makeProfileEditView(user: ProfileEntity) -> AnyView
 }

@@ -8,5 +8,8 @@
 import Foundation
 
 enum ProfileIntent {
+    case onAppear
+    case fetchProfile(MeProfileResponse)
+    case fetchFailed(String)
     case editProfileTapped
 }

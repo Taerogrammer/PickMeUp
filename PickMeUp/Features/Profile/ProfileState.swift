@@ -8,5 +8,8 @@
 import Foundation
 
 struct ProfileState {
-    var profileEditClicked = false
+    var user: MeProfileResponse
+    var profile: ProfileEntity?
+    var isEditing: Bool = false
+    var errorMessage: String?
 }

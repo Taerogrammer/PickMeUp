@@ -25,7 +25,7 @@ struct TabbarScreen: View {
             case .friends:
                 AnyView(CommunityView())
             case .profile:
-                container.makeProfileView()
+                container.makeProfileScreen()
             }
         }
     }

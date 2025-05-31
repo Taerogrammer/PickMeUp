@@ -27,9 +27,10 @@ final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding {
     }
 
     // MARK: - ProfileViewProviding
-    func makeProfileView() -> AnyView {
-        let viewModel = ProfileViewModel(router: router, user: MeProfileResponse.mock)
-        return AnyView(ProfileView(viewModel: viewModel))
+    func makeProfileScreen() -> AnyView {
+        let state = ProfileState(user: MeProfileResponse.mock, profile: MeProfileResponse.mock.toEntity())
+        let store = ProfileStore(state: state, router: router)
+        return AnyView(ProfileScreen(store: store))
     }
 
     func makeProfileEditView(user: ProfileEntity) -> AnyView {
