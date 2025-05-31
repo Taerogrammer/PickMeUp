@@ -9,8 +9,8 @@ import SwiftUI
 
 struct AppRootView: View {
     @EnvironmentObject var launchState: AppLaunchState
-    let container: DIContainer
     @ObservedObject private var router: AppRouter
+    let container: DIContainer
 
     init(container: DIContainer) {
         self.container = container
