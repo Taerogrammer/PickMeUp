@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-protocol AuthViewProviding {
+protocol AuthViewProviding: AnyObject {
     func makeLandingView(appLaunchState: AppLaunchState) -> AnyView
-    func makeRegisterView() -> AnyView
+    func makeRegisterScreen() -> AnyView
 }

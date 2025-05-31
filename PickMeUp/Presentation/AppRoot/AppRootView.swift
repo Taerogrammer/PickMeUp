@@ -40,7 +40,7 @@ struct AppRootView: View {
             .navigationDestination(for: AppRoute.self) { route in
                 switch route {
                 case .register:
-                    container.makeRegisterView()
+                    container.makeRegisterScreen()
                 case .editProfile(let user):
                     container.makeProfileEditView(user: user)
                 }

@@ -60,7 +60,7 @@ struct LandingView: View {
             get: { viewModel.state.isShowingRegister },
             set: { _ in }
         )) {
-            container.makeRegisterView()
+            container.makeRegisterScreen()
         }
     }
 

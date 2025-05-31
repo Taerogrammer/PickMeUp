@@ -10,11 +10,11 @@ import SwiftUI
 struct RegisterView: View {
     @StateObject private var store: RegisterStore
 
-    init(store: RegisterStore) {
+    public init(store: RegisterStore) {
         _store = StateObject(wrappedValue: store)
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 16) {
             EmailVerificationField(state: store.state) { intent in
                 store.send(intent)
@@ -31,7 +31,7 @@ struct RegisterView: View {
             PasswordField(
                 title: "Password",
                 text: store.state.password,
-                isPasswordVisible: store.state.isPasswordValid,
+                isPasswordVisible: store.state.isPasswordVisible,
                 validationMessage: store.state.passwordValidationMessage,
                 onChange: { store.send(.updatePassword($0)) },
                 onToggleVisibility: { store.send(.togglePasswordVisibility) }
