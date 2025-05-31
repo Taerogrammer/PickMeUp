@@ -67,60 +67,6 @@ struct RegisterView: View {
     }
 }
 
-struct EmailVerificationField: View {
-    let state: RegisterState
-    let onSend: (RegisterIntent) -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                TextField("Email", text: Binding(
-                    get: { state.email },
-                    set: { onSend(.updateEmail($0)) }
-                ))
-                .autocapitalization(.none)
-                .textFieldStyle(.roundedBorder)
-                .frame(minWidth: 0, maxWidth: .infinity)
-                .disabled(state.isEmailValid)
-
-                PrimaryButton(action: { onSend(.validateEmail) }) {
-                    Text("중복 확인")
-                        .padding(.horizontal)
-                }
-                .fixedSize()
-                .disabled(state.isEmailValid)
-            }
-
-            Text(state.emailValidationMessage ?? " ")
-                .foregroundColor(state.isEmailValid ? .green : .red)
-                .font(.footnote)
-        }
-    }
-}
-
-struct ValidatedTextField: View {
-    let title: String
-    let text: String
-    let message: String?
-    let isSuccess: Bool
-    let onChange: (String) -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            TextField(title, text: Binding<String>(
-                get: { text },
-                set: { onChange($0) }
-            ))
-            .autocapitalization(.none)
-            .textFieldStyle(.roundedBorder)
-
-            Text(message ?? " ")
-                .foregroundColor(isSuccess ? .green : .red)
-                .font(.footnote)
-        }
-    }
-}
-
 #Preview {
     RegisterView(store: RegisterStore(router: AppRouter()))
 }
