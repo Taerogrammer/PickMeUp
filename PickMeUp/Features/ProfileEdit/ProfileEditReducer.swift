@@ -10,8 +10,26 @@ import Foundation
 struct ProfileEditReducer {
     func reduce(state: inout ProfileEditState, intent: ProfileEditIntent) {
         switch intent {
-        case .updateProfile(let newProfile):
-            state.profile = newProfile
+        case .updateProfile(let profile):
+            state.profile = profile
+
+        case .toggleImagePicker(let show):
+            state.showImagePicker = show
+
+        case .updateSelectedImage(let image):
+            state.selectedImage = image
+
+        case .uploadImage:
+            state.imageUploading = true
+            state.errorMessage = nil
+
+        case .uploadImageSuccess(let path):
+            state.imageUploading = false
+            state.profile.profileImageURL = path
+
+        case .uploadImageFailure(let message):
+            state.imageUploading = false
+            state.errorMessage = message
 
         case .saveTapped:
             state.isSaving = true
@@ -26,3 +44,4 @@ struct ProfileEditReducer {
         }
     }
 }
+

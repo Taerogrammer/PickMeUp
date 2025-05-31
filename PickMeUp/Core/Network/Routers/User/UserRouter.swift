@@ -8,6 +8,7 @@ enum UserRouter: APIRouter {
     case loginWithApple(request: AppleLoginRequest)
     case getProfile
     case putProfile(request: MeProfileRequest)
+    case uploadProfileImage(imageData: Data, fileName: String, mimeType: String)
 
     var environment: APIEnvironment { .production }
     
@@ -27,6 +28,8 @@ enum UserRouter: APIRouter {
             return APIConstants.Endpoints.User.profile
         case .putProfile:
             return APIConstants.Endpoints.User.profile
+        case .uploadProfileImage:
+            return APIConstants.Endpoints.User.profileImage
         }
     }
     
@@ -34,7 +37,7 @@ enum UserRouter: APIRouter {
         switch self {
         case .getProfile:
             return .get
-        case .validateEmail, .join, .login, .loginWithKakao, .loginWithApple:
+        case .validateEmail, .join, .login, .loginWithKakao, .loginWithApple, .uploadProfileImage:
             return .post
         case .putProfile:
             return .put
@@ -78,6 +81,8 @@ enum UserRouter: APIRouter {
                 APIConstants.Parameters.phoneNumber: request.phoneNum,
                 APIConstants.Parameters.profileImage: request.profileImage
             ]
+        case .uploadProfileImage:
+            return nil
         }
     }
     
@@ -85,14 +90,23 @@ enum UserRouter: APIRouter {
         var baseHeaders: [String: String] = [
             APIConstants.Headers.sesacKey: APIConstants.Headers.Values.sesacKeyValue()
         ]
-        
         switch self {
         case .validateEmail, .join, .login, .loginWithKakao, .loginWithApple:
-            // 로그인 관련 요청은 Authorization 없음
             return baseHeaders
-            
+
+        case .uploadProfileImage:
+            if let refreshToken = KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) {
+                baseHeaders[APIConstants.Headers.authorization] = refreshToken
+
+                // boundary 생성
+                let boundary = UUID().uuidString
+                baseHeaders["Content-Type"] = "multipart/form-data; boundary=\(boundary)"
+            } else {
+                print(APIConstants.ErrorMessages.missingRefreshToken)
+            }
+            return baseHeaders
+
         default:
-            // Authorization 헤더 추가
             if let refreshToken = KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) {
                 baseHeaders[APIConstants.Headers.authorization] = refreshToken
             } else {
@@ -101,4 +115,45 @@ enum UserRouter: APIRouter {
             return baseHeaders
         }
     }
-} 
+}
+
+// MARK: - URLRequest 구성 확장 추가
+extension UserRouter {
+    var urlRequest: URLRequest? {
+        guard let baseURL = URL(string: environment.baseURL) else { return nil }
+        let fullURL = baseURL.appendingPathComponent(path)
+        var request = URLRequest(url: fullURL)
+        request.httpMethod = method.rawValue
+
+        switch self {
+        case .uploadProfileImage(let imageData, let fileName, let mimeType):
+            let boundary = "Boundary-\(UUID().uuidString)"
+            request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+            // 헤더 추가
+            headers?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
+
+            // multipart body 구성
+            var body = Data()
+            let fieldName = "profile"
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
+            body.append(imageData)
+            body.append("\r\n".data(using: .utf8)!)
+            body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+
+            request.httpBody = body
+            return request
+
+        default:
+            // JSON 기반 요청 처리
+            if let parameters = parameters {
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                request.httpBody = try? JSONSerialization.data(withJSONObject: parameters)
+            }
+            headers?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
+            return request
+        }
+    }
+}

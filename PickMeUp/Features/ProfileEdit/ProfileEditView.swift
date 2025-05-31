@@ -23,34 +23,25 @@ struct ProfileEditView: View {
         .background(Color.black.ignoresSafeArea())
         .navigationTitle("프로필 수정")
         .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private extension ProfileEditView {
-    var profileEditCard: some View {
-        VStack(spacing: 16) {
-            if let imagePath = store.state.profile.profileImageURL,
-               !imagePath.isEmpty,
-               let url = URL(string: "https://yourdomain.com\(imagePath)") {
-                AsyncImage(url: url) { image in
-                    image.resizable()
-                } placeholder: {
-                    ProgressView()
+        .sheet(isPresented: Binding(
+            get: { store.state.showImagePicker },
+            set: { store.send(.toggleImagePicker($0)) }
+        )) {
+            ImagePicker(image: Binding<UIImage?>(
+                get: { store.state.selectedImage },
+                set: {
+                    if let image = $0 {
+                        store.send(.updateSelectedImage(image))
+                        store.send(.uploadImage)
+                    }
                 }
-                .frame(width: 100, height: 100)
-                .clipShape(Circle())
-                .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                .shadow(radius: 4)
-            } else {
-                Image(systemName: "person.crop.circle.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 100, height: 100)
-                    .foregroundColor(.gray)
-                    .padding(10)
-                    .background(Circle().stroke(Color.white, lineWidth: 2))
-                    .shadow(radius: 4)
-            }
+            ))
+        }
+    }
+
+    private var profileEditCard: some View {
+        VStack(spacing: 16) {
+            profileImageView
 
             VStack(spacing: 8) {
                 TextField("닉네임", text: Binding(
@@ -103,8 +94,85 @@ private extension ProfileEditView {
         .cornerRadius(20)
         .padding(.horizontal)
     }
+
+    private var profileImageView: some View {
+        Group {
+            if let imagePath = store.state.profile.profileImageURL,
+               !imagePath.isEmpty,
+               let url = URL(string: "\(APIConstants.Endpoints.User.profileImage)\(imagePath)") {
+                AsyncImage(url: url) { image in
+                    image.resizable()
+                } placeholder: {
+                    ProgressView()
+                }
+            } else if let selected = store.state.selectedImage {
+                Image(uiImage: selected)
+                    .resizable()
+            } else {
+                Image(systemName: "person.crop.circle.fill")
+                    .resizable()
+                    .foregroundColor(.gray)
+            }
+        }
+        .scaledToFit()
+        .frame(width: 100, height: 100)
+        .clipShape(Circle())
+        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+        .shadow(radius: 4)
+        .onTapGesture {
+            store.send(.toggleImagePicker(true))
+        }
+    }
 }
+
 
 //#Preview {
 //    ProfileEditView(viewModel: <#ProfileEditViewModel#>)
 //}
+
+
+
+import PhotosUI
+
+struct ImagePicker: UIViewControllerRepresentable {
+    @Binding var image: UIImage?
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    func makeUIViewController(context: Context) -> some UIViewController {
+        var configuration = PHPickerConfiguration()
+        configuration.filter = .images
+        configuration.selectionLimit = 1
+
+        let picker = PHPickerViewController(configuration: configuration)
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {
+        // 없음
+    }
+
+    class Coordinator: NSObject, PHPickerViewControllerDelegate {
+        let parent: ImagePicker
+
+        init(_ parent: ImagePicker) {
+            self.parent = parent
+        }
+
+        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            picker.dismiss(animated: true)
+
+            guard let provider = results.first?.itemProvider,
+                  provider.canLoadObject(ofClass: UIImage.self) else { return }
+
+            provider.loadObject(ofClass: UIImage.self) { image, _ in
+                DispatchQueue.main.async {
+                    self.parent.image = image as? UIImage
+                }
+            }
+        }
+    }
+}

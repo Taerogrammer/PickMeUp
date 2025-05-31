@@ -48,6 +48,7 @@ enum APIConstants {
             static let loginKakao = Path.Users.login + "/kakao"
             static let loginApple = Path.Users.login + "/apple"
             static let profile = Path.Users.me + "/profile"
+            static let profileImage = Path.Users.base + "/profile" + "/image"
         }
         
         // Log
@@ -69,6 +70,7 @@ enum APIConstants {
             }
 
             static let applicationJson = "application/json"
+            static let multipartFormData = "multipart/form-data"
         }
     }
     

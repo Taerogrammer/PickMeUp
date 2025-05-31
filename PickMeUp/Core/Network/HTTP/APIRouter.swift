@@ -20,12 +20,54 @@ extension APIRouter {
         guard let url = URL(string: environment.baseURL + path) else { return nil }
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
+
         headers?.forEach { request.addValue($1, forHTTPHeaderField: $0) }
-        if let parameters = parameters,
+
+        // Multipart 전송 분기
+        if let userRouter = self as? UserRouter {
+            switch userRouter {
+            case .uploadProfileImage(let imageData, let fileName, let mimeType):
+                let boundary = "----WebKitFormBoundary\(UUID().uuidString)"
+                request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+                request.httpBody = Self.createMultipartBody(
+                    data: imageData,
+                    boundary: boundary,
+                    fieldName: "profile",
+                    fileName: fileName,
+                    mimeType: mimeType
+                )
+                return request
+            default:
+                break
+            }
+        }
+
+        // JSON 전송
+        if let parameters,
            let body = try? JSONSerialization.data(withJSONObject: parameters) {
             request.httpBody = body
-            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
+
         return request
+    }
+
+    private static func createMultipartBody(
+        data: Data,
+        boundary: String,
+        fieldName: String,
+        fileName: String,
+        mimeType: String
+    ) -> Data {
+        var body = Data()
+        let lineBreak = "\r\n"
+
+        body.append("--\(boundary)\(lineBreak)".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(fileName)\"\(lineBreak)".data(using: .utf8)!)
+        body.append("Content-Type: \(mimeType)\(lineBreak)\(lineBreak)".data(using: .utf8)!)
+        body.append(data)
+        body.append("\(lineBreak)--\(boundary)--\(lineBreak)".data(using: .utf8)!)
+
+        return body
     }
 }
