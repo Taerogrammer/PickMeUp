@@ -8,5 +8,5 @@
 import SwiftUI
 
 protocol TabProviding: AnyObject {
-    func makeTabbarView() -> AnyView
+    func makeTabbarScreen() -> AnyView
 }

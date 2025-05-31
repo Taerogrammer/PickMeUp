@@ -31,7 +31,7 @@ struct AppRootView: View {
                         }
                 } else {
                     if launchState.isSessionValid {
-                        container.makeTabbarView()
+                        container.makeTabbarScreen()
                     } else {
                         container.makeLandingView(appLaunchState: launchState)
                     }

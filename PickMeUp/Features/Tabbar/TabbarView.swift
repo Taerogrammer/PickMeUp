@@ -9,16 +9,16 @@ import SwiftUI
 
 struct TabbarView: View {
     @StateObject private var store: TabbarStore
-    private let container: DIContainer
+    private let onTabSelected: (TabItem) -> AnyView
 
-    init(store: TabbarStore, container: DIContainer) {
+    init(store: TabbarStore, onTabSelected: @escaping (TabItem) -> AnyView) {
         _store = StateObject(wrappedValue: store)
-        self.container = container
+        self.onTabSelected = onTabSelected
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 0) {
-            tabContentView(for: store.state.selectedTab)
+            onTabSelected(store.state.selectedTab)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color(.systemBackground))
 
@@ -33,20 +33,6 @@ struct TabbarView: View {
                     .clipShape(RoundedCorner(radius: 24, corners: [.topLeft, .topRight]))
                     .ignoresSafeArea(edges: .bottom)
             )
-        }
-    }
-
-    @ViewBuilder
-    private func tabContentView(for tab: TabItem) -> some View {
-        switch tab {
-        case .home:
-            HomeView()
-        case .orders:
-            OrderView()
-        case .friends:
-            CommunityView()
-        case .profile:
-            container.makeProfileView()
         }
     }
 
@@ -66,7 +52,18 @@ struct TabbarView: View {
 }
 
 #Preview {
-    let dummyRouter = AppRouter()
-    let store = TabbarStore(router: dummyRouter)
-    TabbarView(store: store, container: DIContainer())
+    let container = DIContainer()
+    let store = TabbarStore(router: container.router)
+    return TabbarView(store: store) { tab in
+        switch tab {
+        case .home:
+            return AnyView(HomeView())
+        case .orders:
+            return AnyView(OrderView())
+        case .friends:
+            return AnyView(CommunityView())
+        case .profile:
+            return container.makeProfileView()
+        }
+    }
 }

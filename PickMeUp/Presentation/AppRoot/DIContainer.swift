@@ -11,9 +11,8 @@ final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding {
     let router = AppRouter()
 
     // MARK: - TabProviding
-    func makeTabbarView() -> AnyView {
-        let store = TabbarStore(router: router)
-        return AnyView(TabbarView(store: store, container: self))
+    func makeTabbarScreen() -> AnyView {
+        AnyView(TabbarScreen(container: self))
     }
 
     // MARK: - AuthViewProviding
