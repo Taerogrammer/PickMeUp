@@ -34,3 +34,13 @@ extension MeProfileResponse {
         phoneNum: "01012341234"
     )
 }
+
+extension MeProfileResponse {
+    static let empty = MeProfileResponse(
+        user_id: "",
+        email: "",
+        nick: "",
+        profileImage: "",
+        phoneNum: ""
+    )
+}

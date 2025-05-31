@@ -49,5 +49,22 @@ struct ProfileScreen: View {
 }
 
 #Preview {
-    ProfileScreen(store: ProfileStore(state: ProfileState(user: MeProfileResponse(user_id: "", email: "", nick: "", profileImage: "", phoneNum: "")), router: AppRouter()))
+    let state = ProfileState(
+        user: MeProfileResponse(
+            user_id: "1",
+            email: "example@example.com",
+            nick: "닉네임",
+            profileImage: "",
+            phoneNum: "010-1234-5678"
+        )
+    )
+    let reducer = ProfileReducer()
+    let effect = ProfileEffect()
+    let store = ProfileStore(
+        state: state,
+        effect: effect,
+        reducer: reducer,
+        router: AppRouter()
+    )
+    ProfileScreen(store: store)
 }

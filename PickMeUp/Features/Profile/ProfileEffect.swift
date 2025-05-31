@@ -7,8 +7,8 @@
 
 import Foundation
 
-enum ProfileEffect {
-    static func handleOnAppear(store: ProfileStore) {
+struct ProfileEffect {
+    func handleOnAppear(store: ProfileStore) {
         Task {
             do {
                 let result = try await NetworkManager.shared.fetch(

@@ -8,8 +8,6 @@
 import Foundation
 
 struct ProfileReducer {
-    let router: AppRouter
-
     func reduce(state: inout ProfileState, intent: ProfileIntent) {
         switch intent {
         case .fetchProfile(let user):
@@ -20,12 +18,10 @@ struct ProfileReducer {
             state.errorMessage = message
 
         case .editProfileTapped:
-            if let profile = state.profile {
-                router.navigate(to: .editProfile(user: profile))
-            }
+            state.isEditing = true
 
         case .onAppear:
-            break // handled by Effect
+            break
         }
     }
 }
