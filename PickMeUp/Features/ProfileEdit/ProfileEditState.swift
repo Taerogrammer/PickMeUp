@@ -9,14 +9,16 @@ import Foundation
 
 struct ProfileEditState {
     var profile: ProfileEntity
-
     var isSaving: Bool = false
     var errorMessage: String? = nil
+
+    init(profile: ProfileEntity = ProfileEntity(nick: "", email: "", phone: "", profileImageURL: "")) {
+        self.profile = profile
+    }
 
     var isNickValid: Bool {
         let trimmed = profile.nick.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return false }
-
         let forbiddenCharacters = CharacterSet(charactersIn: ".,?*-@")
         return trimmed.rangeOfCharacter(from: forbiddenCharacters) == nil
     }
@@ -25,8 +27,4 @@ struct ProfileEditState {
         isNickValid && !profile.phone.isEmpty
     }
 
-
-    init(profile: ProfileEntity = ProfileEntity(nick: "", email: "", phone: "", profileImageURL: nil)) {
-        self.profile = profile
-    }
 }

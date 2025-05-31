@@ -47,7 +47,9 @@ final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding {
 
     func makeProfileEditView(user: ProfileEntity) -> AnyView {
         let state = ProfileEditState(profile: user)
-        let viewModel = ProfileEditViewModel(initialState: state, router: router)
-        return AnyView(ProfileEditView(viewModel: viewModel))
+        let reducer = ProfileEditReducer()
+        let effect = ProfileEditEffect()
+        let store = ProfileEditStore(state: state, reducer: reducer, effect: effect, router: router)
+        return AnyView(ProfileEditView(store: store))
     }
 }

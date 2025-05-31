@@ -8,8 +8,8 @@
 import Foundation
 
 enum ProfileEditIntent {
-    case updateNick(String)
-    case updatePhoneNum(String)
-    case updateProfileImage(String)
+    case updateProfile(ProfileEntity)
     case saveTapped
+    case saveSuccess
+    case saveFailure(APIError)
 }

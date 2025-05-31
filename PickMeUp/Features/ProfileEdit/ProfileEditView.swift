@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct ProfileEditView: View {
-    @StateObject private var viewModel: ProfileEditViewModel
+    @StateObject private var store: ProfileEditStore
 
-    init(viewModel: ProfileEditViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+    init(store: ProfileEditStore) {
+        _store = StateObject(wrappedValue: store)
     }
 
     var body: some View {
@@ -29,8 +29,7 @@ struct ProfileEditView: View {
 private extension ProfileEditView {
     var profileEditCard: some View {
         VStack(spacing: 16) {
-            // ✅ 이미지 표시 로직
-            if let imagePath = viewModel.state.profile.profileImageURL,
+            if let imagePath = store.state.profile.profileImageURL,
                !imagePath.isEmpty,
                let url = URL(string: "https://yourdomain.com\(imagePath)") {
                 AsyncImage(url: url) { image in
@@ -55,41 +54,49 @@ private extension ProfileEditView {
 
             VStack(spacing: 8) {
                 TextField("닉네임", text: Binding(
-                    get: { viewModel.state.profile.nick },
-                    set: { viewModel.handleIntent(.updateNick($0)) }
+                    get: { store.state.profile.nick },
+                    set: {
+                        var updated = store.state.profile
+                        updated.nick = $0
+                        store.send(.updateProfile(updated))
+                    }
                 ))
                 .textFieldStyle(.roundedBorder)
                 .autocapitalization(.none)
 
                 TextField("전화번호", text: Binding(
-                    get: { viewModel.state.profile.phone },
-                    set: { viewModel.handleIntent(.updatePhoneNum($0)) }
+                    get: { store.state.profile.phone },
+                    set: {
+                        var updated = store.state.profile
+                        updated.phone = $0
+                        store.send(.updateProfile(updated))
+                    }
                 ))
                 .keyboardType(.phonePad)
                 .textFieldStyle(.roundedBorder)
             }
 
-            if let error = viewModel.state.errorMessage {
+            if let error = store.state.errorMessage {
                 Text(error)
                     .foregroundColor(.red)
                     .font(.caption)
             }
 
             Button(action: {
-                viewModel.handleIntent(.saveTapped)
+                store.send(.saveTapped)
             }) {
-                if viewModel.state.isSaving {
+                if store.state.isSaving {
                     ProgressView()
                 } else {
                     Text("저장하기")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(viewModel.state.isSaveButtonEnabled ? Color.orange : Color.gray)
+                        .background(store.state.isSaveButtonEnabled ? Color.orange : Color.gray)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
             }
-            .disabled(!viewModel.state.isSaveButtonEnabled || viewModel.state.isSaving)
+            .disabled(!store.state.isSaveButtonEnabled || store.state.isSaving)
         }
         .padding()
         .background(Color(.darkGray))
@@ -97,6 +104,7 @@ private extension ProfileEditView {
         .padding(.horizontal)
     }
 }
+
 //#Preview {
 //    ProfileEditView(viewModel: <#ProfileEditViewModel#>)
 //}

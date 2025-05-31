@@ -8,10 +8,10 @@
 import Foundation
 
 struct ProfileEntity: Equatable, Hashable {
-    let nick: String
-    let email: String
-    let phone: String
-    let profileImageURL: String?
+    var nick: String
+    var email: String
+    var phone: String
+    var profileImageURL: String?
 }
 
 extension ProfileEntity {

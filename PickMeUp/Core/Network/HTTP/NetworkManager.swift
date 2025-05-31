@@ -17,10 +17,9 @@ final class NetworkManager {
         successType: Success.Type,
         failureType: Failure.Type
     ) async throws -> (statusCode: Int, success: Success?, failure: Failure?) {
-        guard let urlRequest = router.urlRequest else { throw APIError.unknown }
-
-        print("📡 [cURL 요청]")
-        print(urlRequest.curlString) // <- 여기에 추가
+        guard let urlRequest = router.urlRequest else {
+            throw APIError.unknown
+        }
 
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
 
@@ -29,8 +28,6 @@ final class NetworkManager {
         }
 
         let statusCode = httpResponse.statusCode
-
-        debugCurlWithResponse(request: urlRequest, response: response, data: data)
 
         if (200...299).contains(statusCode) {
             let decodedSuccess = try? JSONDecoder().decode(Success.self, from: data)
