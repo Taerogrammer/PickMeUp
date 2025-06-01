@@ -56,8 +56,8 @@ struct TabbarView: View {
     let store = TabbarStore(router: container.router)
     return TabbarView(store: store) { tab in
         switch tab {
-        case .home:
-            return AnyView(HomeView())
+        case .store:
+            return AnyView(StoreScreen())
         case .orders:
             return AnyView(OrderView())
         case .friends:
