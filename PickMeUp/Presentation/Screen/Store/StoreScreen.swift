@@ -12,7 +12,7 @@ struct StoreScreen: View {
         Text("Store List")
             .onAppear {
                 Task {
-                    await fetchStores()
+                    await fetchChatList()
                 }
             }
     }
@@ -40,6 +40,24 @@ struct StoreScreen: View {
             }
         } catch {
             print("❌ Store fetch 예외 발생:", error.localizedDescription)
+        }
+    }
+
+    private func fetchChatList() async {
+        do {
+            let response = try await NetworkManager.shared.fetch(
+                ChatRouter.getChats,
+                successType: ChatListResponse.self,
+                failureType: CommonMessageResponse.self
+            )
+
+            if let chats = response.success?.data {
+                print("✅ Fetched Chats:", chats.map { $0.roomID }) // 예시로 roomID 출력
+            } else if let error = response.failure {
+                print("❌ Chat list fetch 실패: \(error.message)")
+            }
+        } catch {
+            print("❌ Chat list fetch 예외 발생:", error.localizedDescription)
         }
     }
 

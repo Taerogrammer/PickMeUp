@@ -17,6 +17,7 @@ enum APIConstants {
         static let auth = "/auth"
         static let users = "/users"
         static let stores = "/stores"
+        static let chat = "/chats"
 
         enum Log {
             static let base = Version.v1 + Path.log
@@ -35,6 +36,12 @@ enum APIConstants {
 
         enum Store {
             static let base = Version.v1 + Path.stores
+        }
+
+        enum Chat {
+            static let base = Version.v1 + Path.chat
+            static func room(_ id: String) -> String { base + "/\(id)" }
+            static func files(_ id: String) -> String { room(id) + "/files" }
         }
     }
     
@@ -72,6 +79,13 @@ enum APIConstants {
             static let searchPopular = Path.Store.base + "/searches-popular"
             static let likedByMe = Path.Store.base + "/likes/me"
         }
+
+        /// Chat
+        enum Chat {
+            static let chat = Path.Chat.base
+            static func chatting(_ roomID: String) -> String { Path.Chat.room(roomID) }
+            static func files(_ roomID: String) -> String { Path.Chat.files(roomID) }
+        }
     }
     
     // MARK: - Headers
@@ -103,8 +117,16 @@ enum APIConstants {
         static let idToken = "idToken"
         static let oauthToken = "oauthToken"
         static let profileImage = "profileImage"
+
+        enum Chat {
+            static let opponentID = "opponent_id"
+            static let content = "content"
+            static let files = "files"
+        }
     }
-    
+
+
+
     // MARK: - Error Messages
     enum ErrorMessages {
         static let missingRefreshToken = "⚠️ RefreshToken이 없습니다. Authorization 헤더가 누락됩니다."
