@@ -7,6 +7,6 @@
 
 import Foundation
 
-struct ChatRequest: Encodable {
+struct PostChatRequest: Encodable {
     let opponent_id: String
 }

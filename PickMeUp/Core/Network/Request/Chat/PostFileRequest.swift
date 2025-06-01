@@ -7,6 +7,7 @@
 
 import Foundation
 
-struct FileRequest: Encodable {
+struct PostFileRequest: Encodable {
+    let roomID: String
     let files: [String]
 }

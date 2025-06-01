@@ -46,7 +46,7 @@ struct StoreScreen: View {
     private func fetchChatList() async {
         do {
             let response = try await NetworkManager.shared.fetch(
-                ChatRouter.getChats,
+                ChatRouter.getChat,
                 successType: ChatListResponse.self,
                 failureType: CommonMessageResponse.self
             )

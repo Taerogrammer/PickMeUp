@@ -8,50 +8,50 @@
 import Foundation
 
 enum ChatRouter: APIRouter {
-    case getChats
-    case postChats(request: ChatRequest)
-    case getChattings(roomID: String, next: String)
-    case postChattings(roomID: String, request: ChatSendRequest)
-    case postFiles(roomID: String, request: FileRequest)
+    case getChat
+    case postChat(request: PostChatRequest)
+    case getChatting(request: GetChattingRequest)
+    case postChatting(request: ChatSendRequest)
+    case postFile(request: PostFileRequest)
 
     var environment: APIEnvironment { .production }
 
     var path: String {
         switch self {
-        case .getChats, .postChats:
+        case .getChat, .postChat:
             return APIConstants.Endpoints.Chat.chat
-        case .getChattings(let roomID, _):
-            return APIConstants.Endpoints.Chat.chatting(roomID)
-        case .postChattings(let roomID, _):
-            return APIConstants.Endpoints.Chat.chatting(roomID)
-        case .postFiles(let roomID, _):
-            return APIConstants.Endpoints.Chat.files(roomID)
+        case .getChatting(let request):
+            return APIConstants.Endpoints.Chat.chatting(request.roomID)
+        case .postChatting(let request):
+            return APIConstants.Endpoints.Chat.chatting(request.roomID)
+        case .postFile(let request):
+            return APIConstants.Endpoints.Chat.files(request.roomID)
         }
     }
 
     var method: HTTPMethod {
         switch self {
-        case .getChats, .getChattings:
+        case .getChat, .getChatting:
             return .get
-        case .postChats, .postChattings, .postFiles:
+        case .postChat, .postChatting, .postFile:
             return .post
         }
     }
 
     var parameters: [String : Any]? {
         switch self {
-        case .getChats, .getChattings:
+        case .getChat, .getChatting:
             return nil
-        case .postChats(let request):
+        case .postChat(let request):
             return [
                 APIConstants.Parameters.Chat.opponentID: request.opponent_id
             ]
-        case .postChattings(_, let request):
+        case .postChatting(let request):
             return [
                 APIConstants.Parameters.Chat.content: request.content,
                 APIConstants.Parameters.Chat.files: request.files
             ]
-        case .postFiles(_, let request):
+        case .postFile(let request):
             return [
                 APIConstants.Parameters.Chat.files: request.files
             ]
@@ -74,8 +74,8 @@ enum ChatRouter: APIRouter {
 
     var queryItems: [URLQueryItem]? {
         switch self {
-        case .getChattings(_, let next):
-            return [.init(name: APIConstants.Query.Chat.next, value: next)]
+        case .getChatting(let request):
+            return [.init(name: APIConstants.Query.Chat.next, value: request.next)]
         default:
             return nil
         }
