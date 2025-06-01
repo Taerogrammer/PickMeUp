@@ -5,8 +5,8 @@
 //  Created by 김태형 on 5/11/25.
 //
 
-import SwiftUI
 import Combine
+import Foundation
 
 final class LandingViewModel: NSObject, ObservableObject {
     @Published var state: LandingState
@@ -114,47 +114,4 @@ final class LandingViewModel: NSObject, ObservableObject {
             }
         }
     }
-
-
-//    private func handleAppleLogin() {
-//        state.isLoading = true
-//        state.loginErrorMessage = nil
-//
-//        AppleLoginManager.shared.setDeviceToken("hard-coding-device-token")
-//
-//        Task {
-//            do {
-//                let request = try await AppleLoginManager.shared.login()
-//                let (status, success, failure) = try await NetworkManager.shared.fetch(
-//                    UserRouter.loginWithApple(request: request),
-//                    successType: LoginResponse.self,
-//                    failureType: CommonMessageResponse.self
-//                )
-//
-//                await MainActor.run {
-//                    if let success = success {
-//                        KeychainManager.shared.save(key: TokenType.accessToken.rawValue, value: success.accessToken)
-//                        KeychainManager.shared.save(key: TokenType.refreshToken.rawValue, value: success.refreshToken)
-//
-//                        router.navigate(to: .home)
-//                        resultMessage = "Apple 로그인 성공!"
-//                        state.loginErrorMessage = nil
-//                    } else if let failure = failure {
-//                        state.loginErrorMessage = failure.message
-//                    } else {
-//                        state.loginErrorMessage = "Apple 로그인 중 알 수 없는 오류가 발생했습니다."
-//                    }
-//                }
-//            } catch {
-//                print("💥 [Error] Apple 로그인 실패: \(error.localizedDescription)")
-//                await MainActor.run {
-//                    state.loginErrorMessage = "Apple 로그인 실패: \(error.localizedDescription)"
-//                }
-//            }
-//
-//            await MainActor.run {
-//                state.isLoading = false
-//            }
-//        }
-//    }
 }

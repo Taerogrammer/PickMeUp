@@ -41,6 +41,16 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		1624FC222DEA054B005ABB6C /* Presentation */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		1624FD202DEABE54005ABB6C /* Utilities */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Utilities;
+			sourceTree = "<group>";
+		};
 		164E9A472DCE545200C348AB /* App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = App;
@@ -120,7 +130,9 @@
 				164E9ACE2DD085D900C348AB /* Components */,
 				167A43C62DD09C3C00A7C968 /* DesignSystem */,
 				164E9AC92DD081E300C348AB /* Features */,
+				1624FC222DEA054B005ABB6C /* Presentation */,
 				164E9ACD2DD083C500C348AB /* Resources */,
+				1624FD202DEABE54005ABB6C /* Utilities */,
 				164E9A582DCE545400C348AB /* PickMeUpTests */,
 				164E9A622DCE545400C348AB /* PickMeUpUITests */,
 				164E9A462DCE545200C348AB /* Products */,
@@ -153,6 +165,8 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				1624FC222DEA054B005ABB6C /* Presentation */,
+				1624FD202DEABE54005ABB6C /* Utilities */,
 				164E9A472DCE545200C348AB /* App */,
 				164E9A762DCE5F7000C348AB /* Core */,
 				164E9AC92DD081E300C348AB /* Features */,

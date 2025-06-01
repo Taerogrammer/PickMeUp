@@ -17,20 +17,20 @@ final class NetworkManager {
         successType: Success.Type,
         failureType: Failure.Type
     ) async throws -> (statusCode: Int, success: Success?, failure: Failure?) {
-        guard let urlRequest = router.urlRequest else { throw APIError.unknown }
-
-        print("📡 [cURL 요청]")
-        print(urlRequest.curlString) // <- 여기에 추가
+        guard let urlRequest = router.urlRequest else {
+            throw APIError.unknown
+        }
 
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
+
+        print("[HTTP Request]")
+        debugCurlWithResponse(request: urlRequest, response: response, data: data)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.unknown
         }
 
         let statusCode = httpResponse.statusCode
-
-        debugCurlWithResponse(request: urlRequest, response: response, data: data)
 
         if (200...299).contains(statusCode) {
             let decodedSuccess = try? JSONDecoder().decode(Success.self, from: data)
@@ -72,13 +72,17 @@ extension URLRequest {
             components.append("\"\(url.absoluteString)\"")
         }
 
-        allHTTPHeaderFields?.forEach { key, value in
-            components.append("-H \"\(key): \(value)\"")
-        }
+        allHTTPHeaderFields?.forEach { components.append("-H \"\($0): \($1)\"") }
 
-        if let httpBody,
-           let bodyString = String(data: httpBody, encoding: .utf8) {
-            components.append("-d '\(bodyString)'")
+        if let httpBody {
+            let tmpPath = NSTemporaryDirectory() + "body.data"
+            let tmpURL = URL(fileURLWithPath: tmpPath)
+            do {
+                try httpBody.write(to: tmpURL)
+                components.append("--data-binary @\(tmpPath)")
+            } catch {
+                components.append("# ⚠️ Failed to write body to temp file: \(error)")
+            }
         }
 
         return components.joined(separator: " \\\n\t")
