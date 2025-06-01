@@ -9,9 +9,9 @@ import Foundation
 
 enum StoreRouter: APIRouter {
     case stores(query: StoreListRequest)
-    case detail(id: String)
-    case like(id: String)
-    case search(name: String)
+    case detail(query: StoreIDRequest)
+    case like(query: StoreIDRequest)
+    case search(query: StoreNameRequest)
     case popular
     case searchPopular
     case likedByMe
@@ -22,10 +22,10 @@ enum StoreRouter: APIRouter {
         switch self {
         case .stores:
             return APIConstants.Endpoints.Store.stores
-        case .detail(let id):
-            return APIConstants.Endpoints.Store.detail(id)
-        case .like(let id):
-            return APIConstants.Endpoints.Store.like(id)
+        case .detail(let request):
+            return APIConstants.Endpoints.Store.detail(request.id)
+        case .like(let request):
+            return APIConstants.Endpoints.Store.like(request.id)
         case .search:
             return APIConstants.Endpoints.Store.search
         case .popular:
@@ -86,14 +86,14 @@ enum StoreRouter: APIRouter {
             items.append(.init(name: APIConstants.Query.Store.orderBy, value: query.orderBy.rawValue))
             return items
 
-        case .detail(let id):
-            return [.init(name: APIConstants.Query.Store.id, value: id)]
+        case .detail(let request):
+            return [.init(name: APIConstants.Query.Store.id, value: request.id)]
 
-        case .like(let id):
-            return [.init(name: APIConstants.Query.Store.id, value: id)]
+        case .like(let request):
+            return [.init(name: APIConstants.Query.Store.id, value: request.id)]
 
-        case .search(let name):
-            return [.init(name: APIConstants.Query.Store.keyword, value: name)]
+        case .search(let request):
+            return [.init(name: APIConstants.Query.Store.keyword, value: request.name)]
 
         case .popular:
             return [.init(name: APIConstants.Query.Store.limit, value: "10")]
