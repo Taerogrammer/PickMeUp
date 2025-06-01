@@ -13,34 +13,49 @@ enum APIConstants {
     
     // MARK: - Resource Paths
     enum Path {
-        static let users = "users"
-        static let auth = "auth"
-        static let log = "log"
-        
+        static let log = "/log"
+        static let auth = "/auth"
+        static let users = "/users"
+        static let stores = "/stores"
+        static let chat = "/chats"
+
+        enum Log {
+            static let base = Version.v1 + Path.log
+        }
+
+        enum Auth {
+            static let base = Version.v1 + Path.auth
+        }
+
         enum Users {
-            static let base = Version.v1 + "/" + Path.users
+            static let base = Version.v1 + Path.users
             static let me = base + "/me"
             static let validation = base + "/validation"
             static let login = base + "/login"
         }
-        
-        enum Auth {
-            static let base = Version.v1 + "/" + Path.auth
+
+        enum Store {
+            static let base = Version.v1 + Path.stores
         }
-        
-        enum Log {
-            static let base = Version.v1 + "/" + Path.log
+
+        enum Chat {
+            static let base = Version.v1 + Path.chat
+            static func room(_ id: String) -> String { base + "/\(id)" }
+            static func files(_ id: String) -> String { room(id) + "/files" }
         }
     }
     
     // MARK: - Endpoints
     enum Endpoints {
-        // Auth
+
+        enum Log {
+            static let create = Path.Log.base
+        }
+
         enum Auth {
             static let refresh = Path.Auth.base + "/refresh"
         }
         
-        // User
         enum User {
             static let validateEmail = Path.Users.validation + "/email"
             static let join = Path.Users.base + "/join"
@@ -50,10 +65,21 @@ enum APIConstants {
             static let profile = Path.Users.me + "/profile"
             static let profileImage = Path.Users.base + "/profile" + "/image"
         }
-        
-        // Log
-        enum Log {
-            static let create = Path.Log.base
+
+        enum Store {
+            static let stores = Path.Store.base
+            static func detail(_ id: String) -> String { Path.Store.base + "/\(id)" }
+            static func like(_ id: String) -> String { Path.Store.base + "/\(id)/like" }
+            static let search = Path.Store.base + "/search"
+            static let popular = Path.Store.base + "/popular-stores"
+            static let searchPopular = Path.Store.base + "/searches-popular"
+            static let likedByMe = Path.Store.base + "/likes/me"
+        }
+
+        enum Chat {
+            static let chat = Path.Chat.base
+            static func chatting(_ roomID: String) -> String { Path.Chat.room(roomID) }
+            static func files(_ roomID: String) -> String { Path.Chat.files(roomID) }
         }
     }
     
@@ -76,18 +102,56 @@ enum APIConstants {
     
     // MARK: - Parameters
     enum Parameters {
-        static let email = "email"
-        static let password = "password"
-        static let nickname = "nick"
-        static let phoneNumber = "phoneNum"
-        static let deviceToken = "deviceToken"
-        static let token = "token"
-        static let key = "key"
-        static let idToken = "idToken"
-        static let oauthToken = "oauthToken"
-        static let profileImage = "profileImage"
+
+        enum Log {
+            static let key = "key"
+        }
+
+        enum User {
+            static let email = "email"
+            static let password = "password"
+            static let nickname = "nick"
+            static let phoneNumber = "phoneNum"
+            static let deviceToken = "deviceToken"
+            static let idToken = "idToken"
+            static let oauthToken = "oauthToken"
+            static let profileImage = "profileImage"
+        }
+
+        enum Chat {
+            static let opponentID = "opponent_id"
+            static let content = "content"
+            static let files = "files"
+        }
     }
-    
+
+    // MARK: - Query Keys
+    enum Query {
+
+        enum Store {
+            static let category = "category"
+            static let latitude = "latitude"
+            static let longitude = "longitude"
+            static let next = "next"
+            static let limit = "limit"
+            static let orderBy = "order_by"
+            static let keyword = "keyword"
+            static let page = "page"
+            static let id = "id"
+        }
+
+        enum Chat {
+            static let next = "next"
+        }
+
+        enum Common {
+            static let id = "id"
+            static let keyword = "keyword"
+            static let page = "page"
+            static let limit = "limit"
+        }
+    }
+
     // MARK: - Error Messages
     enum ErrorMessages {
         static let missingRefreshToken = "⚠️ RefreshToken이 없습니다. Authorization 헤더가 누락됩니다."

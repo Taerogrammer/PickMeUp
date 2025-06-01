@@ -30,9 +30,9 @@ enum AuthRouter: APIRouter {
         var baseHeaders: [String: String] = [
             APIConstants.Headers.accept: APIConstants.Headers.Values.applicationJson,
             APIConstants.Headers.sesacKey: APIConstants.Headers.Values.sesacKeyValue(),
-//            APIConstants.Headers.refreshToken: KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) ?? ""
+            APIConstants.Headers.refreshToken: KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) ?? ""
             // MARK: - 로그인 실패
-            APIConstants.Headers.refreshToken: ""
+//            APIConstants.Headers.refreshToken: ""
         ]
         
         // Authorization 헤더 추가
@@ -43,4 +43,8 @@ enum AuthRouter: APIRouter {
         }
         return baseHeaders
     }
-} 
+
+    var queryItems: [URLQueryItem]? {
+        return nil
+    }
+}

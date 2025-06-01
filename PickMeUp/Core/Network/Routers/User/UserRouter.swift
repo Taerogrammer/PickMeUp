@@ -1,17 +1,17 @@
 import Foundation
 
 enum UserRouter: APIRouter {
-    case validateEmail(email: String)
+    case validateEmail(request: EmailRequest)
     case join(request: JoinRequest)
     case login(request: LoginRequest)
     case loginWithKakao(request: KakaoLoginRequest)
     case loginWithApple(request: AppleLoginRequest)
     case getProfile
     case putProfile(request: MeProfileRequest)
-    case uploadProfileImage(imageData: Data, fileName: String, mimeType: String)
+    case uploadProfileImage(request: ProfileImageRequest)
 
     var environment: APIEnvironment { .production }
-    
+
     var path: String {
         switch self {
         case .validateEmail:
@@ -24,72 +24,69 @@ enum UserRouter: APIRouter {
             return APIConstants.Endpoints.User.loginKakao
         case .loginWithApple:
             return APIConstants.Endpoints.User.loginApple
-        case .getProfile:
-            return APIConstants.Endpoints.User.profile
-        case .putProfile:
+        case .getProfile, .putProfile:
             return APIConstants.Endpoints.User.profile
         case .uploadProfileImage:
             return APIConstants.Endpoints.User.profileImage
         }
     }
-    
+
     var method: HTTPMethod {
         switch self {
         case .getProfile:
             return .get
-        case .validateEmail, .join, .login, .loginWithKakao, .loginWithApple, .uploadProfileImage:
-            return .post
         case .putProfile:
             return .put
+        default:
+            return .get
         }
     }
-    
+
     var parameters: [String: Any]? {
         switch self {
         case .validateEmail(let email):
-            return [APIConstants.Parameters.email: email]
+            return [APIConstants.Parameters.User.email: email]
         case .join(let request):
             return [
-                APIConstants.Parameters.email: request.email,
-                APIConstants.Parameters.password: request.password,
-                APIConstants.Parameters.nickname: request.nick,
-                APIConstants.Parameters.phoneNumber: request.phoneNum,
-                APIConstants.Parameters.deviceToken: request.deviceToken
+                APIConstants.Parameters.User.email: request.email,
+                APIConstants.Parameters.User.password: request.password,
+                APIConstants.Parameters.User.nickname: request.nick,
+                APIConstants.Parameters.User.phoneNumber: request.phoneNum,
+                APIConstants.Parameters.User.deviceToken: request.deviceToken
             ]
         case .login(let request):
             return [
-                APIConstants.Parameters.email: request.email,
-                APIConstants.Parameters.password: request.password,
-                APIConstants.Parameters.deviceToken: request.deviceToken
+                APIConstants.Parameters.User.email: request.email,
+                APIConstants.Parameters.User.password: request.password,
+                APIConstants.Parameters.User.deviceToken: request.deviceToken
             ]
         case .loginWithKakao(let request):
             return [
-                APIConstants.Parameters.oauthToken: request.oauthToken,
-                APIConstants.Parameters.deviceToken: request.deviceToken
+                APIConstants.Parameters.User.oauthToken: request.oauthToken,
+                APIConstants.Parameters.User.deviceToken: request.deviceToken
             ]
         case .loginWithApple(let request):
             return [
-                APIConstants.Parameters.idToken: request.idToken,
-                APIConstants.Parameters.deviceToken: request.deviceToken,
-                APIConstants.Parameters.nickname: request.nick
+                APIConstants.Parameters.User.idToken: request.idToken,
+                APIConstants.Parameters.User.deviceToken: request.deviceToken,
+                APIConstants.Parameters.User.nickname: request.nick
             ]
-        case .getProfile:
-            return nil
         case .putProfile(let request):
             return [
-                APIConstants.Parameters.nickname: request.nick,
-                APIConstants.Parameters.phoneNumber: request.phoneNum,
-                APIConstants.Parameters.profileImage: request.profileImage
+                APIConstants.Parameters.User.nickname: request.nick,
+                APIConstants.Parameters.User.phoneNumber: request.phoneNum,
+                APIConstants.Parameters.User.profileImage: request.profileImage
             ]
-        case .uploadProfileImage:
+        case .getProfile, .uploadProfileImage:
             return nil
         }
     }
-    
+
     var headers: [String: String]? {
         var baseHeaders: [String: String] = [
             APIConstants.Headers.sesacKey: APIConstants.Headers.Values.sesacKeyValue()
         ]
+
         switch self {
         case .validateEmail, .join, .login, .loginWithKakao, .loginWithApple:
             return baseHeaders
@@ -97,10 +94,7 @@ enum UserRouter: APIRouter {
         case .uploadProfileImage:
             if let refreshToken = KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) {
                 baseHeaders[APIConstants.Headers.authorization] = refreshToken
-
-                // boundary 생성
-                let boundary = UUID().uuidString
-                baseHeaders["Content-Type"] = "multipart/form-data; boundary=\(boundary)"
+                baseHeaders["Content-Type"] = "multipart/form-data; boundary=\(UUID().uuidString)"
             } else {
                 print(APIConstants.ErrorMessages.missingRefreshToken)
             }
@@ -115,27 +109,27 @@ enum UserRouter: APIRouter {
             return baseHeaders
         }
     }
-}
 
-// MARK: - URLRequest 구성 확장 추가
-extension UserRouter {
+    var queryItems: [URLQueryItem]? { nil }
+
     var urlRequest: URLRequest? {
         guard let baseURL = URL(string: environment.baseURL) else { return nil }
         let fullURL = baseURL.appendingPathComponent(path)
-        var request = URLRequest(url: fullURL)
-        request.httpMethod = method.rawValue
+        var urlRequest = URLRequest(url: fullURL)
+        urlRequest.httpMethod = method.rawValue
 
         switch self {
-        case .uploadProfileImage(let imageData, let fileName, let mimeType):
+        case .uploadProfileImage(let profileImageRequest):
             let boundary = "Boundary-\(UUID().uuidString)"
-            request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+            urlRequest.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+            headers?.forEach { urlRequest.setValue($0.value, forHTTPHeaderField: $0.key) }
 
-            // 헤더 추가
-            headers?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
-
-            // multipart body 구성
-            var body = Data()
+            let imageData = profileImageRequest.imageData
+            let fileName = profileImageRequest.fileName
+            let mimeType = profileImageRequest.mimeType
             let fieldName = "profile"
+
+            var body = Data()
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
             body.append("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
             body.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
@@ -143,17 +137,16 @@ extension UserRouter {
             body.append("\r\n".data(using: .utf8)!)
             body.append("--\(boundary)--\r\n".data(using: .utf8)!)
 
-            request.httpBody = body
-            return request
+            urlRequest.httpBody = body
+            return urlRequest
 
         default:
-            // JSON 기반 요청 처리
             if let parameters = parameters {
-                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                request.httpBody = try? JSONSerialization.data(withJSONObject: parameters)
+                urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                urlRequest.httpBody = try? JSONSerialization.data(withJSONObject: parameters)
             }
-            headers?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
-            return request
+            headers?.forEach { urlRequest.setValue($0.value, forHTTPHeaderField: $0.key) }
+            return urlRequest
         }
     }
 }

@@ -22,7 +22,7 @@ enum LogRouter: APIRouter {
     var parameters: [String: Any]? {
         switch self {
         case .log(let key):
-            return [APIConstants.Parameters.key: key]
+            return [APIConstants.Parameters.Log.key: key]
         }
     }
     
@@ -39,4 +39,8 @@ enum LogRouter: APIRouter {
         }
         return baseHeaders
     }
-} 
+
+    var queryItems: [URLQueryItem]? {
+        return nil
+    }
+}

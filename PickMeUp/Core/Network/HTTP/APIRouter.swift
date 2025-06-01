@@ -13,37 +13,45 @@ protocol APIRouter {
     var method: HTTPMethod { get }
     var parameters: [String: Any]? { get }
     var headers: [String: String]? { get }
+    var queryItems: [URLQueryItem]? { get }
 }
 
 extension APIRouter {
     var urlRequest: URLRequest? {
-        guard let url = URL(string: environment.baseURL + path) else { return nil }
-        var request = URLRequest(url: url)
+        guard var components = URLComponents(string: environment.baseURL + path) else { return nil }
+
+        if let queryItems = queryItems, !queryItems.isEmpty {
+            components.queryItems = queryItems
+        }
+
+        guard let finalURL = components.url else { return nil }
+        var request = URLRequest(url: finalURL)
         request.httpMethod = method.rawValue
 
         headers?.forEach { request.addValue($1, forHTTPHeaderField: $0) }
 
-        // Multipart 전송 분기
         if let userRouter = self as? UserRouter {
             switch userRouter {
-            case .uploadProfileImage(let imageData, let fileName, let mimeType):
+            case .uploadProfileImage(let profileRequest):
                 let boundary = "----WebKitFormBoundary\(UUID().uuidString)"
                 request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
                 request.httpBody = Self.createMultipartBody(
-                    data: imageData,
+                    data: profileRequest.imageData,
                     boundary: boundary,
                     fieldName: "profile",
-                    fileName: fileName,
-                    mimeType: mimeType
+                    fileName: profileRequest.fileName,
+                    mimeType: profileRequest.mimeType
                 )
                 return request
+
             default:
                 break
             }
         }
 
-        // JSON 전송
-        if let parameters,
+        if method != .get,
+           let parameters,
            let body = try? JSONSerialization.data(withJSONObject: parameters) {
             request.httpBody = body
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")

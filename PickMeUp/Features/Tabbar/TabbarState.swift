@@ -8,15 +8,15 @@
 import Foundation
 
 struct TabbarState {
-    var selectedTab: TabItem = .home
+    var selectedTab: TabItem = .store
 }
 
 enum TabItem: Hashable, CaseIterable {
-    case home, orders, friends, profile
+    case store, orders, friends, profile
 
     var iconName: String {
         switch self {
-        case .home: return "house.fill"
+        case .store: return "house.fill"
         case .orders: return "doc.text"
         case .friends: return "person.2"
         case .profile: return "person.crop.circle"

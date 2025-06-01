@@ -18,8 +18,8 @@ struct TabbarScreen: View {
         let store = TabbarStore(router: container.router)
         TabbarView(store: store) { tab in
             switch tab {
-            case .home:
-                AnyView(HomeView())
+            case .store:
+                AnyView(StoreScreen())
             case .orders:
                 AnyView(OrderView())
             case .friends:
