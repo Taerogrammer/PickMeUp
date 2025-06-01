@@ -99,7 +99,7 @@ struct ProfileEditView: View {
         Group {
             if let imagePath = store.state.profile.profileImageURL,
                !imagePath.isEmpty,
-               let url = URL(string: "\(APIConstants.Endpoints.User.profileImage)\(imagePath)") {
+               let url = URL(string: "\((APIEnvironment.production.baseURL))/v1\(imagePath)") {
                 AsyncImage(url: url) { image in
                     image.resizable()
                 } placeholder: {
