@@ -17,4 +17,7 @@ enum ProfileEditIntent {
     case saveTapped
     case saveSuccess
     case saveFailure(APIError)
+
+    case loadRemoteImage(UIImage)
+    case loadRemoteImageFailed(String)
 }

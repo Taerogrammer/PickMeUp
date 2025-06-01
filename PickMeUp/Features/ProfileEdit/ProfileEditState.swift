@@ -19,6 +19,7 @@ struct ProfileEditState {
     var errorMessage: String? = nil
     var showImagePicker: Bool = false
     var selectedImage: UIImage? = nil
+    var remoteImage: UIImage? = nil
     var imageUploading: Bool = false
 
     init(profile: ProfileEntity = ProfileEntity(nick: "", email: "", phone: "", profileImageURL: "")) {

@@ -5,7 +5,7 @@
 //  Created by 김태형 on 5/31/25.
 //
 
-import Foundation
+import SwiftUI
 
 struct ProfileEditReducer {
     func reduce(state: inout ProfileEditState, intent: ProfileEditIntent) {
@@ -41,6 +41,12 @@ struct ProfileEditReducer {
         case .saveFailure(let error):
             state.isSaving = false
             state.errorMessage = error.message
+
+        case .loadRemoteImage(let image):
+            state.remoteImage = image
+
+        case .loadRemoteImageFailed(let error):
+            state.errorMessage = error
         }
     }
 }

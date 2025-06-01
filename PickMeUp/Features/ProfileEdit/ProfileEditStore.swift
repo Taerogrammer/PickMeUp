@@ -5,8 +5,7 @@
 //  Created by 김태형 on 5/31/25.
 //
 
-import Combine
-import Foundation
+import UIKit
 
 final class ProfileEditStore: ObservableObject {
     @Published private(set) var state: ProfileEditState
@@ -32,32 +31,26 @@ final class ProfileEditStore: ObservableObject {
             reducer.reduce(state: &state, intent: .saveTapped)
 
             Task {
-                // 1. 이미지 업로드가 필요하면 먼저 실행
                 if let image = state.selectedImage {
-                    let uploadResult = await effect.uploadImage(image, format: .jpeg)
+                    let uploadResult = await effect.uploadImage(image)
 
                     switch uploadResult {
                     case .success(let urlPath):
                         await MainActor.run {
-                            // 업로드 성공 처리
                             reducer.reduce(state: &state, intent: .uploadImageSuccess(urlPath))
-
-                            // ✅ 업로드한 이미지 URL을 profile에 반영
                             var updated = state.profile
                             updated.profileImageURL = urlPath
                             reducer.reduce(state: &state, intent: .updateProfile(updated))
                         }
-
                     case .failure(let error):
                         await MainActor.run {
                             reducer.reduce(state: &state, intent: .uploadImageFailure(error.message))
-                            reducer.reduce(state: &state, intent: .saveFailure(error)) // 저장도 중단
+                            reducer.reduce(state: &state, intent: .saveFailure(error))
                         }
-                        return // 이미지 업로드 실패 시 저장 중단
+                        return
                     }
                 }
 
-                // 2. 프로필 저장
                 let result = await effect.saveProfile(profile: state.profile)
                 await MainActor.run {
                     switch result {
@@ -74,13 +67,11 @@ final class ProfileEditStore: ObservableObject {
             guard let uiImage = state.selectedImage else { return }
 
             Task {
-                let result = await effect.uploadImage(uiImage, format: .jpeg)
+                let result = await effect.uploadImage(uiImage)
                 await MainActor.run {
                     switch result {
                     case .success(let urlPath):
                         reducer.reduce(state: &state, intent: .uploadImageSuccess(urlPath))
-
-                        // 이곳에서는 updateProfile 호출은 필요하지 않음
                     case .failure(let error):
                         reducer.reduce(state: &state, intent: .uploadImageFailure(error.message))
                     }
@@ -95,6 +86,16 @@ final class ProfileEditStore: ObservableObject {
              .saveSuccess,
              .saveFailure:
             reducer.reduce(state: &state, intent: intent)
+
+        case .loadRemoteImage(let image):
+            reducer.reduce(state: &state, intent: .loadRemoteImage(image))
+
+        case .loadRemoteImageFailed(let errorMessage):
+            reducer.reduce(state: &state, intent: .loadRemoteImageFailed(errorMessage))
         }
+    }
+
+    func loadInitialImageIfNeeded() {
+        effect.loadRemoteImage(for: state.profile.profileImageURL, store: self)
     }
 }

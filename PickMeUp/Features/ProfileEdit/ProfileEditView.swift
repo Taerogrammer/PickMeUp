@@ -37,6 +37,9 @@ struct ProfileEditView: View {
                 }
             ))
         }
+        .task {
+            store.loadInitialImageIfNeeded()
+        }
     }
 
     private var profileEditCard: some View {
@@ -53,7 +56,6 @@ struct ProfileEditView: View {
                     }
                 ))
                 .textFieldStyle(.roundedBorder)
-                .autocapitalization(.none)
 
                 TextField("전화번호", text: Binding(
                     get: { store.state.profile.phone },
@@ -97,16 +99,11 @@ struct ProfileEditView: View {
 
     private var profileImageView: some View {
         Group {
-            if let imagePath = store.state.profile.profileImageURL,
-               !imagePath.isEmpty,
-               let url = URL(string: "\((APIEnvironment.production.baseURL))/v1\(imagePath)") {
-                AsyncImage(url: url) { image in
-                    image.resizable()
-                } placeholder: {
-                    ProgressView()
-                }
-            } else if let selected = store.state.selectedImage {
+            if let selected = store.state.selectedImage {
                 Image(uiImage: selected)
+                    .resizable()
+            } else if let remote = store.state.remoteImage {
+                Image(uiImage: remote)
                     .resizable()
             } else {
                 Image(systemName: "person.crop.circle.fill")
@@ -125,54 +122,20 @@ struct ProfileEditView: View {
     }
 }
 
-
-//#Preview {
-//    ProfileEditView(viewModel: <#ProfileEditViewModel#>)
-//}
-
-
-
-import PhotosUI
-
-struct ImagePicker: UIViewControllerRepresentable {
-    @Binding var image: UIImage?
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-
-    func makeUIViewController(context: Context) -> some UIViewController {
-        var configuration = PHPickerConfiguration()
-        configuration.filter = .images
-        configuration.selectionLimit = 1
-
-        let picker = PHPickerViewController(configuration: configuration)
-        picker.delegate = context.coordinator
-        return picker
-    }
-
-    func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {
-        // 없음
-    }
-
-    class Coordinator: NSObject, PHPickerViewControllerDelegate {
-        let parent: ImagePicker
-
-        init(_ parent: ImagePicker) {
-            self.parent = parent
-        }
-
-        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-            picker.dismiss(animated: true)
-
-            guard let provider = results.first?.itemProvider,
-                  provider.canLoadObject(ofClass: UIImage.self) else { return }
-
-            provider.loadObject(ofClass: UIImage.self) { image, _ in
-                DispatchQueue.main.async {
-                    self.parent.image = image as? UIImage
-                }
-            }
-        }
-    }
+#Preview("ProfileEditView") {
+    let dummyRouter = AppRouter()
+    let dummyProfile = ProfileEntity(
+        nick: "PreviewUser",
+        email: "preview@example.com",
+        phone: "010-9999-8888",
+        profileImageURL: nil
+    )
+    let dummyState = ProfileEditState(profile: dummyProfile)
+    let store = ProfileEditStore(
+        state: dummyState,
+        reducer: ProfileEditReducer(),
+        effect: ProfileEditEffect(),
+        router: dummyRouter
+    )
+    return ProfileEditView(store: store)
 }
