@@ -74,10 +74,10 @@ enum ChatRouter: APIRouter {
 
     var queryItems: [URLQueryItem]? {
         switch self {
-        case .getChats, .postChats, .postChattings, .postFiles:
-            return nil
         case .getChattings(_, let next):
-            return [URLQueryItem(name: "next", value: next)]
+            return [.init(name: APIConstants.Query.Chat.next, value: next)]
+        default:
+            return nil
         }
     }
 }

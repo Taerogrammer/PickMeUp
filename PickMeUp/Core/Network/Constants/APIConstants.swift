@@ -125,7 +125,32 @@ enum APIConstants {
         }
     }
 
+    // MARK: - Query Keys
+    enum Query {
 
+        enum Store {
+            static let category = "category"
+            static let latitude = "latitude"
+            static let longitude = "longitude"
+            static let next = "next"
+            static let limit = "limit"
+            static let orderBy = "order_by"
+            static let keyword = "keyword"
+            static let page = "page"
+            static let id = "id"
+        }
+
+        enum Chat {
+            static let next = "next"
+        }
+
+        enum Common {
+            static let id = "id"
+            static let keyword = "keyword"
+            static let page = "page"
+            static let limit = "limit"
+        }
+    }
 
     // MARK: - Error Messages
     enum ErrorMessages {

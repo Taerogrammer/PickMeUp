@@ -47,14 +47,7 @@ enum StoreRouter: APIRouter {
     }
 
     var parameters: [String: Any]? {
-        switch self {
-        case .stores:
-            return nil
-        case .search:
-            return nil
-        default:
-            return nil
-        }
+        return nil
     }
 
     var headers: [String: String]? {
@@ -75,31 +68,41 @@ enum StoreRouter: APIRouter {
         switch self {
         case .stores(let query):
             var items: [URLQueryItem] = []
-            if let category = query.category { items.append(.init(name: "category", value: category)) }
-            if let lat = query.latitude { items.append(.init(name: "latitude", value: "\(lat)")) }
-            if let lng = query.longitude { items.append(.init(name: "longitude", value: "\(lng)")) }
-            if let next = query.next, !next.isEmpty { items.append(.init(name: "next", value: next)) }
-            if let limit = query.limit { items.append(.init(name: "limit", value: "\(limit)")) }
-            items.append(.init(name: "order_by", value: query.orderBy.rawValue))
+            if let category = query.category {
+                items.append(.init(name: APIConstants.Query.Store.category, value: category))
+            }
+            if let lat = query.latitude {
+                items.append(.init(name: APIConstants.Query.Store.latitude, value: "\(lat)"))
+            }
+            if let lng = query.longitude {
+                items.append(.init(name: APIConstants.Query.Store.longitude, value: "\(lng)"))
+            }
+            if let next = query.next, !next.isEmpty {
+                items.append(.init(name: APIConstants.Query.Store.next, value: next))
+            }
+            if let limit = query.limit {
+                items.append(.init(name: APIConstants.Query.Store.limit, value: "\(limit)"))
+            }
+            items.append(.init(name: APIConstants.Query.Store.orderBy, value: query.orderBy.rawValue))
             return items
 
         case .detail(let id):
-            return [URLQueryItem(name: "id", value: id)]
+            return [.init(name: APIConstants.Query.Store.id, value: id)]
 
         case .like(let id):
-            return [URLQueryItem(name: "id", value: id)]
+            return [.init(name: APIConstants.Query.Store.id, value: id)]
 
         case .search(let name):
-            return [URLQueryItem(name: "keyword", value: name)]
+            return [.init(name: APIConstants.Query.Store.keyword, value: name)]
 
         case .popular:
-            return [URLQueryItem(name: "limit", value: "10")] // 필요시 수정
+            return [.init(name: APIConstants.Query.Store.limit, value: "10")]
+
+        case .likedByMe:
+            return [.init(name: APIConstants.Query.Store.page, value: "1")]
 
         case .searchPopular:
             return nil
-
-        case .likedByMe:
-            return [URLQueryItem(name: "page", value: "1")] // 필요시 수정
         }
     }
 }
