@@ -30,7 +30,7 @@ extension MeProfileResponse {
         user_id: "65c9aa6932b0964405117d97",
         email: "sesac@sesac.com",
         nick: "김새싹",
-        profileImage: "/data/profiles/1707716853682.png",
+        profileImage: "/data/profiles/1748751154046.jpg",
         phoneNum: "01012341234"
     )
 }

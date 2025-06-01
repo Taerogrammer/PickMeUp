@@ -26,9 +26,14 @@ final class ProfileStore: ObservableObject {
     }
 
     func send(_ intent: ProfileIntent) {
-        if case .onAppear = intent {
+        switch intent {
+        case .onAppear:
             effect.handleOnAppear(store: self)
-        } else {
+
+        case .loadProfileImage(let path):
+            effect.handleLoadProfileImage(store: self, imagePath: path)
+
+        default:
             reducer.reduce(state: &state, intent: intent)
 
             if case .editProfileTapped = intent,

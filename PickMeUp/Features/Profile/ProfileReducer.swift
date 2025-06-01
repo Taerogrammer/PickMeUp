@@ -17,10 +17,16 @@ struct ProfileReducer {
         case .fetchFailed(let message):
             state.errorMessage = message
 
+        case .profileImageLoaded(let image):
+            state.profileImage = image
+
+        case .profileImageLoadFailed:
+            state.profileImage = nil
+
         case .editProfileTapped:
             state.isEditing = true
 
-        case .onAppear:
+        case .onAppear, .loadProfileImage:
             break
         }
     }

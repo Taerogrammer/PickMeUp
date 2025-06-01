@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ProfileView: View {
     @StateObject private var store: ProfileStore
-    @State private var profileImage: UIImage?
 
     init(store: ProfileStore) {
         _store = StateObject(wrappedValue: store)
@@ -25,14 +24,7 @@ struct ProfileView: View {
         .navigationTitle("설정")
         .navigationBarTitleDisplayMode(.inline)
         .task {
-            print("🟡 Task started")
             store.send(.onAppear)
-        }
-        .onChange(of: store.state.user.profileImage) { newPath in
-            print("🔁 imagePath changed:", newPath)
-            Task {
-                await loadProfileImage(for: newPath)
-            }
         }
     }
 
@@ -41,13 +33,16 @@ struct ProfileView: View {
 
         return VStack(spacing: 16) {
             Group {
-                if let image = profileImage {
+                if let image = store.state.profileImage {
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFill()
                 } else {
-                    ProgressView()
-                        .frame(width: 40, height: 40)
+                    Image(systemName: "person")
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundColor(.gray)
+                        .padding(20)
                 }
             }
             .frame(width: 100, height: 100)
@@ -65,9 +60,6 @@ struct ProfileView: View {
 
                 Text(user.phoneNum)
                     .font(.subheadline).foregroundColor(.gray)
-
-                Text("가입일: 25.01.23")
-                    .font(.footnote).foregroundColor(.gray)
             }
 
             Button {
@@ -90,86 +82,17 @@ struct ProfileView: View {
         .cornerRadius(20)
         .padding(.horizontal)
     }
-
-    private func loadProfileImage(for imagePath: String?) async {
-        print(#function)
-
-        print("🟡 imagePath:", imagePath ?? "nil")
-        let accessToken = KeychainManager.shared.load(key: "accessToken")
-        print("🟡 accessToken:", accessToken ?? "nil")
-
-        guard
-            let imagePath = imagePath,
-            !imagePath.isEmpty,
-            let url = URL(string: "\(APIEnvironment.production.baseURL)/v1/\(imagePath)"),
-            let accessToken = accessToken
-        else {
-            print("❌ 이미지 요청을 위한 정보 부족")
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.setValue("\(accessToken)", forHTTPHeaderField: "Authorization")
-        request.setValue(APIConstants.Headers.Values.sesacKeyValue(), forHTTPHeaderField: APIConstants.Headers.sesacKey)
-
-        printCurlCommand(for: request)
-
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-
-            if let httpResponse = response as? HTTPURLResponse {
-                print("🌐 HTTP Status:", httpResponse.statusCode)
-            }
-
-            if let image = UIImage(data: data) {
-                await MainActor.run {
-                    self.profileImage = image
-                }
-                print("✅ Profile Image Loaded: \(url.absoluteString)")
-            } else {
-                print("❌ 이미지 데이터 디코딩 실패")
-            }
-        } catch {
-            print("❌ Failed to load profile image: \(error.localizedDescription)")
-        }
-    }
-
-
-    private func printCurlCommand(for request: URLRequest) {
-        guard let url = request.url else { return }
-
-        var components: [String] = ["curl"]
-
-        // HTTP Method
-        let method = request.httpMethod ?? "GET"
-        if method != "GET" {
-            components.append("-X \(method)")
-        }
-
-        // Headers
-        if let headers = request.allHTTPHeaderFields {
-            for (key, value) in headers {
-                components.append("-H \"\(key): \(value)\"")
-            }
-        }
-
-        // Body
-        if let httpBody = request.httpBody,
-           let bodyString = String(data: httpBody, encoding: .utf8) {
-            components.append("-d '\(bodyString)'")
-        }
-
-        // URL
-        components.append("\"\(url.absoluteString)\"")
-
-        let curlCommand = components.joined(separator: " \\\n  ")
-        print("📡 cURL Request:\n\(curlCommand)")
-    }
 }
 
-//#Preview {
-//    let dummyRouter = AppRouter()
-//    let mockUser = MeProfileResponse.mock
-//    let mockViewModel = ProfileViewModel(router: dummyRouter, user: mockUser)
-//    ProfileView(viewModel: mockViewModel)
-//}
+#Preview {
+    let dummyRouter = AppRouter()
+    let dummyUser = MeProfileResponse.mock
+    let dummyState = ProfileState(user: dummyUser)
+    let store = ProfileStore(
+        state: dummyState,
+        effect: ProfileEffect(),
+        reducer: ProfileReducer(),
+        router: dummyRouter
+    )
+    return ProfileView(store: store)
+}

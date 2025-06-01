@@ -15,7 +15,7 @@ struct ProfileScreen: View {
     }
 
     var body: some View {
-        VStack(spacing: 32) {
+        VStack {
             ProfileView(store: store)
             profileMenuList
             Spacer()
