@@ -48,17 +48,14 @@ enum APIConstants {
     // MARK: - Endpoints
     enum Endpoints {
 
-        /// Log
         enum Log {
             static let create = Path.Log.base
         }
 
-        /// Auth
         enum Auth {
             static let refresh = Path.Auth.base + "/refresh"
         }
         
-        /// User
         enum User {
             static let validateEmail = Path.Users.validation + "/email"
             static let join = Path.Users.base + "/join"
@@ -69,7 +66,6 @@ enum APIConstants {
             static let profileImage = Path.Users.base + "/profile" + "/image"
         }
 
-        /// Store
         enum Store {
             static let stores = Path.Store.base
             static func detail(_ id: String) -> String { Path.Store.base + "/\(id)" }
@@ -80,7 +76,6 @@ enum APIConstants {
             static let likedByMe = Path.Store.base + "/likes/me"
         }
 
-        /// Chat
         enum Chat {
             static let chat = Path.Chat.base
             static func chatting(_ roomID: String) -> String { Path.Chat.room(roomID) }
