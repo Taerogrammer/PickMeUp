@@ -32,17 +32,19 @@ extension APIRouter {
 
         if let userRouter = self as? UserRouter {
             switch userRouter {
-            case .uploadProfileImage(let imageData, let fileName, let mimeType):
+            case .uploadProfileImage(let profileRequest):
                 let boundary = "----WebKitFormBoundary\(UUID().uuidString)"
                 request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
                 request.httpBody = Self.createMultipartBody(
-                    data: imageData,
+                    data: profileRequest.imageData,
                     boundary: boundary,
                     fieldName: "profile",
-                    fileName: fileName,
-                    mimeType: mimeType
+                    fileName: profileRequest.fileName,
+                    mimeType: profileRequest.mimeType
                 )
                 return request
+
             default:
                 break
             }
@@ -57,6 +59,7 @@ extension APIRouter {
 
         return request
     }
+
     private static func createMultipartBody(
         data: Data,
         boundary: String,

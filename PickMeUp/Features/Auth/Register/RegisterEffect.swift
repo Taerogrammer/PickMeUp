@@ -36,7 +36,7 @@ struct RegisterEffect {
 
                 do {
                     let result = try await NetworkManager.shared.fetch(
-                        UserRouter.validateEmail(email: state.email),
+                        UserRouter.validateEmail(request: EmailRequest(email: state.email)),
                         successType: CommonMessageResponse.self,
                         failureType: CommonMessageResponse.self
                     )

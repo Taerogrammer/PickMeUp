@@ -41,15 +41,20 @@ struct ProfileEditEffect {
             filename = "profile.png"
             mimeType = "image/png"
         } else {
-            // 기본적으로 JPEG로 강제 변환
             imageData = image.jpegData(compressionQuality: 0.8)!
             filename = "profile.jpg"
             mimeType = "image/jpeg"
         }
 
+        let requestData = ProfileImageRequest(
+            imageData: imageData,
+            fileName: filename,
+            mimeType: mimeType
+        )
+
         do {
             let result = try await NetworkManager.shared.fetch(
-                UserRouter.uploadProfileImage(imageData: imageData, fileName: filename, mimeType: mimeType),
+                UserRouter.uploadProfileImage(request: requestData),
                 successType: ProfileImageResponse.self,
                 failureType: CommonMessageResponse.self
             )
@@ -65,7 +70,6 @@ struct ProfileEditEffect {
             return .failure(.message("이미지 업로드 실패: \(error.localizedDescription)"))
         }
     }
-
 
     func loadRemoteImage(for path: String?, store: ProfileEditStore) {
         guard let path = path,

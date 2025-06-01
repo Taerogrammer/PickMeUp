@@ -1,14 +1,14 @@
 import Foundation
 
 enum UserRouter: APIRouter {
-    case validateEmail(email: String)
+    case validateEmail(request: EmailRequest)
     case join(request: JoinRequest)
     case login(request: LoginRequest)
     case loginWithKakao(request: KakaoLoginRequest)
     case loginWithApple(request: AppleLoginRequest)
     case getProfile
     case putProfile(request: MeProfileRequest)
-    case uploadProfileImage(imageData: Data, fileName: String, mimeType: String)
+    case uploadProfileImage(request: ProfileImageRequest)
 
     var environment: APIEnvironment { .production }
 
@@ -115,33 +115,38 @@ enum UserRouter: APIRouter {
     var urlRequest: URLRequest? {
         guard let baseURL = URL(string: environment.baseURL) else { return nil }
         let fullURL = baseURL.appendingPathComponent(path)
-        var request = URLRequest(url: fullURL)
-        request.httpMethod = method.rawValue
+        var urlRequest = URLRequest(url: fullURL)
+        urlRequest.httpMethod = method.rawValue
 
         switch self {
-        case .uploadProfileImage(let imageData, let fileName, let mimeType):
+        case .uploadProfileImage(let profileImageRequest):
             let boundary = "Boundary-\(UUID().uuidString)"
-            request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-            headers?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
+            urlRequest.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+            headers?.forEach { urlRequest.setValue($0.value, forHTTPHeaderField: $0.key) }
+
+            let imageData = profileImageRequest.imageData
+            let fileName = profileImageRequest.fileName
+            let mimeType = profileImageRequest.mimeType
+            let fieldName = "profile"
 
             var body = Data()
-            let fieldName = "profile"
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
             body.append("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
             body.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
             body.append(imageData)
             body.append("\r\n".data(using: .utf8)!)
             body.append("--\(boundary)--\r\n".data(using: .utf8)!)
-            request.httpBody = body
-            return request
+
+            urlRequest.httpBody = body
+            return urlRequest
 
         default:
             if let parameters = parameters {
-                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                request.httpBody = try? JSONSerialization.data(withJSONObject: parameters)
+                urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                urlRequest.httpBody = try? JSONSerialization.data(withJSONObject: parameters)
             }
-            headers?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
-            return request
+            headers?.forEach { urlRequest.setValue($0.value, forHTTPHeaderField: $0.key) }
+            return urlRequest
         }
     }
 }
