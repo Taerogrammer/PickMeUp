@@ -107,16 +107,21 @@ enum APIConstants {
     
     // MARK: - Parameters
     enum Parameters {
-        static let email = "email"
-        static let password = "password"
-        static let nickname = "nick"
-        static let phoneNumber = "phoneNum"
-        static let deviceToken = "deviceToken"
-        static let token = "token"
-        static let key = "key"
-        static let idToken = "idToken"
-        static let oauthToken = "oauthToken"
-        static let profileImage = "profileImage"
+
+        enum Log {
+            static let key = "key"
+        }
+
+        enum User {
+            static let email = "email"
+            static let password = "password"
+            static let nickname = "nick"
+            static let phoneNumber = "phoneNum"
+            static let deviceToken = "deviceToken"
+            static let idToken = "idToken"
+            static let oauthToken = "oauthToken"
+            static let profileImage = "profileImage"
+        }
 
         enum Chat {
             static let opponentID = "opponent_id"
