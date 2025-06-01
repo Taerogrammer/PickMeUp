@@ -74,6 +74,16 @@ extension URLRequest {
 
         allHTTPHeaderFields?.forEach { components.append("-H \"\($0): \($1)\"") }
 
+        if let url = url,
+           let componentsURL = URLComponents(url: url, resolvingAgainstBaseURL: false),
+           let queryItems = componentsURL.queryItems,
+           !queryItems.isEmpty {
+            let queryString = queryItems
+                .map { "\($0.name)=\($0.value ?? "")" }
+                .joined(separator: "&")
+            components.append("# 🔍 query: ?\(queryString)")
+        }
+
         if let httpBody {
             let tmpPath = NSTemporaryDirectory() + "body.data"
             let tmpURL = URL(fileURLWithPath: tmpPath)
