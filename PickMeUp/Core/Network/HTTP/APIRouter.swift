@@ -13,17 +13,23 @@ protocol APIRouter {
     var method: HTTPMethod { get }
     var parameters: [String: Any]? { get }
     var headers: [String: String]? { get }
+    var queryItems: [URLQueryItem]? { get }
 }
 
 extension APIRouter {
     var urlRequest: URLRequest? {
-        guard let url = URL(string: environment.baseURL + path) else { return nil }
-        var request = URLRequest(url: url)
+        guard var components = URLComponents(string: environment.baseURL + path) else { return nil }
+
+        if let queryItems = queryItems, !queryItems.isEmpty {
+            components.queryItems = queryItems
+        }
+
+        guard let finalURL = components.url else { return nil }
+        var request = URLRequest(url: finalURL)
         request.httpMethod = method.rawValue
 
         headers?.forEach { request.addValue($1, forHTTPHeaderField: $0) }
 
-        // Multipart 전송 분기
         if let userRouter = self as? UserRouter {
             switch userRouter {
             case .uploadProfileImage(let imageData, let fileName, let mimeType):
@@ -42,8 +48,8 @@ extension APIRouter {
             }
         }
 
-        // JSON 전송
-        if let parameters,
+        if method != .get,
+           let parameters,
            let body = try? JSONSerialization.data(withJSONObject: parameters) {
             request.httpBody = body
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -51,7 +57,6 @@ extension APIRouter {
 
         return request
     }
-
     private static func createMultipartBody(
         data: Data,
         boundary: String,

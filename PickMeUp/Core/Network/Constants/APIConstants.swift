@@ -13,34 +13,45 @@ enum APIConstants {
     
     // MARK: - Resource Paths
     enum Path {
-        static let users = "users"
-        static let auth = "auth"
-        static let log = "log"
-        
+        static let log = "/log"
+        static let auth = "/auth"
+        static let users = "/users"
+        static let stores = "/stores"
+
+        enum Log {
+            static let base = Version.v1 + Path.log
+        }
+
+        enum Auth {
+            static let base = Version.v1 + Path.auth
+        }
+
         enum Users {
-            static let base = Version.v1 + "/" + Path.users
+            static let base = Version.v1 + Path.users
             static let me = base + "/me"
             static let validation = base + "/validation"
             static let login = base + "/login"
         }
-        
-        enum Auth {
-            static let base = Version.v1 + "/" + Path.auth
-        }
-        
-        enum Log {
-            static let base = Version.v1 + "/" + Path.log
+
+        enum Store {
+            static let base = Version.v1 + Path.stores
         }
     }
     
     // MARK: - Endpoints
     enum Endpoints {
-        // Auth
+
+        /// Log
+        enum Log {
+            static let create = Path.Log.base
+        }
+
+        /// Auth
         enum Auth {
             static let refresh = Path.Auth.base + "/refresh"
         }
         
-        // User
+        /// User
         enum User {
             static let validateEmail = Path.Users.validation + "/email"
             static let join = Path.Users.base + "/join"
@@ -50,10 +61,16 @@ enum APIConstants {
             static let profile = Path.Users.me + "/profile"
             static let profileImage = Path.Users.base + "/profile" + "/image"
         }
-        
-        // Log
-        enum Log {
-            static let create = Path.Log.base
+
+        /// Store
+        enum Store {
+            static let stores = Path.Store.base
+            static func detail(_ id: String) -> String { Path.Store.base + "/\(id)" }
+            static func like(_ id: String) -> String { Path.Store.base + "/\(id)/like" }
+            static let search = Path.Store.base + "/search"
+            static let popular = Path.Store.base + "/popular-stores"
+            static let searchPopular = Path.Store.base + "/searches-popular"
+            static let likedByMe = Path.Store.base + "/likes/me"
         }
     }
     

@@ -39,4 +39,8 @@ enum LogRouter: APIRouter {
         }
         return baseHeaders
     }
-} 
+
+    var queryItems: [URLQueryItem]? {
+        return nil
+    }
+}

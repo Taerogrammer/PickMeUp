@@ -43,4 +43,8 @@ enum AuthRouter: APIRouter {
         }
         return baseHeaders
     }
-} 
+
+    var queryItems: [URLQueryItem]? {
+        return nil
+    }
+}

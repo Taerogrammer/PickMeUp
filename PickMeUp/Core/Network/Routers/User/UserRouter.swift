@@ -115,6 +115,10 @@ enum UserRouter: APIRouter {
             return baseHeaders
         }
     }
+
+    var queryItems: [URLQueryItem]? {
+        return nil
+    }
 }
 
 // MARK: - URLRequest 구성 확장 추가
