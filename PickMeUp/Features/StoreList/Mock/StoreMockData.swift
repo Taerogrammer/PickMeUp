@@ -21,7 +21,7 @@ struct StoreMockData {
                 "/data/stores/deepthi-clicks--UUkXJIXgy4-unsplash_1747128618888.jpg"
             ],
             isPicchelin: true,
-            isPick: false,
+            isPick: true,
             pickCount: 2,
             hashTags: ["#오늘은치킨이닭"],
             totalRating: 0,

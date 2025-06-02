@@ -36,13 +36,8 @@ struct StoreListItemView: View {
                     Spacer()
 
                     if store.isPicchelin {
-                        Text("픽슐랭")
-                            .font(.pretendardBody2)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.deepSprout)
-                            .cornerRadius(8)
+                        PickchelinConcaveRibbonView()
+                            .padding([.top, .trailing], 10)
                     }
                 }
                 .padding(12)
@@ -114,4 +109,3 @@ struct StoreListItemView: View {
 #Preview {
     StoreListItemView(store: StoreMockData.samples[0])
 }
-
