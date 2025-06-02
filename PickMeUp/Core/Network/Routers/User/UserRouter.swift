@@ -38,7 +38,7 @@ enum UserRouter: APIRouter {
         case .putProfile:
             return .put
         default:
-            return .get
+            return .post
         }
     }
 
