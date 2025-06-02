@@ -16,9 +16,8 @@ struct StoreMockData {
             close: "22:00",
             storeImageURLs: [
                 "https://images.unsplash.com/photo-1600891964599-f61ba0e24092",
-                "/data/stores/alexandra-tran-oXULSch338E-unsplash_1747128618331.jpg",
-                "/data/stores/d-pham-MU0pYUnrT68-unsplash_1747128618513.jpg",
-                "/data/stores/deepthi-clicks--UUkXJIXgy4-unsplash_1747128618888.jpg"
+                "https://images.unsplash.com/photo-1600891964599-f61ba0e24092",
+                "https://images.unsplash.com/photo-1600891964599-f61ba0e24092"
             ],
             isPicchelin: true,
             isPick: true,
