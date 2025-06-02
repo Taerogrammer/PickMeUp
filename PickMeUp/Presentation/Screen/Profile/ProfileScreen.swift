@@ -15,38 +15,41 @@ struct ProfileScreen: View {
     }
 
     var body: some View {
-        VStack {
-            ProfileView(store: store)
-            profileMenuList
-            Spacer()
+        ScrollView {
+            VStack(spacing: 0) {
+                ProfileView(store: store)
+                profileMenuList
+            }
         }
-        .background(Color.black.ignoresSafeArea())
+        .background(Color.brightSprout.ignoresSafeArea())
     }
 
     private var profileMenuList: some View {
         VStack(spacing: 0) {
             profileMenuItem(title: "자주 묻는 질문")
-            Divider().background(Color.gray)
+            Divider().background(Color.gray30)
             profileMenuItem(title: "1:1 문의")
-            Divider().background(Color.gray)
+            Divider().background(Color.gray30)
             profileMenuItem(title: "알림 설정")
-            Divider().background(Color.gray)
-            profileMenuItem(title: "탈퇴하기", textColor: .red)
+            Divider().background(Color.gray30)
+            profileMenuItem(title: "탈퇴하기", textColor: .brightForsythia)
         }
         .padding(.horizontal)
+        .padding(.top, 8) // 약간의 여유 간격만 유지
     }
 
     @ViewBuilder
-    private func profileMenuItem(title: String, textColor: Color = .white) -> some View {
+    private func profileMenuItem(title: String, textColor: Color = .gray90) -> some View {
         HStack {
             Text(title)
                 .foregroundColor(textColor)
-                .font(.body)
+                .font(.pretendardBody2)
             Spacer()
         }
         .padding(.vertical, 16)
     }
 }
+
 
 #Preview {
     let state = ProfileState(
