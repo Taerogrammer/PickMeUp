@@ -67,13 +67,40 @@ private struct MainImageView: View {
 private struct ThumbnailImagesView: View {
     let imageURLs: [String]
 
+    private var paddedURLs: [String?] {
+        var result = imageURLs.map { Optional($0) }
+        while result.count < 2 {
+            result.append(nil)
+        }
+        return result
+    }
+
     var body: some View {
         VStack(spacing: 4) {
-            ForEach(imageURLs, id: \.self) { url in
-                AsyncImage(url: URL(string: url)) { phase in
-                    switch phase {
-                    case .success(let image): image.resizable().scaledToFill()
-                    default: Color.gray30
+            ForEach(0..<paddedURLs.count, id: \.self) { index in
+                Group {
+                    if let url = paddedURLs[index],
+                       let imageURL = URL(string: url) {
+                        AsyncImage(url: imageURL) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image.resizable().scaledToFill()
+                            default:
+                                Color.gray30
+                            }
+                        }
+                    } else {
+                        ZStack {
+                            Color.gray30
+                            VStack(spacing: 4) {
+                                Image(systemName: "photo")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.gray60)
+                                Text("No Image")
+                                    .font(.caption2)
+                                    .foregroundColor(.gray60)
+                            }
+                        }
                     }
                 }
                 .frame(width: 80, height: (160 - 4) / 2)
