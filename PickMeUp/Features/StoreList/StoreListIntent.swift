@@ -6,3 +6,12 @@
 //
 
 import Foundation
+
+enum StoreListIntent {
+    case onAppear
+    case fetchStores([StorePresentable])
+    case fetchFailed(String)
+    case togglePickchelin
+    case toggleMyPick
+    case selectCategory(String)
+}

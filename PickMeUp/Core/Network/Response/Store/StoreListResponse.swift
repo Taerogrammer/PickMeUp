@@ -56,3 +56,23 @@ struct Geolocation: Decodable {
     let longitude: Double
     let latitude: Double
 }
+
+extension StoreModel {
+    func toStoreListEntity() -> StoreListEntity {
+        return StoreListEntity(
+            storeID: storeID,
+            category: category,
+            name: name,
+            close: close,
+            storeImageURLs: storeImageUrls,
+            isPicchelin: isPicchelin,
+            isPick: isPick,
+            pickCount: pickCount,
+            hashTags: hashTags,
+            totalRating: totalRating,
+            totalOrderCount: totalOrderCount,
+            totalReviewCount: totalReviewCount,
+            distance: distance
+        )
+    }
+}

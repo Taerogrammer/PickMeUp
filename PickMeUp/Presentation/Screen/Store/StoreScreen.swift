@@ -11,7 +11,7 @@ struct StoreScreen: View {
     var body: some View {
         VStack(spacing: 0) {
             StoreSearchHeaderView()
-            StoreListView(stores: StoreMockData.samples)
+            StoreListView()
         }
         .background(Color.gray30)
     }

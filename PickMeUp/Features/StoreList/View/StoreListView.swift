@@ -8,121 +8,63 @@
 import SwiftUI
 
 struct StoreListView: View {
-    let stores: [StorePresentable]
-    let categories: [(image: String, title: String)] = [
-        ("coffee", "커피"),
-        ("hamburger", "패스트푸드"),
-        ("desert", "디저트"),
-        ("bread", "베이커리")
-    ]
-
-    @State private var selectedCategory: String = "전체"
-    @State private var isPickchelinOn: Bool = true
-    @State private var isMyPickOn: Bool = false
-
-    var filteredStores: [StorePresentable] {
-        var filtered = selectedCategory == "전체"
-            ? stores
-            : stores.filter { $0.category == selectedCategory }
-
-        if isPickchelinOn {
-            filtered = filtered.filter { $0.isPicchelin }
-        }
-        if isMyPickOn {
-            filtered = filtered.filter { $0.isPick }
-        }
-
-        return filtered
-    }
+    @StateObject private var store = StoreListStore()
 
     var body: some View {
         VStack(spacing: 8) {
-            // 카테고리 버튼 스크롤
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    CategoryButton(
-                        imageName: "more",
-                        title: "전체",
-                        isSelected: selectedCategory == "전체"
-                    ) {
-                        selectedCategory = "전체"
+                    CategoryButton(imageName: "more", title: "전체", isSelected: store.state.selectedCategory == "전체") {
+                        store.send(.selectCategory("전체"))
                     }
-
-                    ForEach(categories, id: \.title) { category in
-                        CategoryButton(
-                            imageName: category.image,
-                            title: category.title,
-                            isSelected: selectedCategory == category.title
-                        ) {
-                            selectedCategory = category.title
+                    ForEach(store.state.categories, id: \.title) { category in
+                        CategoryButton(imageName: category.image, title: category.title, isSelected: store.state.selectedCategory == category.title) {
+                            store.send(.selectCategory(category.title))
                         }
                     }
                 }
                 .padding([.top, .leading, .trailing])
-                .task {
-                    await fetchStores()
-                }
             }
 
-            // Section View로 리스트 통합
             ScrollView(showsIndicators: false) {
-                StoreSectionView(
-                    title: "내가 픽업 가게",
-                    stores: filteredStores,
-                    showFilter: true,
-                    showSortButton: true,
-                    onSortTapped: {
-                        // 정렬 이벤트 처리
-                    },
-                    onPickchelinToggle: {
-                        isPickchelinOn.toggle()
-                    },
-                    onMyPickToggle: {
-                        isMyPickOn.toggle()
-                    },
-                    isPickchelinOn: isPickchelinOn,
-                    isMyPickOn: isMyPickOn
-                )
+                VStack(spacing: 10) {
+                    StoreSectionHeaderView(
+                        title: "내가 픽업 가게",
+                        showFilter: true,
+                        showSortButton: true,
+                        onSortTapped: {},
+                        onPickchelinToggle: { store.send(.togglePickchelin) },
+                        onMyPickToggle: { store.send(.toggleMyPick) },
+                        isPickchelinOn: store.state.isPickchelinOn,
+                        isMyPickOn: store.state.isMyPickOn
+                    )
+
+                    if store.state.filteredStores.isEmpty {
+                        Text("불러올 가게가 없습니다.")
+                            .foregroundColor(.gray60)
+                            .font(.caption)
+                            .padding(.vertical, 32)
+                            .frame(maxWidth: .infinity)
+                    } else {
+                        ForEach(Array(store.state.filteredStores.enumerated()), id: \.element.storeID) { _, store in
+                            StoreListItemView(store: store)
+                        }
+                    }
+                }
+                .padding(.horizontal)
             }
         }
         .background(Color.gray0)
         .cornerRadius(20, corners: [.topLeft, .topRight])
-    }
-
-    private func fetchStores() async {
-        let query = StoreListRequest(
-            category: nil,
-            latitude: nil,
-            longitude: nil,
-            next: nil,
-            limit: 5,
-            orderBy: .distance
-        )
-        do {
-            let response = try await NetworkManager.shared.fetch(
-                StoreRouter.stores(query: query),
-                successType: StoreListResponse.self,
-                failureType: CommonMessageResponse.self
-            )
-
-            if let stores = response.success?.data {
-                print("✅ Fetched Stores:", stores.map { $0.name })
-            } else if let error = response.failure {
-                print("❌ Store fetch 실패: \(error.message)")
-            }
-        } catch {
-            print("❌ Store fetch 예외 발생:", error.localizedDescription)
+        .task {
+            store.send(.onAppear)
         }
     }
 }
 
-
-
 #Preview {
-    StoreListView(stores: StoreMockData.samples)
+    StoreListView()
 }
-
-
 
 struct StoreSectionView: View {
     let title: String
@@ -157,7 +99,6 @@ struct StoreSectionView: View {
         }
     }
 }
-
 
 struct StoreSectionHeaderView: View {
     var title: String
