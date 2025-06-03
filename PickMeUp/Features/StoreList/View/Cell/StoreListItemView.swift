@@ -8,19 +8,19 @@
 import SwiftUI
 
 struct StoreListItemView: View {
-    let store: StorePresentable
+    let storeData: StorePresentable
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
-                MainImageView(store: store)
-                ThumbnailImagesView(imageURLs: Array(store.storeImageURLs.dropFirst().prefix(2)))
+                MainImageView(storeData: storeData)
+                ThumbnailImagesView(imageURLs: Array(storeData.storeImageURLs.dropFirst().prefix(2)))
             }
             .frame(maxWidth: .infinity, maxHeight: 128)
 
-            InfoRowView(store: store)
-            MetaRowView(store: store)
-            HashTagsView(tags: store.hashTags)
+            InfoRowView(storeData: storeData)
+            MetaRowView(storeData: storeData)
+            HashTagsView(tags: storeData.hashTags)
         }
         .padding()
         .frame(height: 235)
@@ -31,11 +31,11 @@ struct StoreListItemView: View {
 }
 
 private struct MainImageView: View {
-    let store: StorePresentable
+    let storeData: StorePresentable
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            AsyncImage(url: URL(string: store.storeImageURLs.first ?? "")) { phase in
+            AsyncImage(url: URL(string: storeData.storeImageURLs.first ?? "")) { phase in
                 switch phase {
                 case .success(let image): image.resizable().scaledToFill()
                 default: Color.gray30
@@ -46,8 +46,8 @@ private struct MainImageView: View {
             .cornerRadius(12)
 
             HStack {
-                Image(systemName: store.isPick ? "heart.fill" : "heart")
-                    .foregroundColor(store.isPick ? .deepSprout : .gray60)
+                Image(systemName: storeData.isPick ? "heart.fill" : "heart")
+                    .foregroundColor(storeData.isPick ? .deepSprout : .gray60)
                     .padding(8)
                     .background(Color.white)
                     .clipShape(Circle())
@@ -55,7 +55,7 @@ private struct MainImageView: View {
 
                 Spacer()
 
-                if store.isPicchelin {
+                if storeData.isPicchelin {
                     PickchelinConcaveRibbonView()
                 }
             }
@@ -114,17 +114,17 @@ private struct ThumbnailImagesView: View {
 }
 
 private struct InfoRowView: View {
-    let store: StorePresentable
+    let storeData: StorePresentable
 
     var body: some View {
         HStack(spacing: 8) {
-            Text(store.name)
+            Text(storeData.name)
                 .font(.pretendardBody1)
                 .foregroundColor(.gray100)
 
-            IconText(systemName: "heart.fill", text: "\(store.pickCount)", color: .brightForsythia)
-            IconText(systemName: "star.fill", text: String(format: "%.1f", store.totalRating), color: .brightForsythia)
-            Text("(\(store.totalReviewCount))")
+            IconText(systemName: "heart.fill", text: "\(storeData.pickCount)", color: .brightForsythia)
+            IconText(systemName: "star.fill", text: String(format: "%.1f", storeData.totalRating), color: .brightForsythia)
+            Text("(\(storeData.totalReviewCount))")
                 .font(.pretendardCaption1)
                 .foregroundColor(.gray60)
 
@@ -134,19 +134,19 @@ private struct InfoRowView: View {
 }
 
 private struct MetaRowView: View {
-    let store: StorePresentable
+    let storeData: StorePresentable
 
     private var formattedDistance: String {
-        store.distance >= 1000
-        ? String(format: "%.1fkm", store.distance / 1000)
-        : String(format: "%.0fm", store.distance)
+        storeData.distance >= 1000
+        ? String(format: "%.1fkm", storeData.distance / 1000)
+        : String(format: "%.0fm", storeData.distance)
     }
 
     var body: some View {
         HStack(spacing: 8) {
             IconText(systemName: "paperplane.fill", text: formattedDistance, color: .deepSprout)
-            IconText(systemName: "clock", text: store.close, color: .deepSprout)
-            IconText(systemName: "figure.walk", text: "\(store.totalOrderCount)회", color: .blackSprout)
+            IconText(systemName: "clock", text: storeData.close, color: .deepSprout)
+            IconText(systemName: "figure.walk", text: "\(storeData.totalOrderCount)회", color: .blackSprout)
         }
     }
 }
@@ -186,5 +186,5 @@ private struct IconText: View {
 }
 
 #Preview {
-    StoreListItemView(store: StoreMockData.samples[0])
+    StoreListItemView(storeData: StoreMockData.samples[0])
 }

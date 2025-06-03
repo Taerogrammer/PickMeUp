@@ -42,7 +42,7 @@ struct StoreListView: View {
                             .frame(maxWidth: .infinity)
                     } else {
                         ForEach(Array(store.state.filteredStores.enumerated()), id: \.element.storeID) { _, store in
-                            StoreListItemView(store: store)
+                            StoreListItemView(storeData: store)
                         }
                     }
                 }
