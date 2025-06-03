@@ -22,3 +22,11 @@ protocol StorePresentable {
     var totalReviewCount: Int { get }
     var distance: Double { get }
 }
+
+extension StorePresentable {
+    var distanceText: String {
+        distance >= 1000
+        ? String(format: "%.1fkm", distance / 1000)
+        : String(format: "%.0fm", distance)
+    }
+}

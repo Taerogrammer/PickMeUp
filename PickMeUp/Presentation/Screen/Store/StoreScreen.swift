@@ -9,10 +9,11 @@ import SwiftUI
 
 struct StoreScreen: View {
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             StoreSearchHeaderView()
             StoreListView(stores: StoreMockData.samples)
         }
+        .background(Color.gray30)
     }
 
     private func fetchChatList() async {
@@ -32,7 +33,6 @@ struct StoreScreen: View {
             print("❌ Chat list fetch 예외 발생:", error.localizedDescription)
         }
     }
-
 }
 
 #Preview {

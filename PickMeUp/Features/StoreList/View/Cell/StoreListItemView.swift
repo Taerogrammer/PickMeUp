@@ -16,13 +16,14 @@ struct StoreListItemView: View {
                 MainImageView(store: store)
                 ThumbnailImagesView(imageURLs: Array(store.storeImageURLs.dropFirst().prefix(2)))
             }
-            .frame(maxWidth: .infinity, maxHeight: 160)
+            .frame(maxWidth: .infinity, maxHeight: 128)
 
             InfoRowView(store: store)
             MetaRowView(store: store)
             HashTagsView(tags: store.hashTags)
         }
         .padding()
+        .frame(height: 235)
         .background(Color.white)
         .cornerRadius(16)
         .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
@@ -40,7 +41,7 @@ private struct MainImageView: View {
                 default: Color.gray30
                 }
             }
-            .frame(height: 160)
+            .frame(height: 128)
             .clipped()
             .cornerRadius(12)
 
@@ -63,6 +64,7 @@ private struct MainImageView: View {
         .frame(maxWidth: .infinity)
     }
 }
+
 
 private struct ThumbnailImagesView: View {
     let imageURLs: [String]
@@ -103,7 +105,7 @@ private struct ThumbnailImagesView: View {
                         }
                     }
                 }
-                .frame(width: 80, height: (160 - 4) / 2)
+                .frame(width: 92, height: (128 - 4) / 2)
                 .clipped()
                 .cornerRadius(8)
             }
