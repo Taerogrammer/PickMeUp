@@ -9,12 +9,14 @@ import SwiftUI
 
 struct StoreListItemView: View {
     let storeData: StorePresentable
+    let loadedImages: [UIImage]
+    let onAppear: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
-                MainImageView(storeData: storeData)
-                ThumbnailImagesView(imageURLs: Array(storeData.storeImageURLs.dropFirst().prefix(2)))
+                MainImageView(image: loadedImages.first)
+                ThumbnailImagesView(images: Array(loadedImages.dropFirst()))
             }
             .frame(maxWidth: .infinity, maxHeight: 128)
 
@@ -27,70 +29,40 @@ struct StoreListItemView: View {
         .background(Color.white)
         .cornerRadius(16)
         .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
+        .onAppear(perform: onAppear)
     }
 }
 
 private struct MainImageView: View {
-    let storeData: StorePresentable
+    let image: UIImage?
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            AsyncImage(url: URL(string: storeData.storeImageURLs.first ?? "")) { phase in
-                switch phase {
-                case .success(let image): image.resizable().scaledToFill()
-                default: Color.gray30
-                }
+            if let image = image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Color.gray30
             }
-            .frame(height: 128)
-            .clipped()
-            .cornerRadius(12)
-
-            HStack {
-                Image(systemName: storeData.isPick ? "heart.fill" : "heart")
-                    .foregroundColor(storeData.isPick ? .deepSprout : .gray60)
-                    .padding(8)
-                    .background(Color.white)
-                    .clipShape(Circle())
-                    .shadow(radius: 2)
-
-                Spacer()
-
-                if storeData.isPicchelin {
-                    PickchelinConcaveRibbonView()
-                }
-            }
-            .padding(8)
         }
-        .frame(maxWidth: .infinity)
+        .frame(height: 128)
+        .clipped()
+        .cornerRadius(12)
     }
 }
 
-
 private struct ThumbnailImagesView: View {
-    let imageURLs: [String]
-
-    private var paddedURLs: [String?] {
-        var result = imageURLs.map { Optional($0) }
-        while result.count < 2 {
-            result.append(nil)
-        }
-        return result
-    }
+    let images: [UIImage?]
 
     var body: some View {
         VStack(spacing: 4) {
-            ForEach(0..<paddedURLs.count, id: \.self) { index in
+            ForEach(0..<2, id: \.self) { index in
                 Group {
-                    if let url = paddedURLs[index],
-                       let imageURL = URL(string: url) {
-                        AsyncImage(url: imageURL) { phase in
-                            switch phase {
-                            case .success(let image):
-                                image.resizable().scaledToFill()
-                            default:
-                                Color.gray30
-                            }
-                        }
+                    if index < images.count, let image = images[index] {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
                     } else {
                         ZStack {
                             Color.gray30
@@ -185,6 +157,6 @@ private struct IconText: View {
     }
 }
 
-#Preview {
-    StoreListItemView(storeData: StoreMockData.samples[0])
-}
+//#Preview {
+//    StoreListItemView(storeData: StoreMockData.samples[0])
+//}

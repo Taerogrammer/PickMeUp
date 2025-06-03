@@ -5,11 +5,13 @@
 //  Created by 김태형 on 6/2/25.
 //
 
-import Foundation
+import SwiftUI
 
 struct StoreListState {
     var stores: [StorePresentable] = []
-    var selectedCategory: String = "전체"
+    var loadedImages: [String: [UIImage]] = [:]
+
+    var selectedCategory: String
     var isPickchelinOn: Bool = false
     var isMyPickOn: Bool = false
     var errorMessage: String? = nil
@@ -30,4 +32,14 @@ struct StoreListState {
 
     var showFilter: Bool = true
     var showSortButton: Bool = true
+
+    init(
+        stores: [StorePresentable] = [],
+        loadedImages: [String: [UIImage]] = [:],
+        selectedCategory: String = "전체"
+    ) {
+        self.stores = stores
+        self.loadedImages = loadedImages
+        self.selectedCategory = selectedCategory
+    }
 }

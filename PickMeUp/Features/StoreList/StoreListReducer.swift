@@ -10,16 +10,12 @@ import Foundation
 struct StoreListReducer {
     func reduce(state: inout StoreListState, action: StoreListAction.Intent) {
         switch action {
-        case .onAppear:
-            break // Effect triggered
-        case .selectCategory(let category):
-            state.selectedCategory = category
-        case .togglePickchelin:
-            state.isPickchelinOn.toggle()
-        case .toggleMyPick:
-            state.isMyPickOn.toggle()
-        case .sortByDistance:
-            state.stores.sort { $0.distance < $1.distance }
+        case .onAppear: break
+        case .selectCategory(let category): state.selectedCategory = category
+        case .togglePickchelin: state.isPickchelinOn.toggle()
+        case .toggleMyPick: state.isMyPickOn.toggle()
+        case .sortByDistance: state.stores.sort { $0.distance < $1.distance }
+        case .loadImage: break // handled by effect
         }
     }
 
@@ -30,6 +26,10 @@ struct StoreListReducer {
             state.errorMessage = nil
         case .fetchFailed(let message):
             state.errorMessage = message
+        case .loadImageSuccess(let storeID, let images):
+            state.loadedImages[storeID] = images.compactMap { $0 }
+        case .loadImageFailed(_, let errorMessage):
+            state.errorMessage = errorMessage
         }
     }
 }

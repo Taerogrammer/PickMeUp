@@ -5,22 +5,22 @@
 //  Created by 김태형 on 6/3/25.
 //
 
-import Foundation
+import SwiftUI
 
 enum StoreListAction {
-  enum Intent {
-      /// StoreListView
-      case selectCategory(String)
-      case onAppear
+    enum Intent {
+        case onAppear
+        case selectCategory(String)
+        case togglePickchelin
+        case toggleMyPick
+        case sortByDistance
+        case loadImage(storeID: String, imagePaths: [String])
+    }
 
-      /// StoreSectionHeaderView
-      case togglePickchelin
-      case toggleMyPick
-      case sortByDistance
-  }
-
-  enum Result {
-    case fetchStores([StorePresentable])
-    case fetchFailed(String)
-  }
+    enum Result {
+        case fetchStores([StorePresentable])
+        case fetchFailed(String)
+        case loadImageSuccess(storeID: String, images: [UIImage?])
+        case loadImageFailed(storeID: String, errorMessage: String)
+    }
 }

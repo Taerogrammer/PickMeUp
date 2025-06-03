@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct StoreListView: View {
-    @StateObject private var store: StoreListStore
+    @StateObject var store: StoreListStore
 
     init(store: StoreListStore) {
         _store = StateObject(wrappedValue: store)
@@ -32,7 +32,11 @@ struct StoreListView: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 10) {
-                    StoreSectionHeaderView(store: store, title: "내가 피업 가게")
+                    StoreSectionHeaderView(
+                        state: store.state,
+                        send: store.send,
+                        title: "내가 픽업 가게"
+                    )
 
                     if store.state.filteredStores.isEmpty {
                         Text("불러올 가게가 없습니다.")
@@ -41,8 +45,16 @@ struct StoreListView: View {
                             .padding(.vertical, 32)
                             .frame(maxWidth: .infinity)
                     } else {
-                        ForEach(Array(store.state.filteredStores.enumerated()), id: \.element.storeID) { _, store in
-                            StoreListItemView(storeData: store)
+                        ForEach(store.state.filteredStores, id: \.storeID) { storeData in
+                            StoreListItemView(
+                                storeData: storeData,
+                                loadedImages: store.state.loadedImages[storeData.storeID] ?? [],
+                                onAppear: {
+                                    if store.state.loadedImages[storeData.storeID] == nil {
+                                        store.send(.loadImage(storeID: storeData.storeID, imagePaths: storeData.storeImageURLs))
+                                    }
+                                }
+                            )
                         }
                     }
                 }
@@ -57,8 +69,11 @@ struct StoreListView: View {
     }
 }
 
+
+
 struct StoreSectionHeaderView: View {
-    @ObservedObject var store: StoreListStore
+    let state: StoreListState
+    let send: (StoreListAction.Intent) -> Void
     let title: String
 
     var body: some View {
@@ -70,9 +85,9 @@ struct StoreSectionHeaderView: View {
 
                 Spacer()
 
-                if store.state.showSortButton {
+                if state.showSortButton {
                     Button {
-                        store.send(.sortByDistance)
+                        send(.sortByDistance)
                     } label: {
                         HStack(spacing: 4) {
                             Text("거리순")
@@ -86,10 +101,10 @@ struct StoreSectionHeaderView: View {
                 }
             }
 
-            if store.state.showFilter {
+            if state.showFilter {
                 HStack(spacing: 12) {
                     Button {
-                        store.send(.togglePickchelin)
+                        send(.togglePickchelin)
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "checkmark.square.fill")
@@ -98,11 +113,11 @@ struct StoreSectionHeaderView: View {
                                 .font(.pretendardCaption2)
                                 .foregroundColor(.deepSprout)
                         }
-                        .opacity(store.state.isPickchelinOn ? 1.0 : 0.3)
+                        .opacity(state.isPickchelinOn ? 1.0 : 0.3)
                     }
 
                     Button {
-                        store.send(.toggleMyPick)
+                        send(.toggleMyPick)
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "checkmark.square.fill")
@@ -111,7 +126,7 @@ struct StoreSectionHeaderView: View {
                                 .font(.pretendardCaption2)
                                 .foregroundColor(.blackSprout)
                         }
-                        .opacity(store.state.isMyPickOn ? 1.0 : 0.3)
+                        .opacity(state.isMyPickOn ? 1.0 : 0.3)
                     }
 
                     Spacer()
@@ -123,5 +138,23 @@ struct StoreSectionHeaderView: View {
 }
 
 #Preview {
-    StoreListView(store: StoreListStore())
+    StoreListView(store: .preview)
+}
+
+extension StoreListStore {
+    static var preview: StoreListStore {
+        let mockStores = StoreMockData.samples
+        var mockLoadedImages: [String: [UIImage]] = [:]
+
+        for store in mockStores {
+            mockLoadedImages[store.storeID] = Array(repeating: UIImage(systemName: "photo")!, count: 3)
+        }
+
+        let state = StoreListState(
+            stores: mockStores,
+            loadedImages: mockLoadedImages,
+            selectedCategory: "전체"
+        )
+        return StoreListStore(initialState: state)
+    }
 }
