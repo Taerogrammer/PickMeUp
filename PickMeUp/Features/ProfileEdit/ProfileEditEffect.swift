@@ -9,6 +9,17 @@ import SwiftUI
 
 // TODO: - 이미지 형식 맞추기 (png, jpg, jpeg 이회의 이미지도 가능하게끔)
 struct ProfileEditEffect {
+    func handle(_ intent: ProfileEditAction.Intent, store: ProfileEditStore) {
+        switch intent {
+        case .saveTapped:
+            store.handleSaveTapped()
+        case .uploadImage:
+            store.handleUploadImage()
+        default:
+            break
+        }
+    }
+
     func saveProfile(profile: ProfileEntity) async -> Result<MeProfileResponse, APIError> {
         do {
             let request = profile.toRequest()
@@ -35,7 +46,6 @@ struct ProfileEditEffect {
         let filename: String
         let mimeType: String
 
-        // 서버가 지원하지 않는 포맷을 방지하기 위해 무조건 변환
         if image.isPNG {
             imageData = image.pngData()!
             filename = "profile.png"

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ProfileEditReducer {
-    func reduce(state: inout ProfileEditState, intent: ProfileEditIntent) {
+    func reduce(state: inout ProfileEditState, intent: ProfileEditAction.Intent) {
         switch intent {
         case .updateProfile(let profile):
             state.profile = profile
@@ -23,6 +23,14 @@ struct ProfileEditReducer {
             state.imageUploading = true
             state.errorMessage = nil
 
+        case .saveTapped:
+            state.isSaving = true
+            state.errorMessage = nil
+        }
+    }
+
+    func reduce(state: inout ProfileEditState, result: ProfileEditAction.Result) {
+        switch result {
         case .uploadImageSuccess(let path):
             state.imageUploading = false
             state.profile.profileImageURL = path
@@ -30,10 +38,6 @@ struct ProfileEditReducer {
         case .uploadImageFailure(let message):
             state.imageUploading = false
             state.errorMessage = message
-
-        case .saveTapped:
-            state.isSaving = true
-            state.errorMessage = nil
 
         case .saveSuccess:
             state.isSaving = false
@@ -50,4 +54,3 @@ struct ProfileEditReducer {
         }
     }
 }
-
