@@ -11,12 +11,22 @@ struct StoreListReducer {
     func reduce(state: inout StoreListState, action: StoreListAction.Intent) {
         switch action {
         case .onAppear: break
-        case .selectCategory(let category): state.selectedCategory = category
-        case .togglePickchelin: state.isPickchelinOn.toggle()
-        case .toggleMyPick: state.isMyPickOn.toggle()
-        case .sortByDistance: state.stores.sort { $0.distance < $1.distance }
-        case .storeItemOnAppear: break
-        case .loadImage: break
+        case .selectCategory(let category):
+            state.selectedCategory = category
+        case .togglePickchelin:
+            state.isPickchelinOn.toggle()
+        case .toggleMyPick:
+            state.isMyPickOn.toggle()
+        case .sortByDistance:
+            state.stores.sort { $0.distance < $1.distance }
+
+        case .storeItemOnAppear(let storeID, _):
+            if state.loadedImages[storeID] == nil {
+                // 여기선 상태만 봄, loadImage는 Effect에서 실행
+            }
+
+        case .loadImage:
+            break
         }
     }
 

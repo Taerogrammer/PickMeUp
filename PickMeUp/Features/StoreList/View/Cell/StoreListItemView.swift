@@ -8,9 +8,12 @@
 import SwiftUI
 
 struct StoreListItemView: View {
+    @ObservedObject var store: StoreListStore
     let storeData: StorePresentable
-    let loadedImages: [UIImage]
-    let onAppear: () -> Void
+
+    var loadedImages: [UIImage] {
+        store.state.loadedImages[storeData.storeID] ?? []
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -29,9 +32,15 @@ struct StoreListItemView: View {
         .background(Color.white)
         .cornerRadius(16)
         .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
-        .onAppear(perform: onAppear)
+        .onAppear {
+            store.send(.storeItemOnAppear(
+                storeID: storeData.storeID,
+                imagePaths: storeData.storeImageURLs
+            ))
+        }
     }
 }
+
 
 private struct MainImageView: View {
     let image: UIImage?

@@ -13,17 +13,18 @@ struct StoreListEffect {
         case .onAppear:
             Task { await fetchStores(store: store) }
 
-        case let .storeItemOnAppear(storeID, imagePaths):
-            // 중복 호출 방지
+        case .storeItemOnAppear(let storeID, let imagePaths):
             if store.state.loadedImages[storeID] == nil {
-                let responder = StoreListImageResponder(storeID: storeID, store: store, expectedCount: min(imagePaths.count, 3))
-                for path in imagePaths.prefix(3) {
-                    ImageLoader.load(from: path, responder: responder)
-                }
+                store.send(.loadImage(storeID: storeID, imagePaths: imagePaths))
             }
 
-        default:
-            break
+        case .loadImage(let storeID, let imagePaths):
+            let responder = StoreListImageResponder(storeID: storeID, store: store, expectedCount: min(imagePaths.count, 3))
+            for path in imagePaths.prefix(3) {
+                ImageLoader.load(from: path, responder: responder)
+            }
+
+        default: break
         }
     }
 
@@ -46,6 +47,7 @@ struct StoreListEffect {
         }
     }
 }
+
 
 final class StoreListImageResponder: ImageLoadRespondable {
     private let storeID: String

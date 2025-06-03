@@ -47,11 +47,8 @@ struct StoreListView: View {
                     } else {
                         ForEach(store.state.filteredStores, id: \.storeID) { storeData in
                             StoreListItemView(
-                                storeData: storeData,
-                                loadedImages: store.state.loadedImages[storeData.storeID] ?? [],
-                                onAppear: {
-                                    store.send(.storeItemOnAppear(storeID: storeData.storeID, imagePaths: storeData.storeImageURLs))
-                                }
+                                store: store,
+                                storeData: storeData
                             )
                         }
                     }
