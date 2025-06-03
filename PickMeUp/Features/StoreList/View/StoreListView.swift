@@ -33,8 +33,7 @@ struct StoreListView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 10) {
                     StoreSectionHeaderView(
-                        state: store.state,
-                        send: store.send,
+                        store: store,
                         title: "내가 픽업 가게"
                     )
 
@@ -64,11 +63,8 @@ struct StoreListView: View {
     }
 }
 
-
-
 struct StoreSectionHeaderView: View {
-    let state: StoreListState
-    let send: (StoreListAction.Intent) -> Void
+    @ObservedObject var store: StoreListStore
     let title: String
 
     var body: some View {
@@ -80,9 +76,9 @@ struct StoreSectionHeaderView: View {
 
                 Spacer()
 
-                if state.showSortButton {
+                if store.state.showSortButton {
                     Button {
-                        send(.sortByDistance)
+                        store.send(.sortByDistance)
                     } label: {
                         HStack(spacing: 4) {
                             Text("거리순")
@@ -96,10 +92,10 @@ struct StoreSectionHeaderView: View {
                 }
             }
 
-            if state.showFilter {
+            if store.state.showFilter {
                 HStack(spacing: 12) {
                     Button {
-                        send(.togglePickchelin)
+                        store.send(.togglePickchelin)
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "checkmark.square.fill")
@@ -108,11 +104,11 @@ struct StoreSectionHeaderView: View {
                                 .font(.pretendardCaption2)
                                 .foregroundColor(.deepSprout)
                         }
-                        .opacity(state.isPickchelinOn ? 1.0 : 0.3)
+                        .opacity(store.state.isPickchelinOn ? 1.0 : 0.3)
                     }
 
                     Button {
-                        send(.toggleMyPick)
+                        store.send(.toggleMyPick)
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "checkmark.square.fill")
@@ -121,7 +117,7 @@ struct StoreSectionHeaderView: View {
                                 .font(.pretendardCaption2)
                                 .foregroundColor(.blackSprout)
                         }
-                        .opacity(state.isMyPickOn ? 1.0 : 0.3)
+                        .opacity(store.state.isMyPickOn ? 1.0 : 0.3)
                     }
 
                     Spacer()
