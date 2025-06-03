@@ -27,4 +27,7 @@ struct StoreListState {
         ("desert", "디저트"),
         ("bread", "베이커리")
     ]
+
+    var showFilter: Bool = true
+    var showSortButton: Bool = true
 }

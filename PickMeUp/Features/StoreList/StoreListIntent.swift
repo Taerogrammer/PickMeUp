@@ -8,10 +8,15 @@
 import Foundation
 
 enum StoreListIntent {
+
+    /// StoreListView
+    case selectCategory(String)
     case onAppear
     case fetchStores([StorePresentable])
     case fetchFailed(String)
+
+    /// StoreSectionHeaderView
     case togglePickchelin
     case toggleMyPick
-    case selectCategory(String)
+    case sortByDistance
 }

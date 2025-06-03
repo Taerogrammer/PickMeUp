@@ -8,7 +8,11 @@
 import SwiftUI
 
 struct StoreListView: View {
-    @StateObject private var store = StoreListStore()
+    @StateObject private var store: StoreListStore
+
+    init(store: StoreListStore) {
+        _store = StateObject(wrappedValue: store)
+    }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -29,14 +33,8 @@ struct StoreListView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 10) {
                     StoreSectionHeaderView(
-                        title: "내가 픽업 가게",
-                        showFilter: true,
-                        showSortButton: true,
-                        onSortTapped: {},
-                        onPickchelinToggle: { store.send(.togglePickchelin) },
-                        onMyPickToggle: { store.send(.toggleMyPick) },
-                        isPickchelinOn: store.state.isPickchelinOn,
-                        isMyPickOn: store.state.isMyPickOn
+                        store: store,
+                        title: "내가 픽업 가게"
                     )
 
                     if store.state.filteredStores.isEmpty {
@@ -62,55 +60,9 @@ struct StoreListView: View {
     }
 }
 
-#Preview {
-    StoreListView()
-}
-
-struct StoreSectionView: View {
-    let title: String
-    let stores: [StorePresentable]
-    let showFilter: Bool
-    let showSortButton: Bool
-    let onSortTapped: (() -> Void)?
-    let onPickchelinToggle: (() -> Void)?
-    let onMyPickToggle: (() -> Void)?
-    let isPickchelinOn: Bool
-    let isMyPickOn: Bool
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            StoreSectionHeaderView(
-                title: title,
-                showFilter: showFilter,
-                showSortButton: showSortButton,
-                onSortTapped: onSortTapped,
-                onPickchelinToggle: onPickchelinToggle,
-                onMyPickToggle: onMyPickToggle,
-                isPickchelinOn: isPickchelinOn,
-                isMyPickOn: isMyPickOn
-            )
-
-            VStack(spacing: 10) {
-                ForEach(stores, id: \.storeID) { store in
-                    StoreListItemView(store: store)
-                }
-            }
-            .padding(.horizontal)
-        }
-    }
-}
-
 struct StoreSectionHeaderView: View {
-    var title: String
-    var showFilter: Bool = true
-    var showSortButton: Bool = true
-
-    var onSortTapped: (() -> Void)? = nil
-    var onPickchelinToggle: (() -> Void)? = nil
-    var onMyPickToggle: (() -> Void)? = nil
-
-    var isPickchelinOn: Bool = true
-    var isMyPickOn: Bool = false
+    @ObservedObject var store: StoreListStore
+    let title: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -121,10 +73,10 @@ struct StoreSectionHeaderView: View {
 
                 Spacer()
 
-                if showSortButton {
-                    Button(action: {
-                        onSortTapped?()
-                    }) {
+                if store.state.showSortButton {
+                    Button {
+                        store.send(.sortByDistance)
+                    } label: {
                         HStack(spacing: 4) {
                             Text("거리순")
                                 .font(.pretendardCaption1)
@@ -137,10 +89,11 @@ struct StoreSectionHeaderView: View {
                 }
             }
 
-            if showFilter {
+            if store.state.showFilter {
                 HStack(spacing: 12) {
-                    // 픽슐랭
-                    Button(action: { onPickchelinToggle?() }) {
+                    Button {
+                        store.send(.togglePickchelin)
+                    } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "checkmark.square.fill")
                                 .foregroundColor(.deepSprout)
@@ -148,9 +101,12 @@ struct StoreSectionHeaderView: View {
                                 .font(.pretendardCaption2)
                                 .foregroundColor(.deepSprout)
                         }
-                        .opacity(isPickchelinOn ? 1.0 : 0.3)
+                        .opacity(store.state.isPickchelinOn ? 1.0 : 0.3)
                     }
-                    Button(action: { onMyPickToggle?() }) {
+
+                    Button {
+                        store.send(.toggleMyPick)
+                    } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "checkmark.square.fill")
                                 .foregroundColor(.blackSprout)
@@ -158,7 +114,7 @@ struct StoreSectionHeaderView: View {
                                 .font(.pretendardCaption2)
                                 .foregroundColor(.blackSprout)
                         }
-                        .opacity(isMyPickOn ? 1.0 : 0.3)
+                        .opacity(store.state.isMyPickOn ? 1.0 : 0.3)
                     }
 
                     Spacer()
@@ -167,4 +123,8 @@ struct StoreSectionHeaderView: View {
         }
         .padding(.horizontal)
     }
+}
+
+#Preview {
+    StoreListView(store: StoreListStore())
 }

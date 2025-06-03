@@ -28,6 +28,8 @@ struct StoreListReducer {
 
         case .onAppear:
             break // Effect handles
+        case .sortByDistance:
+            state.stores.sort { $0.distance < $1.distance }
         }
     }
 }
