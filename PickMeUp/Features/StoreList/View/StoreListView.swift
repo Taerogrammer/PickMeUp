@@ -32,10 +32,7 @@ struct StoreListView: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 10) {
-                    StoreSectionHeaderView(
-                        store: store,
-                        title: "내가 픽업 가게"
-                    )
+                    StoreSectionHeaderView(store: store, title: "내가 피업 가게")
 
                     if store.state.filteredStores.isEmpty {
                         Text("불러올 가게가 없습니다.")

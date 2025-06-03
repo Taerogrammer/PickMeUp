@@ -16,8 +16,12 @@ final class StoreListStore: ObservableObject {
         self.state = initialState
     }
 
-    func send(_ intent: StoreListIntent) {
-        reducer.reduce(state: &state, intent: intent)
-        effect.handle(intent, store: self)
+    func send(_ action: StoreListAction.Intent) {
+        reducer.reduce(state: &state, action: action)
+        effect.handle(action, store: self)
+    }
+
+    func send(_ result: StoreListAction.Result) {
+        reducer.reduce(state: &state, result: result)
     }
 }

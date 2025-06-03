@@ -8,7 +8,7 @@
 import Foundation
 
 struct StoreListEffect {
-    func handle(_ intent: StoreListIntent, store: StoreListStore) {
+    func handle(_ intent: StoreListAction.Intent, store: StoreListStore) {
         switch intent {
         case .onAppear:
             Task {
@@ -29,7 +29,6 @@ struct StoreListEffect {
             )
             if let stores = response.success?.data {
                 let entities = stores.map { $0.toStoreListEntity() }
-                print("-----결과-----", entities)
                 await MainActor.run { store.send(.fetchStores(entities)) }
             } else if let error = response.failure {
                 await MainActor.run { store.send(.fetchFailed(error.message)) }
