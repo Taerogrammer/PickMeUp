@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class ProfileEditStore: ObservableObject {
+final class ProfileEditStore: ObservableObject, ImageLoadRespondable {
     @Published private(set) var state: ProfileEditState
     private let reducer: ProfileEditReducer
     private let effect: ProfileEditEffect
@@ -97,5 +97,15 @@ final class ProfileEditStore: ObservableObject {
 
     func loadInitialImageIfNeeded() {
         effect.loadRemoteImage(for: state.profile.profileImageURL, store: self)
+    }
+}
+
+extension ProfileEditStore {
+    func onImageLoaded(_ image: UIImage) {
+        send(.loadRemoteImage(image))
+    }
+
+    func onImageLoadFailed(_ errorMessage: String) {
+        send(.loadRemoteImageFailed(errorMessage))
     }
 }

@@ -72,37 +72,16 @@ struct ProfileEditEffect {
     }
 
     func loadRemoteImage(for path: String?, store: ProfileEditStore) {
-        guard let path = path,
-              !path.isEmpty,
-              let url = URL(string: "\(APIEnvironment.production.baseURL)/v1\(path)"),
-              let accessToken = KeychainManager.shared.load(key: "accessToken")
-        else {
-            store.send(.loadRemoteImageFailed("이미지 경로가 없거나 토큰이 없습니다"))
+        guard let path = path else {
+            store.send(.loadRemoteImageFailed("이미지 경로가 존재하지 않습니다"))
             return
         }
 
-        var request = URLRequest(url: url)
-        request.setValue(accessToken, forHTTPHeaderField: "Authorization")
-        request.setValue(APIConstants.Headers.Values.sesacKeyValue(), forHTTPHeaderField: APIConstants.Headers.sesacKey)
-
-        Task {
-            do {
-                let (data, _) = try await URLSession.shared.data(for: request)
-                if let image = UIImage(data: data) {
-                    await MainActor.run {
-                        store.send(.loadRemoteImage(image))
-                    }
-                } else {
-                    await MainActor.run {
-                        store.send(.loadRemoteImageFailed("이미지 디코딩 실패"))
-                    }
-                }
-            } catch {
-                await MainActor.run {
-                    store.send(.loadRemoteImageFailed(error.localizedDescription))
-                }
-            }
-        }
+        ImageLoader.load(
+            from: path,
+            accessTokenKey: "accessToken",
+            responder: store
+        )
     }
 }
 
