@@ -15,9 +15,9 @@ struct StoreMockData {
             name: "새싹 치킨 관악점",
             close: "22:00",
             storeImageURLs: [
-                "https://images.unsplash.com/photo-1600891964599-f61ba0e24092",
-                "https://images.unsplash.com/photo-1600891964599-f61ba0e24092",
-                "https://images.unsplash.com/photo-1600891964599-f61ba0e24092"
+                "https://picsum.photos/id/237/300/200",
+                "https://picsum.photos/id/1025/300/200",
+                "https://picsum.photos/id/1074/300/200"
             ],
             isPicchelin: true,
             isPick: true,
@@ -34,9 +34,9 @@ struct StoreMockData {
             name: "새싹 피자 창동점 2",
             close: "22:00",
             storeImageURLs: [
-                "/data/stores/alan-hardman-SU1LFoeEUkk-unsplash_1747128644203.jpg",
-                "/data/stores/chad-montano-MqT0asuoIcU-unsplash_1747128644346.jpg",
-                "/data/stores/shourav-sheikh-a66sGfOnnqQ-unsplash_1747128644500.jpg"
+                "https://picsum.photos/id/1080/300/200",
+                "https://picsum.photos/id/1084/300/200",
+                "https://picsum.photos/id/1081/300/200"
             ],
             isPicchelin: false,
             isPick: false,
@@ -53,9 +53,9 @@ struct StoreMockData {
             name: "새싹 커피 2",
             close: "18:00",
             storeImageURLs: [
-                "/data/stores/ante-samarzija-lsmu0rUhUOk-unsplash_1747128571997.jpg",
-                "/data/stores/demi-deherrera-L-sm1B4L1Ns-unsplash_1747128572138.jpg",
-                "/data/stores/jeremy-yap-jn-HaGWe4yw-unsplash_1747128572373.jpg"
+                "https://picsum.photos/id/1060/300/200",
+                "https://picsum.photos/id/1062/300/200",
+                "https://picsum.photos/id/1063/300/200"
             ],
             isPicchelin: false,
             isPick: false,
@@ -72,9 +72,9 @@ struct StoreMockData {
             name: "새싹 커피 10",
             close: "18:00",
             storeImageURLs: [
-                "/data/stores/ante-samarzija-lsmu0rUhUOk-unsplash_1747128571997.jpg",
-                "/data/stores/demi-deherrera-L-sm1B4L1Ns-unsplash_1747128572138.jpg",
-                "/data/stores/jeremy-yap-jn-HaGWe4yw-unsplash_1747128572373.jpg"
+                "https://picsum.photos/id/1065/300/200",
+                "https://picsum.photos/id/1066/300/200",
+                "https://picsum.photos/id/1067/300/200"
             ],
             isPicchelin: true,
             isPick: true,
@@ -91,9 +91,9 @@ struct StoreMockData {
             name: "새싹 커피 1",
             close: "18:00",
             storeImageURLs: [
-                "/data/stores/ante-samarzija-lsmu0rUhUOk-unsplash_1747128571997.jpg",
-                "/data/stores/demi-deherrera-L-sm1B4L1Ns-unsplash_1747128572138.jpg",
-                "/data/stores/jeremy-yap-jn-HaGWe4yw-unsplash_1747128572373.jpg"
+                "https://picsum.photos/id/1068/300/200",
+                "https://picsum.photos/id/1069/300/200",
+                "https://picsum.photos/id/1070/300/200"
             ],
             isPicchelin: false,
             isPick: false,
