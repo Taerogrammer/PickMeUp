@@ -10,7 +10,8 @@ import SwiftUI
 struct StoreScreen: View {
     var body: some View {
         VStack {
-            StoreListView()
+            StoreSearchHeaderView()
+            StoreListView(stores: StoreMockData.samples)
         }
     }
 
