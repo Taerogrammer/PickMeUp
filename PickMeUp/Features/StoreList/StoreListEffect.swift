@@ -12,11 +12,16 @@ struct StoreListEffect {
         switch intent {
         case .onAppear:
             Task { await fetchStores(store: store) }
-        case let .loadImage(storeID, imagePaths):
-            let responder = StoreListImageResponder(storeID: storeID, store: store, expectedCount: min(imagePaths.count, 3))
-            for path in imagePaths.prefix(3) {
-                ImageLoader.load(from: path, responder: responder)
+
+        case let .storeItemOnAppear(storeID, imagePaths):
+            // 중복 호출 방지
+            if store.state.loadedImages[storeID] == nil {
+                let responder = StoreListImageResponder(storeID: storeID, store: store, expectedCount: min(imagePaths.count, 3))
+                for path in imagePaths.prefix(3) {
+                    ImageLoader.load(from: path, responder: responder)
+                }
             }
+
         default:
             break
         }

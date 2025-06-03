@@ -15,7 +15,8 @@ struct StoreListReducer {
         case .togglePickchelin: state.isPickchelinOn.toggle()
         case .toggleMyPick: state.isMyPickOn.toggle()
         case .sortByDistance: state.stores.sort { $0.distance < $1.distance }
-        case .loadImage: break // handled by effect
+        case .storeItemOnAppear: break
+        case .loadImage: break
         }
     }
 

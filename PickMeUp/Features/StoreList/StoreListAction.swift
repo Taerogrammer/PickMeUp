@@ -15,6 +15,7 @@ enum StoreListAction {
         case toggleMyPick
         case sortByDistance
         case loadImage(storeID: String, imagePaths: [String])
+        case storeItemOnAppear(storeID: String, imagePaths: [String])
     }
 
     enum Result {

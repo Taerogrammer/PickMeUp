@@ -50,9 +50,7 @@ struct StoreListView: View {
                                 storeData: storeData,
                                 loadedImages: store.state.loadedImages[storeData.storeID] ?? [],
                                 onAppear: {
-                                    if store.state.loadedImages[storeData.storeID] == nil {
-                                        store.send(.loadImage(storeID: storeData.storeID, imagePaths: storeData.storeImageURLs))
-                                    }
+                                    store.send(.storeItemOnAppear(storeID: storeData.storeID, imagePaths: storeData.storeImageURLs))
                                 }
                             )
                         }
