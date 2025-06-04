@@ -19,14 +19,12 @@ struct StoreListReducer {
             state.isMyPickOn.toggle()
         case .sortByDistance:
             state.stores.sort { $0.distance < $1.distance }
-
         case .storeItemOnAppear(let storeID, _):
             if state.loadedImages[storeID] == nil {
                 // 여기선 상태만 봄, loadImage는 Effect에서 실행
             }
-
-        case .loadImage:
-            break
+        case .tapStore: break
+        case .loadImage: break
         }
     }
 

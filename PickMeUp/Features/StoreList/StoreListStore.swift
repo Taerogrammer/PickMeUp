@@ -11,15 +11,20 @@ final class StoreListStore: ObservableObject {
     @Published private(set) var state: StoreListState
     private let effect: StoreListEffect
     private let reducer: StoreListReducer
+    private let router: AppRouter
 
-    init(state: StoreListState, effect: StoreListEffect, reducer: StoreListReducer) {
+    init(state: StoreListState, effect: StoreListEffect, reducer: StoreListReducer, router: AppRouter) {
         self.state = state
         self.effect = effect
         self.reducer = reducer
+        self.router = router
     }
 
     func send(_ action: StoreListAction.Intent) {
         reducer.reduce(state: &state, action: action)
+        if case let .tapStore(storeID) = action {
+            router.navigate(to: .storeDetail(storeID: storeID))
+        }
         effect.handle(action, store: self)
     }
 
@@ -51,7 +56,8 @@ extension StoreListStore {
         self.init(
             state: initialState,
             effect: StoreListEffect(),
-            reducer: StoreListReducer()
+            reducer: StoreListReducer(),
+            router: AppRouter() // ⚠️ 여긴 임시 AppRouter()로 채움 (프리뷰용)
         )
     }
 }

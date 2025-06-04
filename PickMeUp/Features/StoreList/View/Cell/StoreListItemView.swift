@@ -16,22 +16,27 @@ struct StoreListItemView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                MainImageView(image: loadedImages.first)
-                ThumbnailImagesView(images: Array(loadedImages.dropFirst()))
-            }
-            .frame(maxWidth: .infinity, maxHeight: 128)
+        Button {
+            store.send(.tapStore(storeID: storeData.storeID))
+        } label: {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
+                    MainImageView(image: loadedImages.first)
+                    ThumbnailImagesView(images: Array(loadedImages.dropFirst()))
+                }
+                .frame(maxWidth: .infinity, maxHeight: 128)
 
-            InfoRowView(storeData: storeData)
-            MetaRowView(storeData: storeData)
-            HashTagsView(tags: storeData.hashTags)
+                InfoRowView(storeData: storeData)
+                MetaRowView(storeData: storeData)
+                HashTagsView(tags: storeData.hashTags)
+            }
+            .padding()
+            .frame(height: 235)
+            .background(Color.white)
+            .cornerRadius(16)
+            .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
         }
-        .padding()
-        .frame(height: 235)
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
+        .buttonStyle(.plain)
         .onAppear {
             store.send(.storeItemOnAppear(
                 storeID: storeData.storeID,
