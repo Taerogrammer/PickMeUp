@@ -69,6 +69,6 @@ final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding, 
 
     // MARK: - StoreDetailViewProviding
     func makeStoreDetailScreen(storeID: String) -> AnyView {
-        return AnyView(StoreDetailScreen(storeID: storeID))
+        return AnyView(StoreDetailScreen(storeID: storeID, router: router))
     }
 }

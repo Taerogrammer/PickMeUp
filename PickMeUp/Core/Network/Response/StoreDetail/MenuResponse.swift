@@ -5,7 +5,7 @@
 //  Created by 김태형 on 6/4/25.
 //
 
-import Foundation
+import SwiftUI
 
 struct MenuResponse: Decodable {
     let menuID: String
@@ -28,5 +28,20 @@ struct MenuResponse: Decodable {
         case isSoldOut = "is_sold_out"
         case tags
         case menuImageURL = "menu_image_url"
+    }
+}
+
+extension MenuResponse {
+    func toMenuItem() -> MenuItem {
+        return MenuItem(
+            name: name,
+            description: description,
+            image: UIImage(systemName: "photo")!,
+            isPopular: false,
+            rank: 0,
+            category: category,
+            price: price,
+            isSoldOut: isSoldOut
+        )
     }
 }

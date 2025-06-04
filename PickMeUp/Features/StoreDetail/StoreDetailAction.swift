@@ -6,3 +6,18 @@
 //
 
 import Foundation
+
+enum StoreDetailAction {
+    enum Intent {
+        case onAppear
+        case selectCategory(String)
+        case tapNavigation
+        case tapPay
+        case tapBack
+        case tapLike
+    }
+
+    enum Result {
+        case fetchedStoreDetail(StoreDetailResponse)
+    }
+}

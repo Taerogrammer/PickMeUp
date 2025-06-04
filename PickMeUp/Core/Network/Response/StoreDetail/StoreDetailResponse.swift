@@ -5,7 +5,7 @@
 //  Created by 김태형 on 6/4/25.
 //
 
-import Foundation
+import SwiftUI
 
 struct StoreDetailResponse: Decodable {
     let storeID: String
@@ -92,6 +92,27 @@ extension StoreDetailResponse {
                     menuImageURL: "/data/menus/1747133821135.png"
                 )
             ]
+        )
+    }
+}
+
+extension StoreDetailResponse {
+    func toState() -> StoreDetailState {
+        return StoreDetailState(
+            storeID: storeID,
+            name: name,
+            isPickchelin: isPicchelin,
+            likeCount: pickCount,
+            rating: totalRating,
+            address: address,
+            openHour: "매일 \(open) ~ \(close)",
+            parkingAvailable: parkingGuide,
+            estimatedTime: "\(estimatedPickupTime)분",
+            distance: "3.2km", // 서버 응답에 직접적인 거리 없음 시 하드코딩 또는 계산 필요
+            categories: ["전체"] + Array(Set(menuList.map { $0.category })),
+            selectedCategory: "전체",
+            menus: menuList.map { $0.toMenuItem() },
+            images: storeImageURLs.map { _ in UIImage(systemName: "photo")! } // 실제 이미지는 비동기 처리 필요
         )
     }
 }
