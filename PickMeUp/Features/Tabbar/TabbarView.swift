@@ -54,10 +54,10 @@ struct TabbarView: View {
 #Preview {
     let container = DIContainer()
     let store = TabbarStore(router: container.router)
-    return TabbarView(store: store) { tab in
+    TabbarView(store: store) { tab in
         switch tab {
         case .store:
-            return AnyView(StoreScreen())
+            return container.makeStoreScreen()
         case .orders:
             return AnyView(OrderView())
         case .friends:
