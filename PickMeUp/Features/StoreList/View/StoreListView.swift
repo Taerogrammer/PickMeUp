@@ -131,21 +131,3 @@ struct StoreSectionHeaderView: View {
 #Preview {
     StoreListView(store: .preview)
 }
-
-extension StoreListStore {
-    static var preview: StoreListStore {
-        let mockStores = StoreMockData.samples
-        var mockLoadedImages: [String: [UIImage]] = [:]
-
-        for store in mockStores {
-            mockLoadedImages[store.storeID] = Array(repeating: UIImage(systemName: "photo")!, count: 3)
-        }
-
-        let state = StoreListState(
-            stores: mockStores,
-            loadedImages: mockLoadedImages,
-            selectedCategory: "전체"
-        )
-        return StoreListStore(initialState: state)
-    }
-}
