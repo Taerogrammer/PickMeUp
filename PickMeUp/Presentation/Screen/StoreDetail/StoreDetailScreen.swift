@@ -91,51 +91,6 @@ struct MenuItem: Hashable {
     let isSoldOut: Bool
 }
 
-struct StoreImageCarouselView: View {
-    let images: [UIImage]
-    let onBack: () -> Void
-    let onLike: () -> Void
-    let isLiked: Bool
-
-    var body: some View {
-        ZStack(alignment: .top) {
-            TabView {
-                ForEach(images.indices, id: \.self) { index in
-                    Image(uiImage: images[index])
-                        .resizable()
-                        .scaledToFill()
-                        .frame(height: 240)
-                        .clipped()
-                }
-            }
-            .frame(height: 240)
-            .tabViewStyle(PageTabViewStyle())
-
-            HStack {
-                Button(action: onBack) {
-                    Image(systemName: "chevron.left")
-                        .foregroundColor(.black)
-                        .padding(12)
-                        .background(Color.white.opacity(0.7))
-                        .clipShape(Circle())
-                }
-
-                Spacer()
-
-                Button(action: onLike) {
-                    Image(systemName: isLiked ? "heart.fill" : "heart")
-                        .foregroundColor(isLiked ? .red : .black)
-                        .padding(12)
-                        .background(Color.white.opacity(0.7))
-                        .clipShape(Circle())
-                }
-            }
-            .padding(.horizontal)
-            .padding(.top, 48) // Safe area 고려
-        }
-    }
-}
-
 struct StoreSummaryInfoView: View {
     let state: StoreDetailState
 
