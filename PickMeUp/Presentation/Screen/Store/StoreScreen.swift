@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct StoreScreen: View {
+    let store: StoreListStore
     var body: some View {
         VStack(spacing: 0) {
             StoreSearchHeaderView()
-            StoreListView(store: StoreListStore())
+            StoreListView(store: store)
         }
         .background(Color.gray30)
     }
@@ -36,5 +37,5 @@ struct StoreScreen: View {
 }
 
 #Preview {
-    StoreScreen()
+    StoreScreen(store: .preview)
 }

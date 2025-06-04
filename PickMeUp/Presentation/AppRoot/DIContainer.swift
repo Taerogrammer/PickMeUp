@@ -55,8 +55,14 @@ final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding, 
 
     // MARK: - StoreViewProviding
     func makeStoreScreen() -> AnyView {
-        return AnyView(StoreScreen())
+        let state = StoreListState()
+        let reducer = StoreListReducer()
+        let effect = StoreListEffect()
+        let store = StoreListStore(
+            state: state,
+            effect: effect,
+            reducer: reducer
+        )
+        return AnyView(StoreScreen(store: store))
     }
-
-    
 }

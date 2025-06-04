@@ -9,11 +9,13 @@ import SwiftUI
 
 final class StoreListStore: ObservableObject {
     @Published private(set) var state: StoreListState
-    private let effect = StoreListEffect()
-    private let reducer = StoreListReducer()
+    private let effect: StoreListEffect
+    private let reducer: StoreListReducer
 
-    init(initialState: StoreListState = StoreListState()) {
-        self.state = initialState
+    init(state: StoreListState, effect: StoreListEffect, reducer: StoreListReducer) {
+        self.state = state
+        self.effect = effect
+        self.reducer = reducer
     }
 
     func send(_ action: StoreListAction.Intent) {
@@ -41,5 +43,15 @@ extension StoreListStore {
             selectedCategory: "전체"
         )
         return StoreListStore(initialState: state)
+    }
+}
+
+extension StoreListStore {
+    convenience init(initialState: StoreListState) {
+        self.init(
+            state: initialState,
+            effect: StoreListEffect(),
+            reducer: StoreListReducer()
+        )
     }
 }
