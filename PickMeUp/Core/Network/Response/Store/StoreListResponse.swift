@@ -52,11 +52,6 @@ struct StoreModel: Decodable, Identifiable {
     }
 }
 
-struct Geolocation: Decodable {
-    let longitude: Double
-    let latitude: Double
-}
-
 extension StoreModel {
     func toStoreListEntity() -> StoreListEntity {
         return StoreListEntity(

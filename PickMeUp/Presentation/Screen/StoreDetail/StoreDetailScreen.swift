@@ -26,6 +26,7 @@ struct StoreDetailScreen: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 }
+
 #Preview {
     StoreDetailScreen(storeID: "asdq")
 }
