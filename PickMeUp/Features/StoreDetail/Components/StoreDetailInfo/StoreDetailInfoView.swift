@@ -46,6 +46,7 @@ struct StoreDetailInfoView: View {
             }
         }
         .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.gray0) // 배경색
@@ -54,7 +55,6 @@ struct StoreDetailInfoView: View {
                         .stroke(Color.gray.opacity(0.2), lineWidth: 1) // 테두리
                 )
         )
-        .padding(.horizontal)
     }
 }
 

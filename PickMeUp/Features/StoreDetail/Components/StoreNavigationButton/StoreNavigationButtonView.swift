@@ -20,7 +20,6 @@ struct StoreNavigationButtonView: View {
                 .foregroundColor(.white)
                 .cornerRadius(12)
         }
-        .padding(.horizontal)
     }
 }
 

@@ -27,7 +27,7 @@ struct StoreMenuCategoryTabView: View {
                     }
                 }
             }
-            .padding(.horizontal)
+//            .padding(.horizontal)
         }
     }
 }
