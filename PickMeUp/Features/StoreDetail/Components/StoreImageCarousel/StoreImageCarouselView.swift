@@ -45,44 +45,52 @@ struct StoreImageCarouselView: View {
             HStack {
                 Button(action: onBack) {
                     Image(systemName: "chevron.left")
-                        .frame(width: 32, height: 32)
-                        .foregroundColor(.white)
-                        .padding(12)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .foregroundColor(.gray0)
+                        .padding(6)
                 }
+                .frame(width: 32, height: 32)
+                .padding(.leading, 12)
+                .padding(.top, 12)
 
                 Spacer()
 
                 Button(action: onLike) {
                     Image(systemName: entity.isLiked ? "heart.fill" : "heart")
-                        .foregroundColor(entity.isLiked ? .red : .white)
-                        .padding(12)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .foregroundColor(entity.isLiked ? .deepSprout : .gray0)
                 }
+                .frame(width: 32, height: 32)
+                .padding(.trailing, 12)
+                .padding(.top, 12)
             }
-            .padding(.horizontal)
-            .padding(.top, 48)
         }
     }
 }
 
-//#Preview {
-//    let mockImages: [UIImage] = Array(repeating: makeGrayImage(size: CGSize(width: 400, height: 240)), count: 3)
-//
-//    let mockEntity = StoreImageCarouselEntity(
-//        images: mockImages,
-//        isLiked: true
-//    )
-//
-//    return StoreImageCarouselView(
-//        entity: mockEntity,
-//        onBack: { print("back") },
-//        onLike: { print("like") }
-//    )
-//}
-//
-//func makeGrayImage(size: CGSize) -> UIImage {
-//    let renderer = UIGraphicsImageRenderer(size: size)
-//    return renderer.image { context in
-//        UIColor.lightGray.setFill()
-//        context.fill(CGRect(origin: .zero, size: size))
-//    }
-//}
+#Preview {
+    let mockImages: [UIImage] = Array(repeating: makeGrayImage(size: CGSize(width: 400, height: 240)), count: 3)
+
+    let mockEntity = StoreImageCarouselEntity(
+        imageURLs: mockImages.map { _ in "https://mock.url/image.png" }, // 유효한 URL 필요 없음
+        isLiked: true
+    )
+
+    return StoreImageCarouselView(
+        entity: mockEntity,
+        onBack: { print("Back tapped") },
+        onLike: { print("Like tapped") }
+    )
+}
+
+fileprivate func makeGrayImage(size: CGSize) -> UIImage {
+    let renderer = UIGraphicsImageRenderer(size: size)
+    return renderer.image { context in
+        UIColor.lightGray.setFill()
+        context.fill(CGRect(origin: .zero, size: size))
+    }
+}
