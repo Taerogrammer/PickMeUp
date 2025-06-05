@@ -77,14 +77,3 @@ struct StoreDetailScreen: View {
 #Preview {
     StoreDetailScreen(storeID: "asdq", router: AppRouter())
 }
-
-struct MenuItem: Hashable {
-    let name: String
-    let description: String
-    let image: UIImage
-    let isPopular: Bool
-    let rank: Int
-    let category: String
-    let price: Int
-    let isSoldOut: Bool
-}
