@@ -14,7 +14,7 @@ struct StoreSummaryInfoView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(entity.name)
-                    .font(.title2)
+                    .font(.pretendardTitle1)
                     .bold()
                 if entity.isPickchelin {
                     Text("픽슐랭")
@@ -24,21 +24,53 @@ struct StoreSummaryInfoView: View {
                         .cornerRadius(6)
                 }
                 Spacer()
-                Image(systemName: "heart")
             }
 
-            HStack(spacing: 8) {
-                Label("\(entity.pickCount)", systemImage: "heart.fill")
-                    .foregroundColor(.red)
-                Label(String(format: "%.1f", entity.rating), systemImage: "star.fill")
-                    .foregroundColor(.yellow)
+            HStack(spacing: 12) {
+                HStack(spacing: 4) {
+                    Image(systemName: "heart.fill")
+                        .resizable()
+                        .frame(width: 16, height: 16)
+                        .foregroundColor(.brightForsythia)
+                    Text("\(entity.pickCount)")
+                        .font(.pretendardBody1)
+                }
+                HStack(spacing: 4) {
+                    Image(systemName: "star.fill")
+                        .resizable()
+                        .frame(width: 16, height: 16)
+                        .foregroundColor(.brightForsythia)
+                    Text(String(format: "%.1f", entity.totalRating))
+                        .font(.pretendardBody1)
+                }
+                Text("(\(entity.totalReviewCount))")
+                    .font(.pretendardBody1)
+                    .foregroundColor(.gray60)
+
+                Spacer()
+                HStack(spacing: 4) {
+                    Image(systemName: "motorcycle")
+                        .resizable()
+                        .frame(width: 16, height: 16)
+                        .foregroundColor(.gray45)
+                    Text("누적 주문 \(entity.totalOrderCount)회")
+                        .font(.pretendardBody3)
+                        .foregroundColor(.gray45)
+                }
             }
-            .font(.subheadline)
         }
-        .padding(.horizontal)
     }
 }
 
-//#Preview {
-//    StoreSummaryInfoView()
-//}
+#Preview {
+    let mockEntity = StoreSummaryInfoEntity(
+        name: "도넛왕",
+        isPickchelin: true,
+        pickCount: 128,
+        totalRating: 4.7,
+        totalReviewCount: 211,
+        totalOrderCount: 135
+    )
+
+    return StoreSummaryInfoView(entity: mockEntity)
+}

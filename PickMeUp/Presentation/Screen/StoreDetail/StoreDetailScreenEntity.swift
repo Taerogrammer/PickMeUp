@@ -27,7 +27,9 @@ extension StoreDetailScreenEntity {
                 name: "",
                 isPickchelin: false,
                 pickCount: 0,
-                rating: 0.0
+                totalRating: 0.0,
+                totalReviewCount: 0,
+                totalOrderCount: 0
             ),
             detailInfo: StoreDetailInfoEntity(
                 address: "",

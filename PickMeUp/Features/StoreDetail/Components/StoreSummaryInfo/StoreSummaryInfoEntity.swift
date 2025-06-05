@@ -11,5 +11,7 @@ struct StoreSummaryInfoEntity {
     let name: String
     let isPickchelin: Bool
     let pickCount: Int
-    let rating: Double
+    let totalRating: Double
+    let totalReviewCount: Int
+    let totalOrderCount: Int
 }

@@ -54,7 +54,9 @@ extension StoreDetailResponse {
                 name: name,
                 isPickchelin: isPicchelin,
                 pickCount: pickCount,
-                rating: totalRating
+                totalRating: totalRating,
+                totalReviewCount: totalReviewCount,
+                totalOrderCount: totalOrderCount
             ),
             detailInfo: StoreDetailInfoEntity(
                 address: address,
@@ -160,7 +162,9 @@ extension StoreDetailResponse {
                 name: name,
                 isPickchelin: isPicchelin,
                 pickCount: pickCount,
-                rating: totalRating
+                totalRating: totalRating,
+                totalReviewCount: totalReviewCount,
+                totalOrderCount: totalOrderCount
             ),
             detailInfo: StoreDetailInfoEntity(
                 address: address,
