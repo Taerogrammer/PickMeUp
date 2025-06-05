@@ -12,16 +12,12 @@ struct StoreSummaryInfoView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
+            HStack(spacing: 12) {
                 Text(entity.name)
                     .font(.pretendardTitle1)
                     .bold()
                 if entity.isPickchelin {
-                    Text("픽슐랭")
-                        .font(.caption)
-                        .padding(4)
-                        .background(Color.orange.opacity(0.2))
-                        .cornerRadius(6)
+                    PickchelinConcaveRibbonView()
                 }
                 Spacer()
             }
