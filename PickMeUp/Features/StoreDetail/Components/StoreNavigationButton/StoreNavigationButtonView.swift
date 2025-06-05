@@ -13,10 +13,10 @@ struct StoreNavigationButtonView: View {
             // TODO: 길찾기 기능 연결
         }) {
             Text("길찾기")
-                .font(.headline)
+                .font(.pretendardTitle1)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.orange)
+                .background(Color.deepSprout)
                 .foregroundColor(.white)
                 .cornerRadius(12)
         }
