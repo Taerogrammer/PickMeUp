@@ -8,12 +8,11 @@
 import SwiftUI
 
 struct StoreEstimatedTimeView: View {
-    let time: String
-    let distance: String
+    let entity: StoreEstimatedTimeEntity
 
     var body: some View {
         HStack {
-            Label("예상 소요시간 \(time) (\(distance))", systemImage: "figure.walk")
+            Label("예상 소요시간 \(entity.estimatedPickupTime) (\(entity.distance))", systemImage: "figure.walk")
                 .font(.footnote)
                 .foregroundColor(.orange)
             Spacer()

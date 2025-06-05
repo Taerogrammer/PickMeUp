@@ -11,7 +11,7 @@ struct StoreDetailScreen: View {
     @StateObject private var store: StoreDetailStore
 
     init(storeID: String, router: AppRouter) {
-        let state = StoreDetailState(storeID: storeID)
+        let state = StoreDetailState(storeID: storeID, entity: StoreDetailScreenEntity.placeholder(storeID: storeID))
         _store = StateObject(wrappedValue: StoreDetailStore(
             state: state,
             effect: StoreDetailEffect(),
@@ -25,46 +25,45 @@ struct StoreDetailScreen: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 16) {
                     StoreImageCarouselView(
-                        images: store.state.images,
+                        entity: store.state.storeImageCarouselEntity,
                         onBack: {
                             store.send(.tapBack)
                         },
                         onLike: {
                             store.send(.tapLike)
-                        },
-                        isLiked: store.state.isLiked
+                        }
                     )
-                    StoreSummaryInfoView(state: store.state)
+
+                    StoreSummaryInfoView(
+                        entity: store.state.storeSummaryInfoEntity
+                    )
 
                     StoreDetailInfoView(
-                        address: store.state.address,
-                        time: store.state.openHour,
-                        parking: store.state.parkingAvailable
+                        entity: store.state.storeDetailInfoEntity
                     )
 
                     StoreEstimatedTimeView(
-                        time: store.state.estimatedTime,
-                        distance: store.state.distance
+                        entity: store.state.storeEstimatedTimeEntity
                     )
 
                     StoreNavigationButtonView()
 
                     StoreMenuCategoryTabView(
-                        selected: store.state.selectedCategory,
-                        categories: store.state.categories,
+                        entity: store.state.storeMenuCategoryTabEntity,
                         onSelect: { category in
                             store.send(.selectCategory(category))
                         }
                     )
 
-                    StoreMenuListView(menus: store.state.filteredMenus)
+                    StoreMenuListView(
+                        entity: store.state.entity.storeMenuListEntity
+                    )
                 }
                 .padding()
             }
 
             StoreBottomBarView(
-                totalPrice: store.state.totalPrice,
-                itemCount: store.state.totalCount
+                entity: store.state.storeBottomBarEntity
             )
         }
         .navigationBarHidden(true)

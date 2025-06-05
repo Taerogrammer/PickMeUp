@@ -9,25 +9,48 @@ import SwiftUI
 
 struct StoreDetailState {
     let storeID: String
-    var isLiked: Bool = false
+    var entity: StoreDetailScreenEntity
 
-    var name: String = ""
-    var isPickchelin: Bool = false
-    var likeCount: Int = 0
-    var rating: Double = 0
-    var address: String = ""
-    var openHour: String = ""
-    var parkingAvailable: String = ""
-    var estimatedTime: String = ""
-    var distance: String = ""
-    var categories: [String] = []
+    // 뷰에 필요한 상태
     var selectedCategory: String = "전체"
-    var menus: [MenuItem] = []
     var images: [UIImage] = []
     var totalPrice: Int = 0
     var totalCount: Int = 0
 
-    var filteredMenus: [MenuItem] {
-        selectedCategory == "전체" ? menus : menus.filter { $0.category == selectedCategory }
+    var filteredMenus: [StoreMenuItemEntity] {
+        if selectedCategory == "전체" {
+            return entity.menuItems
+        }
+        return entity.menuItems.filter { $0.category == selectedCategory }
+    }
+}
+
+extension StoreDetailState {
+    var storeSummaryInfoEntity: StoreSummaryInfoEntity {
+        entity.summary
+    }
+
+    var storeDetailInfoEntity: StoreDetailInfoEntity {
+        entity.detailInfo
+    }
+
+    var storeEstimatedTimeEntity: StoreEstimatedTimeEntity {
+        entity.estimatedTime
+    }
+
+    var storeImageCarouselEntity: StoreImageCarouselEntity {
+        .init(imageURLs: entity.imageCarousel.imageURLs, isLiked: entity.imageCarousel.isLiked)
+    }
+
+    var storeMenuCategoryTabEntity: StoreMenuCategoryTabEntity {
+        .init(selectedCategory: selectedCategory, categories: entity.categoryTab.categories)
+    }
+
+    var storeMenuItemEntities: [StoreMenuItemEntity] {
+        filteredMenus
+    }
+
+    var storeBottomBarEntity: StoreBottomBarEntity {
+        .init(totalPrice: totalPrice, itemCount: totalCount)
     }
 }

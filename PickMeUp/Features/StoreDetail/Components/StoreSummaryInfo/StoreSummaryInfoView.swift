@@ -8,15 +8,15 @@
 import SwiftUI
 
 struct StoreSummaryInfoView: View {
-    let state: StoreDetailState
+    let entity: StoreSummaryInfoEntity
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(state.name)
+                Text(entity.name)
                     .font(.title2)
                     .bold()
-                if state.isPickchelin {
+                if entity.isPickchelin {
                     Text("픽슐랭")
                         .font(.caption)
                         .padding(4)
@@ -28,9 +28,9 @@ struct StoreSummaryInfoView: View {
             }
 
             HStack(spacing: 8) {
-                Label("\(state.likeCount)개", systemImage: "heart.fill")
+                Label("\(entity.pickCount)", systemImage: "heart.fill")
                     .foregroundColor(.red)
-                Label(String(format: "%.1f", state.rating), systemImage: "star.fill")
+                Label(String(format: "%.1f", entity.rating), systemImage: "star.fill")
                     .foregroundColor(.yellow)
             }
             .font(.subheadline)

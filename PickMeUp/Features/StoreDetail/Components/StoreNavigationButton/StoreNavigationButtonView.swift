@@ -23,6 +23,7 @@ struct StoreNavigationButtonView: View {
         .padding(.horizontal)
     }
 }
+
 #Preview {
     StoreNavigationButtonView()
 }

@@ -8,22 +8,21 @@
 import SwiftUI
 
 struct StoreMenuCategoryTabView: View {
-    let selected: String
-    let categories: [String]
+    let entity: StoreMenuCategoryTabEntity
     let onSelect: (String) -> Void
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
-                ForEach(categories, id: \.self) { category in
+                ForEach(entity.categories, id: \.self) { category in
                     Button(action: {
                         onSelect(category)
                     }) {
                         Text(category)
                             .padding(.vertical, 6)
                             .padding(.horizontal, 12)
-                            .background(category == selected ? Color.orange : Color.gray.opacity(0.2))
-                            .foregroundColor(category == selected ? .white : .black)
+                            .background(category == entity.selectedCategory ? Color.orange : Color.gray.opacity(0.2))
+                            .foregroundColor(category == entity.selectedCategory ? .white : .black)
                             .cornerRadius(16)
                     }
                 }

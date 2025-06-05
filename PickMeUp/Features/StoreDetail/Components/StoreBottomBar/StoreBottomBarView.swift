@@ -8,12 +8,11 @@
 import SwiftUI
 
 struct StoreBottomBarView: View {
-    let totalPrice: Int
-    let itemCount: Int
+    let entity: StoreBottomBarEntity
 
     var body: some View {
         HStack {
-            Text("\(totalPrice)원")
+            Text("\(entity.totalPrice)원")
                 .font(.headline)
             Spacer()
             Button(action: {
@@ -21,8 +20,8 @@ struct StoreBottomBarView: View {
             }) {
                 HStack {
                     Text("결제하기")
-                    if itemCount > 0 {
-                        Text("\(itemCount)")
+                    if entity.itemCount > 0 {
+                        Text("\(entity.itemCount)")
                             .padding(6)
                             .background(Color.white)
                             .clipShape(Circle())

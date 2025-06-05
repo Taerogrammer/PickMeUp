@@ -8,15 +8,13 @@
 import SwiftUI
 
 struct StoreDetailInfoView: View {
-    let address: String
-    let time: String
-    let parking: String
+    let entity: StoreDetailInfoEntity
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label(address, systemImage: "mappin.and.ellipse")
-            Label(time, systemImage: "clock")
-            Label(parking, systemImage: "parkingsign.circle")
+            Label(entity.address, systemImage: "mappin.and.ellipse")
+            Label(entity.open, systemImage: "clock")
+            Label(entity.parkingGuide, systemImage: "parkingsign.circle")
         }
         .font(.footnote)
         .padding()

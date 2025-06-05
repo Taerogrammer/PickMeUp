@@ -47,6 +47,62 @@ struct StoreDetailResponse: Decodable {
 }
 
 extension StoreDetailResponse {
+    func toScreenEntity() -> StoreDetailScreenEntity {
+        return StoreDetailScreenEntity(
+            storeID: storeID,
+            summary: StoreSummaryInfoEntity(
+                name: name,
+                isPickchelin: isPicchelin,
+                pickCount: pickCount,
+                rating: totalRating
+            ),
+            detailInfo: StoreDetailInfoEntity(
+                address: address,
+                open: open,
+                close: close,
+                parkingGuide: parkingGuide
+            ),
+            estimatedTime: StoreEstimatedTimeEntity(
+                estimatedPickupTime: estimatedPickupTime,
+                distance: "" // 거리 계산 필요시 후처리
+            ),
+            imageCarousel: StoreImageCarouselEntity(
+                imageURLs: storeImageURLs,
+                isLiked: isPick
+            ),
+            categoryTab: StoreMenuCategoryTabEntity(
+                selectedCategory: "전체",
+                categories: ["전체"] + Array(Set(menuList.map { $0.category }))
+            ),
+            menuItems: menuList.map { $0.toEntity() },
+            storeMenuListEntity: StoreMenuListEntity(
+                menus: menuList.map { $0.toMenuItem() }
+            ),
+            bottomBar: StoreBottomBarEntity(
+                totalPrice: 0,
+                itemCount: 0
+            )
+        )
+    }
+}
+
+extension MenuResponse {
+    func toEntity() -> StoreMenuItemEntity {
+        return StoreMenuItemEntity(
+            menuID: menuID,
+            storeID: storeID,
+            category: category,
+            name: name,
+            description: description,
+            originInformation: originInformation,
+            price: price,
+            isSoldOut: isSoldOut,
+            menuImageURL: menuImageURL
+        )
+    }
+}
+
+extension StoreDetailResponse {
     static func mock() -> StoreDetailResponse {
         return StoreDetailResponse(
             storeID: "68232364ca81ef0db5a4628d",
@@ -98,21 +154,45 @@ extension StoreDetailResponse {
 
 extension StoreDetailResponse {
     func toState() -> StoreDetailState {
+        let screenEntity = StoreDetailScreenEntity(
+            storeID: storeID,
+            summary: StoreSummaryInfoEntity(
+                name: name,
+                isPickchelin: isPicchelin,
+                pickCount: pickCount,
+                rating: totalRating
+            ),
+            detailInfo: StoreDetailInfoEntity(
+                address: address,
+                open: open,
+                close: close,
+                parkingGuide: parkingGuide
+            ),
+            estimatedTime: StoreEstimatedTimeEntity(
+                estimatedPickupTime: estimatedPickupTime,
+                distance: "3.2km" // 임시값
+            ),
+            imageCarousel: StoreImageCarouselEntity(
+                imageURLs: storeImageURLs,
+                isLiked: isPick
+            ),
+            categoryTab: StoreMenuCategoryTabEntity(
+                selectedCategory: "전체",
+                categories: ["전체"] + Array(Set(menuList.map { $0.category }))
+            ),
+            menuItems: menuList.map { $0.toEntity() },
+            storeMenuListEntity: StoreMenuListEntity(
+                menus: menuList.map { $0.toMenuItem() }
+            ),
+            bottomBar: StoreBottomBarEntity(
+                totalPrice: 0,
+                itemCount: 0
+            )
+        )
+        
         return StoreDetailState(
             storeID: storeID,
-            name: name,
-            isPickchelin: isPicchelin,
-            likeCount: pickCount,
-            rating: totalRating,
-            address: address,
-            openHour: "매일 \(open) ~ \(close)",
-            parkingAvailable: parkingGuide,
-            estimatedTime: "\(estimatedPickupTime)분",
-            distance: "3.2km", // 서버 응답에 직접적인 거리 없음 시 하드코딩 또는 계산 필요
-            categories: ["전체"] + Array(Set(menuList.map { $0.category })),
-            selectedCategory: "전체",
-            menus: menuList.map { $0.toMenuItem() },
-            images: storeImageURLs.map { _ in UIImage(systemName: "photo")! } // 실제 이미지는 비동기 처리 필요
+            entity: screenEntity
         )
     }
 }

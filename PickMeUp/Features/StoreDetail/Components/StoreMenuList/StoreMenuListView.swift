@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct StoreMenuListView: View {
-    let menus: [MenuItem]
+    let entity: StoreMenuListEntity
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            ForEach(menus, id: \.self) { menu in
+            ForEach(entity.menus, id: \.self) { menu in
                 StoreMenuItemCardView(menu: menu)
             }
         }
