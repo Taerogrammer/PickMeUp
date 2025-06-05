@@ -21,50 +21,35 @@ struct StoreDetailScreen: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .bottom) {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 16) {
                     StoreImageCarouselView(
                         entity: store.state.storeImageCarouselEntity,
-                        onBack: {
-                            store.send(.tapBack)
-                        },
-                        onLike: {
-                            store.send(.tapLike)
-                        }
+                        onBack: { store.send(.tapBack) },
+                        onLike: { store.send(.tapLike) }
                     )
 
-                    StoreSummaryInfoView(
-                        entity: store.state.storeSummaryInfoEntity
-                    )
-
-                    StoreDetailInfoView(
-                        entity: store.state.storeDetailInfoEntity
-                    )
-
-                    StoreEstimatedTimeView(
-                        entity: store.state.storeEstimatedTimeEntity
-                    )
-
+                    StoreSummaryInfoView(entity: store.state.storeSummaryInfoEntity)
+                    StoreDetailInfoView(entity: store.state.storeDetailInfoEntity)
+                    StoreEstimatedTimeView(entity: store.state.storeEstimatedTimeEntity)
                     StoreNavigationButtonView()
-
                     StoreMenuCategoryTabView(
                         entity: store.state.storeMenuCategoryTabEntity,
                         onSelect: { category in
                             store.send(.selectCategory(category))
                         }
                     )
-
-                    StoreMenuListView(
-                        entity: store.state.entity.storeMenuListEntity
-                    )
+                    StoreMenuListView(entity: store.state.entity.storeMenuListEntity)
                 }
-                .padding()
+                .padding(.horizontal)
+                .padding(.bottom, 100)
             }
 
-            StoreBottomBarView(
-                entity: store.state.storeBottomBarEntity
-            )
+            StoreBottomBarView(entity: store.state.storeBottomBarEntity)
+                .frame(maxWidth: .infinity)
+                .background(Color.white)
+                .ignoresSafeArea(.container, edges: .bottom)
         }
         .navigationBarHidden(true)
         .task {
