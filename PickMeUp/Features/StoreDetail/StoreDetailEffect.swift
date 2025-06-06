@@ -23,6 +23,7 @@ struct StoreDetailEffect {
                         await MainActor.run {
                             store.send(.fetchedStoreDetail(success))
                             store.send(.loadMenuImages(items: success.toState().entity.menuItems))
+                            store.send(.loadCarouselImages(imageURLs: success.toState().entity.imageCarousel.imageURLs)) // 추가
                         }
                     } else if let failure = result.failure {
                         print("❌ 서버 오류: \(failure.message)")
@@ -37,6 +38,11 @@ struct StoreDetailEffect {
         case .loadMenuImages(let items):
             for item in items {
                 ImageLoader.load(from: item.menuImageURL, responder: MenuImageResponder(menuID: item.menuID, store: store))
+            }
+
+        case .loadCarouselImages(let imageURLs): // 추가
+            for imageURL in imageURLs {
+                ImageLoader.load(from: imageURL, responder: CarouselImageResponder(imageURL: imageURL, store: store))
             }
 
         default:
@@ -62,5 +68,27 @@ final class MenuImageResponder: ImageLoadRespondable {
 
     func onImageLoadFailed(_ errorMessage: String) {
         print("❌ \(menuID) 이미지 로딩 실패: \(errorMessage)")
+    }
+}
+
+final class CarouselImageResponder: ImageLoadRespondable {
+    private let imageURL: String
+    private let store: StoreDetailStore
+
+    init(imageURL: String, store: StoreDetailStore) {
+        self.imageURL = imageURL
+        self.store = store
+    }
+
+    func onImageLoaded(_ image: UIImage) {
+        DispatchQueue.main.async {
+            self.store.send(.loadCarouselImageSuccess(imageURL: self.imageURL, image: image))
+        }
+    }
+
+    func onImageLoadFailed(_ errorMessage: String) {
+        DispatchQueue.main.async {
+            self.store.send(.loadCarouselImageFailed(imageURL: self.imageURL, errorMessage: errorMessage))
+        }
     }
 }

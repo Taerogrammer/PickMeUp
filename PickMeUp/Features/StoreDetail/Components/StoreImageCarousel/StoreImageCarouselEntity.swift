@@ -10,4 +10,5 @@ import SwiftUI
 struct StoreImageCarouselEntity {
     let imageURLs: [String]
     let isLiked: Bool
+    let loadedImages: [String: UIImage] // 추가
 }

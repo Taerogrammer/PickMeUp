@@ -30,6 +30,12 @@ struct StoreDetailReducer {
 
         case .loadMenuImageFailed(_, let errorMessage):
             print("❌ 메뉴 이미지 로딩 실패: \(errorMessage)")
+
+        case .loadCarouselImageSuccess(let imageURL, let image): // 추가
+            state.loadedCarouselImages[imageURL] = image
+
+        case .loadCarouselImageFailed(let imageURL, let errorMessage): // 추가
+            print("❌ 캐러셀 이미지 로딩 실패 (\(imageURL)): \(errorMessage)")
         }
     }
 }

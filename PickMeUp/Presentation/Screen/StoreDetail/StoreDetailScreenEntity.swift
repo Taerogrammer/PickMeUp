@@ -43,7 +43,8 @@ extension StoreDetailScreenEntity {
             ),
             imageCarousel: StoreImageCarouselEntity(
                 imageURLs: [],
-                isLiked: false
+                isLiked: false,
+                loadedImages: [:]
             ),
             categoryTab: StoreMenuCategoryTabEntity(
                 selectedCategory: "전체",

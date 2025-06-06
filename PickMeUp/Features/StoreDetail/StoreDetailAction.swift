@@ -16,10 +16,13 @@ enum StoreDetailAction {
         case tapBack
         case tapLike
         case loadMenuImages(items: [StoreMenuItemEntity])
+        case loadCarouselImages(imageURLs: [String])
     }
 
     enum Result {
         case fetchedStoreDetail(StoreDetailResponse)
+        case loadCarouselImageSuccess(imageURL: String, image: UIImage) // 추가
+        case loadCarouselImageFailed(imageURL: String, errorMessage: String) // 추가
         case loadMenuImageSuccess(menuID: String, image: UIImage)
         case loadMenuImageFailed(menuID: String, errorMessage: String)
     }

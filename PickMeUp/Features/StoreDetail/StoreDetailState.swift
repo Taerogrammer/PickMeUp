@@ -17,6 +17,7 @@ struct StoreDetailState {
     var totalCount: Int = 0
 
     var loadedMenuImages: [String: UIImage] = [:]
+    var loadedCarouselImages: [String: UIImage] = [:] // 추가
 
     var filteredMenus: [StoreMenuItemEntity] {
         if selectedCategory == "전체" {
@@ -40,7 +41,11 @@ extension StoreDetailState {
     }
 
     var storeImageCarouselEntity: StoreImageCarouselEntity {
-        .init(imageURLs: entity.imageCarousel.imageURLs, isLiked: entity.imageCarousel.isLiked)
+        .init(
+            imageURLs: entity.imageCarousel.imageURLs,
+            isLiked: entity.imageCarousel.isLiked,
+            loadedImages: loadedCarouselImages
+        )
     }
 
     var storeMenuCategoryTabEntity: StoreMenuCategoryTabEntity {
@@ -54,9 +59,7 @@ extension StoreDetailState {
     var storeBottomBarEntity: StoreBottomBarEntity {
         .init(totalPrice: totalPrice, itemCount: totalCount)
     }
-}
 
-extension StoreDetailState {
     var storeMenuListEntity: StoreMenuListEntity {
         StoreMenuListEntity(
             menus: filteredMenus,
