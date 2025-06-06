@@ -46,25 +46,53 @@ struct StoreListItemView: View {
     }
 }
 
-
 private struct MainImageView: View {
     let image: UIImage?
+    var isPick: Bool = true
+    var isPicchelin: Bool = true
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            if let image = image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                Color.gray30
+            Group {
+                if let image = image {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    Color.gray30
+                }
             }
+            .frame(height: 128)
+            .clipped()
+            .cornerRadius(12)
+
+            HStack {
+                if isPick {
+                    Image(systemName: "heart.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.deepSprout)
+                } else {
+                    Image(systemName: "heart")
+                        .foregroundColor(.gray0)
+                }
+
+                Spacer()
+
+                if isPicchelin {
+                    PickchelinConcaveRibbonView()
+                }
+            }
+            .padding(.top, 8)
+            .padding(.horizontal, 8)
         }
         .frame(height: 128)
-        .clipped()
         .cornerRadius(12)
+        .clipped()
     }
 }
+
 
 private struct ThumbnailImagesView: View {
     let images: [UIImage?]
@@ -171,6 +199,22 @@ private struct IconText: View {
     }
 }
 
-//#Preview {
-//    StoreListItemView(storeData: StoreMockData.samples[0])
-//}
+#Preview {
+    let mockStore = StoreListStore(
+        initialState: StoreListState(
+            stores: StoreMockData.samples,
+            loadedImages: [
+                StoreMockData.samples[0].storeID: [
+                    UIImage(systemName: "photo")!,
+                    UIImage(systemName: "photo.fill")!
+                ]
+            ],
+            selectedCategory: "전체"
+        )
+    )
+
+    return StoreListItemView(
+        store: mockStore,
+        storeData: StoreMockData.samples[0]
+    )
+}

@@ -49,17 +49,17 @@ struct PickchelinConcaveRibbonView: View {
                         .stroke(Color.white.opacity(0.4), lineWidth: 1)
                 )
 
-            HStack(spacing: 4) {
+            HStack(spacing: 2) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(.white)
                 Text("픽슐랭")
-                    .font(.pretendardBody2)
+                    .font(.pretendardCaption2)
                     .foregroundColor(.white)
             }
-            .padding(.horizontal, 14)
+            .padding(.trailing, 12)
         }
-        .frame(height: 32)
+        .frame(height: 28)
         .fixedSize()
         .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
