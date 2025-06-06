@@ -28,6 +28,8 @@ struct StoreDetailResponse: Decodable {
     let creator: Creator
     let geolocation: Geolocation
     let menuList: [MenuResponse]
+    let createdAt: String
+    let updatedAt: String
 
     enum CodingKeys: String, CodingKey {
         case storeID = "store_id"
@@ -43,6 +45,7 @@ struct StoreDetailResponse: Decodable {
         case totalRating = "total_rating"
         case creator, geolocation
         case menuList = "menu_list"
+        case createdAt, updatedAt
     }
 }
 
@@ -147,12 +150,31 @@ extension StoreDetailResponse {
                     price: 1800,
                     isSoldOut: false,
                     tags: [],
-                    menuImageURL: "/data/menus/1747133821135.png"
+                    menuImageURL: "/data/menus/1747133821135.png",
+                    createdAt: "2025-05-13T10:20:00.000Z", // 임의 값
+                    updatedAt: "2025-05-13T10:21:00.000Z"
+                ),
+                MenuResponse(
+                    menuID: "68231de4ca81ef0db5a460c8",
+                    storeID: "68232364ca81ef0db5a4628d",
+                    category: "카테고리 2",
+                    name: "새싹 콜라",
+                    description: "맛있는 빵",
+                    originInformation: "밀가루: 호주산, 설탕: 미국산",
+                    price: 1050,
+                    isSoldOut: false,
+                    tags: ["인기 1위"],
+                    menuImageURL: "/data/menus/1747131220328.jpg",
+                    createdAt: "2025-05-13T10:22:00.000Z",
+                    updatedAt: "2025-05-13T10:23:00.000Z"
                 )
-            ]
+            ],
+            createdAt: "2025-05-13T10:19:00.000Z",
+            updatedAt: "2025-05-13T10:24:00.000Z"
         )
     }
 }
+
 
 extension StoreDetailResponse {
     func toState() -> StoreDetailState {

@@ -18,6 +18,8 @@ struct MenuResponse: Decodable {
     let isSoldOut: Bool
     let tags: [String]
     let menuImageURL: String
+    let createdAt: String
+    let updatedAt: String
 
     enum CodingKeys: String, CodingKey {
         case menuID = "menu_id"
@@ -28,6 +30,7 @@ struct MenuResponse: Decodable {
         case isSoldOut = "is_sold_out"
         case tags
         case menuImageURL = "menu_image_url"
+        case createdAt, updatedAt
     }
 }
 
