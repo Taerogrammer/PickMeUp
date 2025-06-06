@@ -26,7 +26,7 @@ struct StoreDetailScreen: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 16) {
+                VStack(spacing: 0) {
                     StoreImageCarouselView(
                         entity: store.state.storeImageCarouselEntity,
                         onBack: { store.send(.tapBack) },
@@ -43,6 +43,7 @@ struct StoreDetailScreen: View {
                             store.send(.selectCategory(category))
                         }
                     )
+                    .offset(y: -12)
                 }
             }
 
@@ -51,6 +52,7 @@ struct StoreDetailScreen: View {
                 .background(Color.white)
                 .ignoresSafeArea(.container, edges: .bottom)
         }
+        .ignoresSafeArea(.all, edges: .top)
         .navigationBarHidden(true)
         .background(Color.gray0)
         .task {

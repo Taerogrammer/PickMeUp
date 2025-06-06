@@ -25,11 +25,11 @@ struct StoreDetailMainContentView: View {
             StoreMenuCategoryTabView(entity: categoryTabEntity, onSelect: onSelectCategory)
             StoreMenuListView(entity: menuListEntity)
         }
-        .padding(.top)
-        .padding(.horizontal)
+        .padding(.top, 12)
+        .padding(.horizontal, 16)
         .padding(.bottom, 100)
-        .background(Color.gray15)
-        .clipShape(RoundedCorner(radius: 24, corners: [.topLeft, .topRight]))
+        .background(Color.white)
+        .clipShape(RoundedCorner(radius: 16, corners: [.topLeft, .topRight]))
     }
 }
 

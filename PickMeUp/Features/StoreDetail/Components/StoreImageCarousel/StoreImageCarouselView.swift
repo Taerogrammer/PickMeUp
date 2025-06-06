@@ -22,56 +22,60 @@ struct StoreImageCarouselView: View {
                         Image(uiImage: loadedImage)
                             .resizable()
                             .scaledToFill()
-                            .frame(height: 240)
                             .clipped()
                     } else {
                         // 로딩 중 상태 표시
                         ProgressView()
-                            .frame(height: 240)
-                            .frame(maxWidth: .infinity)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .background(Color.gray.opacity(0.1))
                     }
                 }
             }
-            .frame(height: 240)
+            .frame(height: 320)
             .tabViewStyle(PageTabViewStyle())
 
-            HStack {
-                Button(action: onBack) {
-                    Image(systemName: "chevron.left")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(.gray0)
-                        .padding(6)
+            VStack {
+                HStack {
+                    Button(action: onBack) {
+                        Image(systemName: "chevron.left")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .foregroundColor(.white)
+                            .padding(6)
+                    }
+                    .frame(width: 32, height: 32)
+
+                    Spacer()
+
+                    Button(action: onLike) {
+                        Image(systemName: entity.isLiked ? "heart.fill" : "heart")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .foregroundColor(entity.isLiked ? .red : .white)
+                    }
+                    .frame(width: 32, height: 32)
                 }
-                .frame(width: 32, height: 32)
-                .padding(.leading, 12)
-                .padding(.top, 12)
+                .padding(.horizontal, 12)
+                .padding(.top, 60)
 
                 Spacer()
-
-                Button(action: onLike) {
-                    Image(systemName: entity.isLiked ? "heart.fill" : "heart")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(entity.isLiked ? .deepSprout : .gray0)
-                }
-                .frame(width: 32, height: 32)
-                .padding(.trailing, 12)
-                .padding(.top, 12)
             }
         }
     }
 }
+
 
 //#Preview {
 //    let mockImages: [UIImage] = Array(repeating: makeGrayImage(size: CGSize(width: 400, height: 240)), count: 3)
 //
 //    let mockEntity = StoreImageCarouselEntity(
 //        imageURLs: mockImages.map { _ in "https://mock.url/image.png" }, // 유효한 URL 필요 없음
-//        isLiked: true
+//        isLiked: true,
+//        loadedImages: Dictionary(uniqueKeysWithValues: mockImages.enumerated().map {
+//            ("https://mock.url/image.png", $1)
+//        })
 //    )
 //
 //    return StoreImageCarouselView(
@@ -80,7 +84,7 @@ struct StoreImageCarouselView: View {
 //        onLike: { print("Like tapped") }
 //    )
 //}
-
+//
 //fileprivate func makeGrayImage(size: CGSize) -> UIImage {
 //    let renderer = UIGraphicsImageRenderer(size: size)
 //    return renderer.image { context in
