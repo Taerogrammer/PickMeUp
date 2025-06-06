@@ -108,6 +108,19 @@ extension MenuResponse {
 }
 
 extension StoreDetailResponse {
+    func toState() -> StoreDetailState {
+        StoreDetailState(
+            storeID: storeID,
+            entity: self.toScreenEntity(),
+            selectedCategory: "전체",
+            images: [],
+            totalPrice: 0,
+            totalCount: 0
+        )
+    }
+}
+
+extension StoreDetailResponse {
     static func mock() -> StoreDetailResponse {
         return StoreDetailResponse(
             storeID: "68232364ca81ef0db5a4628d",
@@ -171,54 +184,6 @@ extension StoreDetailResponse {
             ],
             createdAt: "2025-05-13T10:19:00.000Z",
             updatedAt: "2025-05-13T10:24:00.000Z"
-        )
-    }
-}
-
-
-extension StoreDetailResponse {
-    func toState() -> StoreDetailState {
-        let screenEntity = StoreDetailScreenEntity(
-            storeID: storeID,
-            summary: StoreSummaryInfoEntity(
-                name: name,
-                isPickchelin: isPicchelin,
-                pickCount: pickCount,
-                totalRating: totalRating,
-                totalReviewCount: totalReviewCount,
-                totalOrderCount: totalOrderCount
-            ),
-            detailInfo: StoreDetailInfoEntity(
-                address: address,
-                open: open,
-                close: close,
-                parkingGuide: parkingGuide
-            ),
-            estimatedTime: StoreEstimatedTimeEntity(
-                estimatedPickupTime: estimatedPickupTime,
-                distance: "3.2km" // 임시값
-            ),
-            imageCarousel: StoreImageCarouselEntity(
-                imageURLs: storeImageURLs,
-                isLiked: isPick
-            ),
-            categoryTab: StoreMenuCategoryTabEntity(
-                selectedCategory: "전체",
-                categories: ["전체"] + Array(Set(menuList.map { $0.category }))
-            ),
-            menuItems: menuList.map { $0.toEntity() },
-            storeMenuListEntity: StoreMenuListEntity(
-                menus: menuList.map { $0.toMenuItem() }
-            ),
-            bottomBar: StoreBottomBarEntity(
-                totalPrice: 0,
-                itemCount: 0
-            )
-        )
-        
-        return StoreDetailState(
-            storeID: storeID,
-            entity: screenEntity
         )
     }
 }
