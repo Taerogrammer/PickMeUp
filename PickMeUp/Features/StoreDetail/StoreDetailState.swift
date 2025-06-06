@@ -18,7 +18,7 @@ struct StoreDetailState {
     var totalCount: Int = 0
 
     var loadedMenuImages: [String: UIImage] = [:]
-    var loadedCarouselImages: [String: UIImage] = [:] // 추가
+    var loadedCarouselImages: [String: UIImage] = [:]
 
     var filteredMenus: [StoreMenuItemEntity] {
         if selectedCategory == "전체" {

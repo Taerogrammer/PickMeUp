@@ -37,7 +37,7 @@ struct StoreDetailEffect {
 
         case .tapLike:
             Task {
-                await handleLike(store: store)
+                await handleLikeOptimistic(store: store)
             }
 
         case .loadMenuImages(let items):
@@ -55,12 +55,15 @@ struct StoreDetailEffect {
         }
     }
 
-    private func handleLike(store: StoreDetailStore) async {
+    // MARK: - 🚀 Optimistic UI 좋아요 처리
+    private func handleLikeOptimistic(store: StoreDetailStore) async {
         let currentLikeStatus = store.state.entity.imageCarousel.isLiked
         let newLikeStatus = !currentLikeStatus
 
-        // 로딩 상태 시작
+        print("🚀 [Optimistic UI 시작] \(currentLikeStatus) → \(newLikeStatus)")
+
         await MainActor.run {
+            store.send(.likeOptimistic(isLiked: newLikeStatus))
             store.send(.setLikeLoading(isLoading: true))
         }
 
@@ -68,8 +71,7 @@ struct StoreDetailEffect {
 
         do {
             let result = try await NetworkManager.shared.fetch(
-                StoreRouter.like(query: StoreIDRequest(id: store.state.storeID),
-                                                       request: request),
+                StoreRouter.like(query: StoreIDRequest(id: store.state.storeID), request: request),
                 successType: StoreLikeResponse.self,
                 failureType: CommonMessageResponse.self
             )
@@ -77,16 +79,24 @@ struct StoreDetailEffect {
             await MainActor.run {
                 store.send(.setLikeLoading(isLoading: false))
 
-                // 올바른 필드명 사용: like_status
                 if let success = result.success {
-                    store.send(.likeSuccess(isLiked: success.like_status))
+                    if success.like_status != newLikeStatus {
+                        print("⚠️ 서버와 로컬 상태 불일치 - 서버 상태로 복구")
+                        store.send(.likeSuccess(isLiked: success.like_status))
+                    } else {
+                        print("✅ 서버와 로컬 상태 일치 - Optimistic UI 성공")
+                    }
                 } else if let failure = result.failure {
+                    print("❌ 좋아요 실패 - 원래 상태로 복구: \(failure.message)")
+                    store.send(.likeRollback(isLiked: currentLikeStatus))
                     store.send(.likeFailed(errorMessage: failure.message))
                 }
             }
         } catch {
+            print("📦 [네트워크 에러 - 롤백]: \(error)")
             await MainActor.run {
                 store.send(.setLikeLoading(isLoading: false))
+                store.send(.likeRollback(isLiked: currentLikeStatus))
                 store.send(.likeFailed(errorMessage: error.localizedDescription))
             }
         }

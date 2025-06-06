@@ -13,7 +13,6 @@ struct StoreDetailReducer {
         case .selectCategory(let category):
             state.selectedCategory = category
         case .tapLike:
-            // 따로 isLiked 상태를 두고 싶다면 state.isLiked.toggle() 등으로 처리 가능
             break
         case .tapBack: break
         default: break
@@ -40,6 +39,16 @@ struct StoreDetailReducer {
         case .likeSuccess(let isLiked):
             state.entity.imageCarousel.isLiked = isLiked
             state.isLikeLoading = false
+            print("✅ [서버 확인] 최종 좋아요 상태: \(isLiked)")
+
+        case .likeOptimistic(let isLiked):
+            state.entity.imageCarousel.isLiked = isLiked
+            print("🚀 [Optimistic UI] 즉시 하트 상태 변경: \(isLiked)")
+
+        case .likeRollback(let isLiked):
+            state.entity.imageCarousel.isLiked = isLiked
+            state.isLikeLoading = false
+            print("🔄 [Rollback] 원래 상태로 복구: \(isLiked)")
 
         case .likeFailed(let errorMessage):
             state.isLikeLoading = false

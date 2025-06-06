@@ -24,7 +24,6 @@ struct StoreImageCarouselView: View {
                             .scaledToFill()
                             .clipped()
                     } else {
-                        // 로딩 중 상태 표시
                         ProgressView()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .background(Color.gray.opacity(0.1))
@@ -48,7 +47,12 @@ struct StoreImageCarouselView: View {
 
                     Spacer()
 
-                    Button(action: onLike) {
+                    Button(action: {
+                        let impact = UIImpactFeedbackGenerator(style: .light)
+                        impact.impactOccurred()
+
+                        onLike()
+                    }) {
                         Group {
                             if entity.isLikeLoading {
                                 ProgressView()
@@ -59,9 +63,11 @@ struct StoreImageCarouselView: View {
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 24, height: 24)
+                                    .scaleEffect(entity.isLiked ? 1.2 : 1.0) // 좋아요 시 살짝 커짐
                             }
                         }
-                        .foregroundColor(entity.isLiked ? .red : .white)
+                        .foregroundColor(entity.isLiked ? .deepSprout : .white)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: entity.isLiked) // 부드러운 애니메이션
                     }
                     .frame(width: 32, height: 32)
                     .disabled(entity.isLikeLoading)
