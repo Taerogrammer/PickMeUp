@@ -11,11 +11,12 @@ struct StoreDetailState {
     let storeID: String
     var entity: StoreDetailScreenEntity
 
-    // 뷰에 필요한 상태
     var selectedCategory: String = "전체"
     var images: [UIImage] = []
     var totalPrice: Int = 0
     var totalCount: Int = 0
+
+    var loadedMenuImages: [String: UIImage] = [:]
 
     var filteredMenus: [StoreMenuItemEntity] {
         if selectedCategory == "전체" {
@@ -52,5 +53,14 @@ extension StoreDetailState {
 
     var storeBottomBarEntity: StoreBottomBarEntity {
         .init(totalPrice: totalPrice, itemCount: totalCount)
+    }
+}
+
+extension StoreDetailState {
+    var storeMenuListEntity: StoreMenuListEntity {
+        StoreMenuListEntity(
+            menus: filteredMenus,
+            loadedImages: loadedMenuImages
+        )
     }
 }

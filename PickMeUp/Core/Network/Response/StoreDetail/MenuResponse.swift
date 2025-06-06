@@ -39,8 +39,8 @@ extension MenuResponse {
         return MenuItem(
             name: name,
             description: description,
-            image: UIImage(systemName: "photo")!,
-            isPopular: false,
+            imageURL: menuImageURL,
+            isPopular: tags.contains("인기"),
             rank: 0,
             category: category,
             price: price,

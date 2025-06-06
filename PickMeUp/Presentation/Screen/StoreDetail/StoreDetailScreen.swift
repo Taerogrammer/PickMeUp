@@ -38,7 +38,7 @@ struct StoreDetailScreen: View {
                         detailEntity: store.state.storeDetailInfoEntity,
                         estimatedTimeEntity: store.state.storeEstimatedTimeEntity,
                         categoryTabEntity: store.state.storeMenuCategoryTabEntity,
-                        menuListEntity: store.state.entity.storeMenuListEntity,
+                        menuListEntity: store.state.storeMenuListEntity,
                         onSelectCategory: { category in
                             store.send(.selectCategory(category))
                         }

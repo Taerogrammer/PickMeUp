@@ -50,7 +50,7 @@ extension StoreDetailScreenEntity {
                 categories: []
             ),
             menuItems: [],
-            storeMenuListEntity: StoreMenuListEntity(menus: []),
+            storeMenuListEntity: StoreMenuListEntity(menus: [], loadedImages: [:]),
             bottomBar: StoreBottomBarEntity(
                 totalPrice: 0,
                 itemCount: 0

@@ -8,27 +8,28 @@
 import SwiftUI
 
 struct StoreMenuItemCardView: View {
-    let menu: MenuItem
+    let menu: StoreMenuItemEntity
+    let image: UIImage?
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            // 메뉴 이미지
-            Image(uiImage: menu.image)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: 72, height: 72)
-                .clipped()
-                .cornerRadius(8)
-
-            // 메뉴 정보
-            VStack(alignment: .leading, spacing: 6) {
-                if menu.isPopular {
-                    Text("인기 \(menu.rank)위")
-                        .font(.caption)
-                        .foregroundColor(.orange)
-                        .bold()
+            if let image = image {
+                Image(uiImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 72, height: 72)
+                    .clipped()
+                    .cornerRadius(8)
+            } else {
+                ZStack {
+                    Color.gray30
+                    ProgressView()
                 }
+                .frame(width: 72, height: 72)
+                .cornerRadius(8)
+            }
 
+            VStack(alignment: .leading, spacing: 6) {
                 Text(menu.name)
                     .font(.headline)
 
@@ -55,6 +56,7 @@ struct StoreMenuItemCardView: View {
         .padding(.vertical, 8)
     }
 }
+
 
 //#Preview {
 //    StoreMenuItemCardView()

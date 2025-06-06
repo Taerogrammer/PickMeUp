@@ -5,7 +5,7 @@
 //  Created by 김태형 on 6/4/25.
 //
 
-import Foundation
+import SwiftUI
 
 final class StoreDetailStore: ObservableObject {
     @Published private(set) var state: StoreDetailState
@@ -34,5 +34,9 @@ final class StoreDetailStore: ObservableObject {
 
     func send(_ result: StoreDetailAction.Result) {
         reducer.reduce(state: &state, result: result)
+    }
+
+    func updateMenuImage(for menuID: String, image: UIImage) {
+        state.loadedMenuImages[menuID] = image
     }
 }

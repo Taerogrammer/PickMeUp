@@ -23,7 +23,13 @@ struct StoreDetailReducer {
     func reduce(state: inout StoreDetailState, result: StoreDetailAction.Result) {
         switch result {
         case .fetchedStoreDetail(let response):
-            state = response.toState() // 💡 response를 변환한 결과로 교체
+            state = response.toState()
+
+        case .loadMenuImageSuccess(let menuID, let image):
+            state.loadedMenuImages[menuID] = image
+
+        case .loadMenuImageFailed(_, let errorMessage):
+            print("❌ 메뉴 이미지 로딩 실패: \(errorMessage)")
         }
     }
 }

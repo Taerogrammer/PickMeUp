@@ -10,7 +10,7 @@ import SwiftUI
 struct MenuItem: Hashable {
     let name: String
     let description: String
-    let image: UIImage
+    let imageURL: String
     let isPopular: Bool
     let rank: Int
     let category: String

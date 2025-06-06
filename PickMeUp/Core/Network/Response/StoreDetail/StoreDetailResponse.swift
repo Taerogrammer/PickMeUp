@@ -81,7 +81,8 @@ extension StoreDetailResponse {
             ),
             menuItems: menuList.map { $0.toEntity() },
             storeMenuListEntity: StoreMenuListEntity(
-                menus: menuList.map { $0.toMenuItem() }
+                menus: menuList.map { $0.toEntity() },
+                loadedImages: [:]
             ),
             bottomBar: StoreBottomBarEntity(
                 totalPrice: 0,

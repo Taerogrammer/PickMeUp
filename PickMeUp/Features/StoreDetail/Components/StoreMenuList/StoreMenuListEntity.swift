@@ -5,8 +5,9 @@
 //  Created by 김태형 on 6/5/25.
 //
 
-import Foundation
+import SwiftUI
 
 struct StoreMenuListEntity {
-    let menus: [MenuItem]
+    let menus: [StoreMenuItemEntity]
+    let loadedImages: [String: UIImage]
 }
