@@ -21,7 +21,11 @@ struct StoreListItemView: View {
         } label: {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 8) {
-                    MainImageView(image: loadedImages.first)
+                    MainImageView(
+                        image: store.state.loadedImages[storeData.storeID]?.first,
+                        isPick: storeData.isPick,
+                        isPicchelin: storeData.isPicchelin
+                    )
                     ThumbnailImagesView(images: Array(loadedImages.dropFirst()))
                 }
                 .frame(maxWidth: .infinity, maxHeight: 128)
@@ -48,8 +52,8 @@ struct StoreListItemView: View {
 
 private struct MainImageView: View {
     let image: UIImage?
-    var isPick: Bool = true
-    var isPicchelin: Bool = true
+    var isPick: Bool
+    var isPicchelin: Bool
 
     var body: some View {
         ZStack(alignment: .topLeading) {
