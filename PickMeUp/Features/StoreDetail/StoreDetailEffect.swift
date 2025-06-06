@@ -23,7 +23,7 @@ struct StoreDetailEffect {
                         await MainActor.run {
                             store.send(.fetchedStoreDetail(success))
                             store.send(.loadMenuImages(items: success.toState().entity.menuItems))
-                            store.send(.loadCarouselImages(imageURLs: success.toState().entity.imageCarousel.imageURLs)) // 추가
+                            store.send(.loadCarouselImages(imageURLs: success.toState().entity.imageCarousel.imageURLs))
                         }
                     } else if let failure = result.failure {
                         print("❌ 서버 오류: \(failure.message)")
@@ -35,18 +35,60 @@ struct StoreDetailEffect {
                 }
             }
 
+        case .tapLike:
+            Task {
+                await handleLike(store: store)
+            }
+
         case .loadMenuImages(let items):
             for item in items {
                 ImageLoader.load(from: item.menuImageURL, responder: MenuImageResponder(menuID: item.menuID, store: store))
             }
 
-        case .loadCarouselImages(let imageURLs): // 추가
+        case .loadCarouselImages(let imageURLs):
             for imageURL in imageURLs {
                 ImageLoader.load(from: imageURL, responder: CarouselImageResponder(imageURL: imageURL, store: store))
             }
 
         default:
             break
+        }
+    }
+
+    private func handleLike(store: StoreDetailStore) async {
+        let currentLikeStatus = store.state.entity.imageCarousel.isLiked
+        let newLikeStatus = !currentLikeStatus
+
+        // 로딩 상태 시작
+        await MainActor.run {
+            store.send(.setLikeLoading(isLoading: true))
+        }
+
+        let request = StoreLikeRequest(like_status: newLikeStatus)
+
+        do {
+            let result = try await NetworkManager.shared.fetch(
+                StoreRouter.like(query: StoreIDRequest(id: store.state.storeID),
+                                                       request: request),
+                successType: StoreLikeResponse.self,
+                failureType: CommonMessageResponse.self
+            )
+
+            await MainActor.run {
+                store.send(.setLikeLoading(isLoading: false))
+
+                // 올바른 필드명 사용: like_status
+                if let success = result.success {
+                    store.send(.likeSuccess(isLiked: success.like_status))
+                } else if let failure = result.failure {
+                    store.send(.likeFailed(errorMessage: failure.message))
+                }
+            }
+        } catch {
+            await MainActor.run {
+                store.send(.setLikeLoading(isLoading: false))
+                store.send(.likeFailed(errorMessage: error.localizedDescription))
+            }
         }
     }
 }

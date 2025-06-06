@@ -118,6 +118,10 @@ enum APIConstants {
             static let profileImage = "profileImage"
         }
 
+        enum Store {
+            static let likeStatus = "like_status"
+        }
+
         enum Chat {
             static let opponentID = "opponent_id"
             static let content = "content"

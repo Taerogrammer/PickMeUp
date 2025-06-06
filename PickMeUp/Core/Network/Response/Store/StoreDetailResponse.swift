@@ -74,7 +74,8 @@ extension StoreDetailResponse {
             imageCarousel: StoreImageCarouselEntity(
                 imageURLs: storeImageURLs,
                 isLiked: isPick,
-                loadedImages: [:]
+                loadedImages: [:],
+                isLikeLoading: false
             ),
             categoryTab: StoreMenuCategoryTabEntity(
                 selectedCategory: "전체",
@@ -114,6 +115,7 @@ extension StoreDetailResponse {
         StoreDetailState(
             storeID: storeID,
             entity: self.toScreenEntity(),
+            isLikeLoading: false,
             selectedCategory: "전체",
             images: [],
             totalPrice: 0,

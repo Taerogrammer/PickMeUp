@@ -12,7 +12,7 @@ struct StoreDetailScreenEntity {
     let summary: StoreSummaryInfoEntity
     let detailInfo: StoreDetailInfoEntity
     let estimatedTime: StoreEstimatedTimeEntity
-    let imageCarousel: StoreImageCarouselEntity
+    var imageCarousel: StoreImageCarouselEntity
     let categoryTab: StoreMenuCategoryTabEntity
     let menuItems: [StoreMenuItemEntity]
     let storeMenuListEntity: StoreMenuListEntity
@@ -44,7 +44,8 @@ extension StoreDetailScreenEntity {
             imageCarousel: StoreImageCarouselEntity(
                 imageURLs: [],
                 isLiked: false,
-                loadedImages: [:]
+                loadedImages: [:],
+                isLikeLoading: false
             ),
             categoryTab: StoreMenuCategoryTabEntity(
                 selectedCategory: "전체",

@@ -31,11 +31,22 @@ struct StoreDetailReducer {
         case .loadMenuImageFailed(_, let errorMessage):
             print("❌ 메뉴 이미지 로딩 실패: \(errorMessage)")
 
-        case .loadCarouselImageSuccess(let imageURL, let image): // 추가
+        case .loadCarouselImageSuccess(let imageURL, let image):
             state.loadedCarouselImages[imageURL] = image
 
-        case .loadCarouselImageFailed(let imageURL, let errorMessage): // 추가
+        case .loadCarouselImageFailed(let imageURL, let errorMessage):
             print("❌ 캐러셀 이미지 로딩 실패 (\(imageURL)): \(errorMessage)")
+
+        case .likeSuccess(let isLiked):
+            state.entity.imageCarousel.isLiked = isLiked
+            state.isLikeLoading = false
+
+        case .likeFailed(let errorMessage):
+            state.isLikeLoading = false
+            print("❌ 좋아요 처리 실패: \(errorMessage)")
+
+        case .setLikeLoading(let isLoading):
+            state.isLikeLoading = isLoading
         }
     }
 }

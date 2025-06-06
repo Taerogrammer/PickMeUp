@@ -10,6 +10,7 @@ import SwiftUI
 struct StoreDetailState {
     let storeID: String
     var entity: StoreDetailScreenEntity
+    var isLikeLoading: Bool
 
     var selectedCategory: String = "전체"
     var images: [UIImage] = []
@@ -44,7 +45,8 @@ extension StoreDetailState {
         .init(
             imageURLs: entity.imageCarousel.imageURLs,
             isLiked: entity.imageCarousel.isLiked,
-            loadedImages: loadedCarouselImages
+            loadedImages: loadedCarouselImages,
+            isLikeLoading: isLikeLoading
         )
     }
 

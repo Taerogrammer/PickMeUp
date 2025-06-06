@@ -49,13 +49,22 @@ struct StoreImageCarouselView: View {
                     Spacer()
 
                     Button(action: onLike) {
-                        Image(systemName: entity.isLiked ? "heart.fill" : "heart")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 24, height: 24)
-                            .foregroundColor(entity.isLiked ? .red : .white)
+                        Group {
+                            if entity.isLikeLoading {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Image(systemName: entity.isLiked ? "heart.fill" : "heart")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 24, height: 24)
+                            }
+                        }
+                        .foregroundColor(entity.isLiked ? .red : .white)
                     }
                     .frame(width: 32, height: 32)
+                    .disabled(entity.isLikeLoading)
                 }
                 .padding(.horizontal, 12)
                 .padding(.top, 60)

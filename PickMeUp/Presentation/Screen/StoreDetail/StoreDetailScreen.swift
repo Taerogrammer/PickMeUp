@@ -13,7 +13,8 @@ struct StoreDetailScreen: View {
     init(storeID: String, router: AppRouter) {
         let state = StoreDetailState(
             storeID: storeID,
-            entity: StoreDetailScreenEntity.placeholder(storeID: storeID)
+            entity: StoreDetailScreenEntity.placeholder(storeID: storeID),
+            isLikeLoading: false
         )
         _store = StateObject(wrappedValue: StoreDetailStore(
             state: state,
