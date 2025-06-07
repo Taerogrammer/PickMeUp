@@ -59,6 +59,9 @@ struct StoreListView: View {
                                     // 🔑 nextCursor와 일치하는지 확인
                                     checkIfMatchesNextCursor(storeData: storeData, index: index)
 
+                                    // 🔑 마지막 근처 아이템에서 다음 페이지 로드
+                                    checkAndLoadNextPage(currentIndex: index)
+
                                     // 현재 화면에 보이는 모든 가게 출력
                                     printCurrentlyVisible()
                                 }
@@ -74,6 +77,26 @@ struct StoreListView: View {
                                 }
                             }
                         }
+
+                        // 🔑 로딩 인디케이터를 최하단으로 이동
+                        if store.state.isLoadingMore {
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("더 많은 가게를 불러오는 중...")
+                                    .font(.caption)
+                                    .foregroundColor(.gray60)
+                            }
+                            .padding(.vertical, 16)
+                        }
+
+                        // 🔑 마지막 페이지 도달 메시지
+                        if store.state.hasReachedEnd && !store.state.stores.isEmpty {
+                            Text("모든 가게를 불러왔습니다.")
+                                .font(.caption)
+                                .foregroundColor(.gray60)
+                                .padding(.vertical, 16)
+                        }
                     }
                 }
                 .padding(.horizontal)
@@ -86,10 +109,32 @@ struct StoreListView: View {
         }
     }
 
+    private func checkAndLoadNextPage(currentIndex: Int) {
+        let totalCount = store.state.filteredStores.count
+
+        // 마지막에서 2번째 아이템이 나타나면 다음 페이지 로드
+        if currentIndex >= totalCount - 2 {
+            print("🚨 마지막 근처 아이템 감지! (index: \(currentIndex), total: \(totalCount))")
+            print("   - nextCursor: \(store.state.nextCursor ?? "nil")")
+            print("   - isLoadingMore: \(store.state.isLoadingMore)")
+            print("   - hasReachedEnd: \(store.state.hasReachedEnd)")
+
+            // 다음 페이지 로드 조건 확인
+            if !store.state.isLoadingMore &&
+               !store.state.hasReachedEnd &&
+               store.state.nextCursor != nil &&
+               store.state.nextCursor != "0" {
+                print("✅ 다음 페이지 로드 시작!")
+                store.send(.loadNextPage)
+            } else {
+                print("❌ 다음 페이지 로드 조건 불만족")
+            }
+        }
+    }
+
     // 🔑 nextCursor와 일치하는 가게 확인
     private func checkIfMatchesNextCursor(storeData: StorePresentable, index: Int) {
         guard let nextCursor = store.state.nextCursor else {
-            print("🚫 nextCursor가 없습니다")
             return
         }
 
@@ -101,13 +146,6 @@ struct StoreListView: View {
             print("   📋 인덱스: [\(index)]")
             print("   🔄 nextCursor: \(nextCursor)")
             print("   ⭐ 이 가게가 다음 페이지의 시작점입니다!")
-        }
-
-        // 또는 nextCursor가 특정 패턴(예: 마지막 가게 기준)일 수도 있으니 추가 체크
-        if index == store.state.filteredStores.count - 1 {
-            print("🏁 마지막 가게 도달 - nextCursor 확인:")
-            print("   현재 가게 ID: \(storeData.storeID)")
-            print("   nextCursor: \(nextCursor)")
         }
     }
 
@@ -125,7 +163,6 @@ struct StoreListView: View {
         print("---")
     }
 }
-
 
 struct StoreSectionHeaderView: View {
     @ObservedObject var store: StoreListStore
