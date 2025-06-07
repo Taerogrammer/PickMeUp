@@ -10,7 +10,7 @@ import Foundation
 enum StoreRouter: APIRouter {
     case stores(query: StoreListRequest)
     case detail(query: StoreIDRequest)
-    case like(query: StoreIDRequest)
+    case like(query: StoreIDRequest, request: StoreLikeRequest)
     case search(query: StoreNameRequest)
     case popular
     case searchPopular
@@ -24,7 +24,7 @@ enum StoreRouter: APIRouter {
             return APIConstants.Endpoints.Store.stores
         case .detail(let request):
             return APIConstants.Endpoints.Store.detail(request.id)
-        case .like(let request):
+        case .like(let request, _):
             return APIConstants.Endpoints.Store.like(request.id)
         case .search:
             return APIConstants.Endpoints.Store.search
@@ -47,7 +47,12 @@ enum StoreRouter: APIRouter {
     }
 
     var parameters: [String: Any]? {
-        return nil
+        switch self {
+        case .like(_, let request):
+            return [APIConstants.Parameters.Store.likeStatus: request.like_status]
+        default:
+            return nil
+        }
     }
 
     var headers: [String: String]? {
@@ -90,7 +95,7 @@ enum StoreRouter: APIRouter {
             return [.init(name: APIConstants.Query.Store.id, value: request.id)]
 
         case .like(let request):
-            return [.init(name: APIConstants.Query.Store.id, value: request.id)]
+            return [.init(name: APIConstants.Query.Store.id, value: request.query.id)]
 
         case .search(let request):
             return [.init(name: APIConstants.Query.Store.keyword, value: request.name)]

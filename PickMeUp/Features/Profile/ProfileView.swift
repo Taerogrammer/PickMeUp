@@ -20,7 +20,7 @@ struct ProfileView: View {
             Spacer()
         }
         .padding(.top, 20)
-        .background(Color.black.ignoresSafeArea())
+        .background(Color.brightSprout.ignoresSafeArea()) // ✅ 밝은 배경 적용
         .navigationTitle("설정")
         .navigationBarTitleDisplayMode(.inline)
         .task {
@@ -41,25 +41,28 @@ struct ProfileView: View {
                     Image(systemName: "person")
                         .resizable()
                         .scaledToFit()
-                        .foregroundColor(.gray)
+                        .foregroundColor(.gray45)
                         .padding(20)
                 }
             }
             .frame(width: 100, height: 100)
-            .background(Color.white)
+            .background(Color.gray0)
             .clipShape(Circle())
-            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+            .overlay(Circle().stroke(Color.gray30, lineWidth: 2))
             .shadow(radius: 4)
 
-            VStack(spacing: 8) {
+            VStack(spacing: 4) {
                 Text(user.nick)
-                    .font(.title2).bold().foregroundColor(.white)
+                    .font(.pretendardTitle1)
+                    .foregroundColor(.gray90)
 
                 Text(user.email)
-                    .font(.subheadline).foregroundColor(.gray)
+                    .font(.pretendardCaption1)
+                    .foregroundColor(.gray60)
 
                 Text(user.phoneNum)
-                    .font(.subheadline).foregroundColor(.gray)
+                    .font(.pretendardCaption1)
+                    .foregroundColor(.gray60)
             }
 
             Button {
@@ -67,18 +70,19 @@ struct ProfileView: View {
             } label: {
                 HStack {
                     Text("프로필 수정")
-                        .foregroundColor(.white)
+                        .foregroundColor(.gray90)
+                        .font(.pretendardBody2)
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
+                        .foregroundColor(.gray60)
                 }
                 .padding()
-                .background(Color(.systemGray5).opacity(0.2))
+                .background(Color.gray15)
                 .cornerRadius(10)
             }
         }
         .padding()
-        .background(Color(.darkGray))
+        .background(Color.gray0)
         .cornerRadius(20)
         .padding(.horizontal)
     }

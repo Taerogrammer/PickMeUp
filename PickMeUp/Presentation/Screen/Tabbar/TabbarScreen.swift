@@ -19,7 +19,7 @@ struct TabbarScreen: View {
         TabbarView(store: store) { tab in
             switch tab {
             case .store:
-                AnyView(StoreScreen())
+                container.makeStoreScreen()
             case .orders:
                 AnyView(OrderView())
             case .friends:

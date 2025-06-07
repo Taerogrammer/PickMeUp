@@ -20,7 +20,7 @@ struct TabbarView: View {
         VStack(spacing: 0) {
             onTabSelected(store.state.selectedTab)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color(.systemBackground))
+                .background(Color.gray0)
 
             HStack {
                 ForEach(TabItem.allCases, id: \.self) { item in
@@ -28,12 +28,12 @@ struct TabbarView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .background(
-                Color(.systemGray6)
-                    .clipShape(RoundedCorner(radius: 24, corners: [.topLeft, .topRight]))
-                    .ignoresSafeArea(edges: .bottom)
-            )
+            .padding(.top, 8)
+            .padding(.bottom, 20)
+            .background(Color.gray0)
+            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: -2)
         }
+        .background(Color.white.ignoresSafeArea())
     }
 
     private func tabBarButton(for item: TabItem) -> some View {
@@ -45,7 +45,7 @@ struct TabbarView: View {
                     .font(.system(size: 32))
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .padding(.vertical, 12)
         }
         .foregroundColor(store.state.selectedTab == item ? .orange : .gray)
     }
@@ -54,10 +54,10 @@ struct TabbarView: View {
 #Preview {
     let container = DIContainer()
     let store = TabbarStore(router: container.router)
-    return TabbarView(store: store) { tab in
+    TabbarView(store: store) { tab in
         switch tab {
         case .store:
-            return AnyView(StoreScreen())
+            return container.makeStoreScreen()
         case .orders:
             return AnyView(OrderView())
         case .friends:

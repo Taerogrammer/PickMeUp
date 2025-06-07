@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class ProfileEditStore: ObservableObject {
+final class ProfileEditStore: ObservableObject, ImageLoadRespondable {
     @Published private(set) var state: ProfileEditState
     private let reducer: ProfileEditReducer
     private let effect: ProfileEditEffect
@@ -25,77 +25,72 @@ final class ProfileEditStore: ObservableObject {
         self.router = router
     }
 
-    func send(_ intent: ProfileEditIntent) {
-        switch intent {
-        case .saveTapped:
-            reducer.reduce(state: &state, intent: .saveTapped)
+    func send(_ intent: ProfileEditAction.Intent) {
+        reducer.reduce(state: &state, intent: intent)
+        effect.handle(intent, store: self)
+    }
 
-            Task {
-                if let image = state.selectedImage {
-                    let uploadResult = await effect.uploadImage(image)
+    func send(_ result: ProfileEditAction.Result) {
+        reducer.reduce(state: &state, result: result)
+    }
 
+    func handleSaveTapped() {
+        Task {
+            if let image = state.selectedImage {
+                let uploadResult = await effect.uploadImage(image)
+                await MainActor.run {
                     switch uploadResult {
                     case .success(let urlPath):
-                        await MainActor.run {
-                            reducer.reduce(state: &state, intent: .uploadImageSuccess(urlPath))
-                            var updated = state.profile
-                            updated.profileImageURL = urlPath
-                            reducer.reduce(state: &state, intent: .updateProfile(updated))
-                        }
+                        send(.uploadImageSuccess(urlPath))
+                        var updated = state.profile
+                        updated.profileImageURL = urlPath
+                        send(.updateProfile(updated))
                     case .failure(let error):
-                        await MainActor.run {
-                            reducer.reduce(state: &state, intent: .uploadImageFailure(error.message))
-                            reducer.reduce(state: &state, intent: .saveFailure(error))
-                        }
+                        send(.uploadImageFailure(error.message))
+                        send(.saveFailure(error))
                         return
                     }
                 }
-
-                let result = await effect.saveProfile(profile: state.profile)
-                await MainActor.run {
-                    switch result {
-                    case .success:
-                        reducer.reduce(state: &state, intent: .saveSuccess)
-                        router.pop()
-                    case .failure(let error):
-                        reducer.reduce(state: &state, intent: .saveFailure(error))
-                    }
-                }
             }
 
-        case .uploadImage:
-            guard let uiImage = state.selectedImage else { return }
-
-            Task {
-                let result = await effect.uploadImage(uiImage)
-                await MainActor.run {
-                    switch result {
-                    case .success(let urlPath):
-                        reducer.reduce(state: &state, intent: .uploadImageSuccess(urlPath))
-                    case .failure(let error):
-                        reducer.reduce(state: &state, intent: .uploadImageFailure(error.message))
-                    }
+            let result = await effect.saveProfile(profile: state.profile)
+            await MainActor.run {
+                switch result {
+                case .success:
+                    send(.saveSuccess)
+                    router.pop()
+                case .failure(let error):
+                    send(.saveFailure(error))
                 }
             }
+        }
+    }
 
-        case .updateProfile,
-             .toggleImagePicker,
-             .updateSelectedImage,
-             .uploadImageSuccess,
-             .uploadImageFailure,
-             .saveSuccess,
-             .saveFailure:
-            reducer.reduce(state: &state, intent: intent)
+    func handleUploadImage() {
+        guard let uiImage = state.selectedImage else { return }
 
-        case .loadRemoteImage(let image):
-            reducer.reduce(state: &state, intent: .loadRemoteImage(image))
-
-        case .loadRemoteImageFailed(let errorMessage):
-            reducer.reduce(state: &state, intent: .loadRemoteImageFailed(errorMessage))
+        Task {
+            let result = await effect.uploadImage(uiImage)
+            await MainActor.run {
+                switch result {
+                case .success(let urlPath):
+                    send(.uploadImageSuccess(urlPath))
+                case .failure(let error):
+                    send(.uploadImageFailure(error.message))
+                }
+            }
         }
     }
 
     func loadInitialImageIfNeeded() {
         effect.loadRemoteImage(for: state.profile.profileImageURL, store: self)
+    }
+
+    func onImageLoaded(_ image: UIImage) {
+        send(.loadRemoteImage(image))
+    }
+
+    func onImageLoadFailed(_ errorMessage: String) {
+        send(.loadRemoteImageFailed(errorMessage))
     }
 }

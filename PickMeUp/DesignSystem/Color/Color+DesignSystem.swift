@@ -32,7 +32,7 @@ public extension Color {
 
 public extension Color {
     static let blackSprout = Color(hex: "D7A86E")
-    static let deepSprout = Color(hex: "E5C9A3")
+    static let deepSprout = Color(hex: "D29A53")
     static let brightSprout = Color(hex: "F6EEE3")
     static let brightForsythia = Color(hex: "FFB3A7")
 

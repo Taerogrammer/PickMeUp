@@ -43,6 +43,8 @@ struct AppRootView: View {
                     container.makeRegisterScreen()
                 case .editProfile(let user):
                     container.makeProfileEditView(user: user)
+                case .storeDetail(let storeID):
+                    container.makeStoreDetailScreen(storeID: storeID)
                 }
             }
         }
