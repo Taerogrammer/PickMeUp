@@ -39,6 +39,10 @@ struct StoreListReducer {
             state.loadedImages[storeID] = images.compactMap { $0 }
         case .loadImageFailed(_, let errorMessage):
             state.errorMessage = errorMessage
+        case .fetchStoresWithCursor(let stores, let nextCursor):
+            state.stores = stores
+            state.nextCursor = nextCursor  // Reducer에서만 State 변경
+            state.errorMessage = nil
         }
     }
 }

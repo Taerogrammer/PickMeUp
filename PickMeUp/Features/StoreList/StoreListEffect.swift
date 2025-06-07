@@ -36,9 +36,13 @@ struct StoreListEffect {
                 successType: StoreListResponse.self,
                 failureType: CommonMessageResponse.self
             )
-            if let stores = response.success?.data {
-                let entities = stores.map { $0.toStoreListEntity() }
-                await MainActor.run { store.send(.fetchStores(entities)) }
+            if let storeResponse = response.success {
+                let entities = storeResponse.data.map { $0.toStoreListEntity() }
+                await MainActor.run {
+                    // 🔑 MVI 패턴: Reducer를 통해 nextCursor 저장
+                    store.send(.fetchStoresWithCursor(entities, nextCursor: storeResponse.nextCursor))
+                    print("🔄 API 응답에서 받은 nextCursor: \(storeResponse.nextCursor ?? "nil")")
+                }
             } else if let error = response.failure {
                 await MainActor.run { store.send(.fetchFailed(error.message)) }
             }

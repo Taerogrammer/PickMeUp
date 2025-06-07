@@ -24,5 +24,6 @@ enum StoreListAction {
         case fetchFailed(String)
         case loadImageSuccess(storeID: String, images: [UIImage?])
         case loadImageFailed(storeID: String, errorMessage: String)
+        case fetchStoresWithCursor([StorePresentable], nextCursor: String?)
     }
 }

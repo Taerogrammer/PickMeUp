@@ -11,6 +11,8 @@ struct StoreListState {
     var stores: [StorePresentable] = []
     var loadedImages: [String: [UIImage]] = [:]
 
+    var nextCursor: String? = nil
+
     var selectedCategory: String
     var isPickchelinOn: Bool = false
     var isMyPickOn: Bool = false

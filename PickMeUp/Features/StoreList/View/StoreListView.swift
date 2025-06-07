@@ -9,6 +9,7 @@ import SwiftUI
 
 struct StoreListView: View {
     @StateObject var store: StoreListStore
+    @State private var visibleStoreIDs: Set<String> = []
 
     init(store: StoreListStore) {
         _store = StateObject(wrappedValue: store)
@@ -31,7 +32,7 @@ struct StoreListView: View {
             }
 
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 10) {
+                LazyVStack(spacing: 10) {
                     StoreSectionHeaderView(
                         store: store,
                         title: "내가 픽업 가게"
@@ -44,11 +45,34 @@ struct StoreListView: View {
                             .padding(.vertical, 32)
                             .frame(maxWidth: .infinity)
                     } else {
-                        ForEach(store.state.filteredStores, id: \.storeID) { storeData in
+                        ForEach(Array(store.state.filteredStores.enumerated()), id: \.element.storeID) { index, storeData in
                             StoreListItemView(
                                 store: store,
                                 storeData: storeData
                             )
+                            .onAppear {
+                                // 화면에 나타날 때
+                                if !visibleStoreIDs.contains(storeData.storeID) {
+                                    visibleStoreIDs.insert(storeData.storeID)
+                                    print("👀 화면에 나타남: [\(index)] \(storeData.storeID) - \(storeData.name)")
+
+                                    // 🔑 nextCursor와 일치하는지 확인
+                                    checkIfMatchesNextCursor(storeData: storeData, index: index)
+
+                                    // 현재 화면에 보이는 모든 가게 출력
+                                    printCurrentlyVisible()
+                                }
+                            }
+                            .onDisappear {
+                                // 화면에서 사라질 때
+                                if visibleStoreIDs.contains(storeData.storeID) {
+                                    visibleStoreIDs.remove(storeData.storeID)
+                                    print("👋 화면에서 사라짐: [\(index)] \(storeData.storeID) - \(storeData.name)")
+
+                                    // 현재 화면에 보이는 모든 가게 출력
+                                    printCurrentlyVisible()
+                                }
+                            }
                         }
                     }
                 }
@@ -61,7 +85,47 @@ struct StoreListView: View {
             store.send(.onAppear)
         }
     }
+
+    // 🔑 nextCursor와 일치하는 가게 확인
+    private func checkIfMatchesNextCursor(storeData: StorePresentable, index: Int) {
+        guard let nextCursor = store.state.nextCursor else {
+            print("🚫 nextCursor가 없습니다")
+            return
+        }
+
+        // nextCursor와 storeID가 일치하는지 확인
+        if storeData.storeID == nextCursor {
+            print("🎯 NextCursor 일치 발견!")
+            print("   📍 storeID: \(storeData.storeID)")
+            print("   🏪 가게명: \(storeData.name)")
+            print("   📋 인덱스: [\(index)]")
+            print("   🔄 nextCursor: \(nextCursor)")
+            print("   ⭐ 이 가게가 다음 페이지의 시작점입니다!")
+        }
+
+        // 또는 nextCursor가 특정 패턴(예: 마지막 가게 기준)일 수도 있으니 추가 체크
+        if index == store.state.filteredStores.count - 1 {
+            print("🏁 마지막 가게 도달 - nextCursor 확인:")
+            print("   현재 가게 ID: \(storeData.storeID)")
+            print("   nextCursor: \(nextCursor)")
+        }
+    }
+
+    private func printCurrentlyVisible() {
+        let visibleStores = store.state.filteredStores.filter { visibleStoreIDs.contains($0.storeID) }
+        print("📱 현재 화면에 보이는 가게: \(visibleStores.count)개")
+        for (i, store) in visibleStores.enumerated() {
+            print("   \(i+1). \(store.name) (ID: \(store.storeID))")
+        }
+
+        // 🔑 현재 nextCursor 정보도 함께 출력
+        if let nextCursor = store.state.nextCursor {
+            print("🔄 현재 nextCursor: \(nextCursor)")
+        }
+        print("---")
+    }
 }
+
 
 struct StoreSectionHeaderView: View {
     @ObservedObject var store: StoreListStore
