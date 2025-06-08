@@ -17,11 +17,14 @@ struct StoreMenuListView: View {
                 StoreMenuItemCardView(
                     menu: menu,
                     image: entity.loadedImages[menu.menuID],
-                    cartQuantity: store.state.getCartQuantity(for: menu.menuID)
+                    cartQuantity: store.state.getCartQuantity(for: menu.menuID),
+                    onRemove: {
+                        store.send(.removeFromCart(menu.menuID))
+                    },
+                    onTap: {
+                        store.send(.showMenuDetail(menu))
+                    }
                 )
-                .onTapGesture {
-                    store.send(.showMenuDetail(menu))
-                }
             }
         }
         .padding(.horizontal)
