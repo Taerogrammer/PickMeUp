@@ -9,20 +9,20 @@ import SwiftUI
 
 struct StoreBottomBarView: View {
     let entity: StoreBottomBarEntity
-    @ObservedObject var cartManager: CartManager
+    @ObservedObject var store: StoreDetailStore
 
     var body: some View {
         HStack {
-            Text("\(cartManager.totalPrice)원")
+            Text("\(store.state.cartTotalPrice)원")
                 .font(.pretendardTitle1)
             Spacer()
             Button(action: {
                 // TODO: 결제 기능 연결
-                print("🛒 결제하기: \(cartManager.itemCount)개 메뉴, 총 \(cartManager.totalPrice)원")
+                print("🛒 결제하기: \(store.state.cartItemCount)개 메뉴, 총 \(store.state.cartTotalPrice)원")
             }) {
                 HStack {
-                    if cartManager.itemCount > 0 {
-                        Text("\(cartManager.itemCount)")
+                    if store.state.cartItemCount > 0 {
+                        Text("\(store.state.cartItemCount)")
                             .padding(6)
                             .background(Color.white)
                             .clipShape(Circle())
@@ -36,8 +36,8 @@ struct StoreBottomBarView: View {
                 .foregroundColor(.white)
                 .cornerRadius(12)
             }
-            .disabled(cartManager.itemCount == 0)
-            .opacity(cartManager.itemCount == 0 ? 0.6 : 1.0)
+            .disabled(store.state.cartItemCount == 0)
+            .opacity(store.state.cartItemCount == 0 ? 0.6 : 1.0)
         }
         .padding()
         .background(Color.white)

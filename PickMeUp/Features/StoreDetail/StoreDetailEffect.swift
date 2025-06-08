@@ -50,6 +50,14 @@ struct StoreDetailEffect {
                 ImageLoader.load(from: imageURL, responder: CarouselImageResponder(imageURL: imageURL, store: store))
             }
 
+        case .addMenuToCart:
+            guard let menu = store.state.selectedMenu else { return }
+
+            let cartItem = CartItem(menu: menu, quantity: store.state.tempQuantity)
+            print("🛒 장바구니에 추가: \(menu.name) × \(store.state.tempQuantity)")
+
+            store.send(.menuAddedToCart(cartItem))
+
         default:
             break
         }

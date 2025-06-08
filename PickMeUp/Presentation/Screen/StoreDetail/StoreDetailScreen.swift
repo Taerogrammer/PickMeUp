@@ -9,7 +9,6 @@ import SwiftUI
 
 struct StoreDetailScreen: View {
     @StateObject private var store: StoreDetailStore
-    @StateObject private var cartManager = CartManager()
 
     init(storeID: String, router: AppRouter) {
         let state = StoreDetailState(
@@ -44,7 +43,7 @@ struct StoreDetailScreen: View {
                         onSelectCategory: { category in
                             store.send(.selectCategory(category))
                         },
-                        cartManager: cartManager
+                        store: store
                     )
                     .offset(y: -12)
                 }
@@ -52,7 +51,7 @@ struct StoreDetailScreen: View {
 
             StoreBottomBarView(
                 entity: store.state.storeBottomBarEntity,
-                cartManager: cartManager
+                store: store
             )
             .frame(maxWidth: .infinity)
             .background(Color.white)

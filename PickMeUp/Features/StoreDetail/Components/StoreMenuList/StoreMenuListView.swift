@@ -9,9 +9,7 @@ import SwiftUI
 
 struct StoreMenuListView: View {
     let entity: StoreMenuListEntity
-    @ObservedObject var cartManager: CartManager
-    @State private var selectedMenu: StoreMenuItemEntity?
-    @State private var showMenuDetail = false
+    @ObservedObject var store: StoreDetailStore
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -19,21 +17,20 @@ struct StoreMenuListView: View {
                 StoreMenuItemCardView(
                     menu: menu,
                     image: entity.loadedImages[menu.menuID],
-                    cartQuantity: cartManager.getQuantity(for: menu.menuID)
+                    cartQuantity: store.state.getCartQuantity(for: menu.menuID)
                 )
                 .onTapGesture {
-                    selectedMenu = menu
-                    showMenuDetail = true
+                    store.send(.showMenuDetail(menu))
                 }
             }
         }
         .padding(.horizontal)
-        .sheet(isPresented: $showMenuDetail) {
-            if let selectedMenu = selectedMenu {
+        .sheet(isPresented: .constant(store.state.isMenuSheetPresented)) {
+            if let selectedMenu = store.state.selectedMenu {
                 MenuDetailSheetView(
                     menu: selectedMenu,
                     image: entity.loadedImages[selectedMenu.menuID],
-                    cartManager: cartManager
+                    store: store
                 )
                 .presentationDetents([.height(280)])
                 .presentationDragIndicator(.visible)

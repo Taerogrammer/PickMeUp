@@ -13,7 +13,6 @@ final class StoreDetailStore: ObservableObject {
     private let reducer: StoreDetailReducer
     private let router: AppRouter
 
-
     init(state: StoreDetailState, effect: StoreDetailEffect, reducer: StoreDetailReducer, router: AppRouter) {
         self.state = state
         self.effect = effect

@@ -17,6 +17,14 @@ enum StoreDetailAction {
         case tapLike
         case loadMenuImages(items: [StoreMenuItemEntity])
         case loadCarouselImages(imageURLs: [String])
+
+        case showMenuDetail(StoreMenuItemEntity)
+        case hideMenuDetail
+        case increaseMenuQuantity
+        case decreaseMenuQuantity
+        case addMenuToCart
+        case removeFromCart(String) // menuID
+        case clearCart
     }
 
     enum Result {
@@ -25,10 +33,17 @@ enum StoreDetailAction {
         case loadCarouselImageFailed(imageURL: String, errorMessage: String)
         case loadMenuImageSuccess(menuID: String, image: UIImage)
         case loadMenuImageFailed(menuID: String, errorMessage: String)
-        case likeSuccess(isLiked: Bool)                    // 서버 확인 후 최종 업데이트
-        case likeOptimistic(isLiked: Bool)                 // 즉시 UI 업데이트 (새로 추가)
-        case likeRollback(isLiked: Bool)                   // 실패 시 롤백 (새로 추가)
+        case likeSuccess(isLiked: Bool)
+        case likeOptimistic(isLiked: Bool)
+        case likeRollback(isLiked: Bool)
         case likeFailed(errorMessage: String)
         case setLikeLoading(isLoading: Bool)
+
+        case menuDetailShown(StoreMenuItemEntity)
+        case menuDetailHidden
+        case menuQuantityUpdated(Int)
+        case menuAddedToCart(CartItem)
+        case menuRemovedFromCart(String)
+        case cartCleared
     }
 }

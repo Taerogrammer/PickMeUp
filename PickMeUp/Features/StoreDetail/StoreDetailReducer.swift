@@ -14,15 +14,49 @@ struct StoreDetailReducer {
             state.selectedCategory = category
         case .tapLike:
             break
-        case .tapBack: break
-        default: break
+        case .tapBack:
+            break
+
+        case .showMenuDetail(let menu):
+            state.selectedMenu = menu
+            state.tempQuantity = state.cartItems[menu.menuID]?.quantity ?? 1
+            state.isMenuSheetPresented = true
+
+        case .hideMenuDetail:
+            state.isMenuSheetPresented = false
+            state.selectedMenu = nil
+            state.tempQuantity = 1
+
+        case .increaseMenuQuantity:
+            state.tempQuantity += 1
+
+        case .decreaseMenuQuantity:
+            if state.tempQuantity > 1 {
+                state.tempQuantity -= 1
+            }
+
+        case .addMenuToCart:
+            break // Effect에서 처리
+
+        case .removeFromCart(let menuID):
+            state.cartItems.removeValue(forKey: menuID)
+
+        case .clearCart:
+            state.cartItems.removeAll()
+
+        default:
+            break
         }
     }
 
     func reduce(state: inout StoreDetailState, result: StoreDetailAction.Result) {
         switch result {
         case .fetchedStoreDetail(let response):
-            state = response.toState()
+            let newState = response.toState()
+            // 기존 장바구니 상태는 유지
+            let cartItems = state.cartItems
+            state = newState
+            state.cartItems = cartItems
 
         case .loadMenuImageSuccess(let menuID, let image):
             state.loadedMenuImages[menuID] = image
@@ -56,6 +90,36 @@ struct StoreDetailReducer {
 
         case .setLikeLoading(let isLoading):
             state.isLikeLoading = isLoading
+
+        // Cart 관련 결과 처리
+        case .menuDetailShown(let menu):
+            state.selectedMenu = menu
+            state.tempQuantity = state.cartItems[menu.menuID]?.quantity ?? 1
+            state.isMenuSheetPresented = true
+
+        case .menuDetailHidden:
+            state.isMenuSheetPresented = false
+            state.selectedMenu = nil
+            state.tempQuantity = 1
+
+        case .menuQuantityUpdated(let quantity):
+            state.tempQuantity = quantity
+
+        case .menuAddedToCart(let cartItem):
+            state.cartItems[cartItem.menu.menuID] = cartItem
+            // Sheet 닫기
+            state.isMenuSheetPresented = false
+            state.selectedMenu = nil
+            state.tempQuantity = 1
+            print("🛒 장바구니에 추가됨: \(cartItem.menu.name) × \(cartItem.quantity)")
+
+        case .menuRemovedFromCart(let menuID):
+            state.cartItems.removeValue(forKey: menuID)
+            print("🗑️ 장바구니에서 제거됨: \(menuID)")
+
+        case .cartCleared:
+            state.cartItems.removeAll()
+            print("🗑️ 장바구니 비워짐")
         }
     }
 }
