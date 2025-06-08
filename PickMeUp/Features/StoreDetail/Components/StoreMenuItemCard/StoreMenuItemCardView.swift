@@ -25,7 +25,6 @@ struct StoreMenuItemCardView: View {
 
                     Spacer()
 
-                    // 장바구니에 담긴 경우 수량과 삭제 버튼 표시
                     if cartQuantity > 0 {
                         HStack(spacing: 8) {
                             // 수량 표시
@@ -33,7 +32,7 @@ struct StoreMenuItemCardView: View {
                                 .font(.pretendardCaption1)
                                 .foregroundColor(.white)
                                 .frame(minWidth: 20, minHeight: 20)
-                                .background(Circle().fill(Color.blue))
+                                .background(Circle().fill(Color.deepSprout))
 
                             // 삭제 버튼
                             Button {
@@ -41,7 +40,7 @@ struct StoreMenuItemCardView: View {
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .font(.system(size: 20))
-                                    .foregroundColor(.red)
+                                    .foregroundColor(Color.brightForsythia)
                             }
                         }
                     }
@@ -97,11 +96,11 @@ struct StoreMenuItemCardView: View {
         .frame(height: 130)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(cartQuantity > 0 ? Color.blue.opacity(0.05) : Color.clear)
+                .fill(cartQuantity > 0 ? Color.blackSprout.opacity(0.05) : Color.clear)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(cartQuantity > 0 ? Color.blue.opacity(0.3) : Color.clear, lineWidth: 1)
+                .stroke(cartQuantity > 0 ? Color.blackSprout.opacity(0.3) : Color.clear, lineWidth: 1)
         )
         .contentShape(Rectangle()) // 전체 영역 탭 가능하게
         .onTapGesture {
