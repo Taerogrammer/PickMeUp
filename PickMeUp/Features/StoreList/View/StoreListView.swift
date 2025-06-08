@@ -54,7 +54,7 @@ struct StoreListView: View {
                                 // 화면에 나타날 때
                                 if !visibleStoreIDs.contains(storeData.storeID) {
                                     visibleStoreIDs.insert(storeData.storeID)
-                                    print("👀 화면에 나타남: [\(index)] \(storeData.storeID) - \(storeData.name)")
+//                                    print("👀 화면에 나타남: [\(index)] \(storeData.storeID) - \(storeData.name)")
 
                                     // 🔑 nextCursor와 일치하는지 확인
                                     checkIfMatchesNextCursor(storeData: storeData, index: index)
@@ -63,17 +63,17 @@ struct StoreListView: View {
                                     checkAndLoadNextPage(currentIndex: index)
 
                                     // 현재 화면에 보이는 모든 가게 출력
-                                    printCurrentlyVisible()
+//                                    printCurrentlyVisible()
                                 }
                             }
                             .onDisappear {
                                 // 화면에서 사라질 때
                                 if visibleStoreIDs.contains(storeData.storeID) {
                                     visibleStoreIDs.remove(storeData.storeID)
-                                    print("👋 화면에서 사라짐: [\(index)] \(storeData.storeID) - \(storeData.name)")
+//                                    print("👋 화면에서 사라짐: [\(index)] \(storeData.storeID) - \(storeData.name)")
 
                                     // 현재 화면에 보이는 모든 가게 출력
-                                    printCurrentlyVisible()
+//                                    printCurrentlyVisible()
                                 }
                             }
                         }
@@ -114,20 +114,20 @@ struct StoreListView: View {
 
         // 마지막에서 2번째 아이템이 나타나면 다음 페이지 로드
         if currentIndex >= totalCount - 2 {
-            print("🚨 마지막 근처 아이템 감지! (index: \(currentIndex), total: \(totalCount))")
-            print("   - nextCursor: \(store.state.nextCursor ?? "nil")")
-            print("   - isLoadingMore: \(store.state.isLoadingMore)")
-            print("   - hasReachedEnd: \(store.state.hasReachedEnd)")
+//            print("🚨 마지막 근처 아이템 감지! (index: \(currentIndex), total: \(totalCount))")
+//            print("   - nextCursor: \(store.state.nextCursor ?? "nil")")
+//            print("   - isLoadingMore: \(store.state.isLoadingMore)")
+//            print("   - hasReachedEnd: \(store.state.hasReachedEnd)")
 
             // 다음 페이지 로드 조건 확인
             if !store.state.isLoadingMore &&
                !store.state.hasReachedEnd &&
                store.state.nextCursor != nil &&
                store.state.nextCursor != "0" {
-                print("✅ 다음 페이지 로드 시작!")
+//                print("✅ 다음 페이지 로드 시작!")
                 store.send(.loadNextPage)
             } else {
-                print("❌ 다음 페이지 로드 조건 불만족")
+//                print("❌ 다음 페이지 로드 조건 불만족")
             }
         }
     }
@@ -140,12 +140,12 @@ struct StoreListView: View {
 
         // nextCursor와 storeID가 일치하는지 확인
         if storeData.storeID == nextCursor {
-            print("🎯 NextCursor 일치 발견!")
-            print("   📍 storeID: \(storeData.storeID)")
-            print("   🏪 가게명: \(storeData.name)")
-            print("   📋 인덱스: [\(index)]")
-            print("   🔄 nextCursor: \(nextCursor)")
-            print("   ⭐ 이 가게가 다음 페이지의 시작점입니다!")
+//            print("🎯 NextCursor 일치 발견!")
+//            print("   📍 storeID: \(storeData.storeID)")
+//            print("   🏪 가게명: \(storeData.name)")
+//            print("   📋 인덱스: [\(index)]")
+//            print("   🔄 nextCursor: \(nextCursor)")
+//            print("   ⭐ 이 가게가 다음 페이지의 시작점입니다!")
         }
     }
 
