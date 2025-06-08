@@ -10,14 +10,28 @@ import SwiftUI
 struct StoreMenuItemCardView: View {
     let menu: StoreMenuItemEntity
     let image: UIImage?
+    let cartQuantity: Int
 
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             VStack(alignment: .leading, spacing: 6) {
-                Text(menu.name)
-                    .font(.pretendardBody1)
-                    .foregroundColor(.gray90)
-                    .lineLimit(1)
+                HStack {
+                    Text(menu.name)
+                        .font(.pretendardBody1)
+                        .foregroundColor(.gray90)
+                        .lineLimit(1)
+
+                    Spacer()
+
+                    // 장바구니 수량 표시
+                    if cartQuantity > 0 {
+                        Text("\(cartQuantity)")
+                            .font(.pretendardCaption1)
+                            .foregroundColor(.white)
+                            .frame(minWidth: 20, minHeight: 20)
+                            .background(Circle().fill(Color.blue))
+                    }
+                }
 
                 Text(menu.description)
                     .font(.pretendardCaption1)
@@ -67,63 +81,71 @@ struct StoreMenuItemCardView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 16)
         .frame(height: 130)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(cartQuantity > 0 ? Color.blue.opacity(0.05) : Color.clear)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(cartQuantity > 0 ? Color.blue.opacity(0.3) : Color.clear, lineWidth: 1)
+        )
     }
 }
 
-#Preview {
-    VStack(spacing: 0) {
-        // 일반 메뉴
-        StoreMenuItemCardView(
-            menu: StoreMenuItemEntity(
-                menuID: "menu_001",
-                storeID: "store_123",
-                category: "디저트",
-                name: "올리브 츄이스티 도넛",
-                description: "올리브 오일을 듬뿍 사용한 바삭한 고소하면서도, 손으로 잡아먹는 재미까지 느낄 수 있어요.",
-                originInformation: "브라질산 원두 100%",
-                price: 3700,
-                isSoldOut: false,
-                menuImageURL: "https://example.com/donut.jpg"
-            ),
-            image: UIImage(systemName: "birthday.cake.fill")
-        )
-
-        Divider()
-
-        // 품절 메뉴
-        StoreMenuItemCardView(
-            menu: StoreMenuItemEntity(
-                menuID: "menu_002",
-                storeID: "store_123",
-                category: "디저트",
-                name: "올리브 츄이스티 도넛",
-                description: "올리브 오일을 듬뿍 사용한 바삭한 고소하면서도, 손으로 잡아먹는 재미까지 느낄 수 있어요.",
-                originInformation: "브라질산 원두, 국내산 우유",
-                price: 3700,
-                isSoldOut: true,
-                menuImageURL: "https://example.com/donut.jpg"
-            ),
-            image: UIImage(systemName: "birthday.cake.fill")
-        )
-
-        Divider()
-
-        // 이미지 로딩 중인 메뉴
-        StoreMenuItemCardView(
-            menu: StoreMenuItemEntity(
-                menuID: "menu_003",
-                storeID: "store_123",
-                category: "디저트",
-                name: "올리브 츄이스티 도넛",
-                description: "올리브 오일을 듬뿍 사용한 바삭한 고소하면서도, 손으로 잡아먹는 재미까지 느낄 수 있어요.",
-                originInformation: "덴마크산 크림치즈",
-                price: 3700,
-                isSoldOut: false,
-                menuImageURL: "https://example.com/donut.jpg"
-            ),
-            image: nil
-        )
-
-        Spacer()
-    }
-}
+//#Preview {
+//    VStack(spacing: 0) {
+//        // 일반 메뉴
+//        StoreMenuItemCardView(
+//            menu: StoreMenuItemEntity(
+//                menuID: "menu_001",
+//                storeID: "store_123",
+//                category: "디저트",
+//                name: "올리브 츄이스티 도넛",
+//                description: "올리브 오일을 듬뿍 사용한 바삭한 고소하면서도, 손으로 잡아먹는 재미까지 느낄 수 있어요.",
+//                originInformation: "브라질산 원두 100%",
+//                price: 3700,
+//                isSoldOut: false,
+//                menuImageURL: "https://example.com/donut.jpg"
+//            ),
+//            image: UIImage(systemName: "birthday.cake.fill")
+//        )
+//
+//        Divider()
+//
+//        // 품절 메뉴
+//        StoreMenuItemCardView(
+//            menu: StoreMenuItemEntity(
+//                menuID: "menu_002",
+//                storeID: "store_123",
+//                category: "디저트",
+//                name: "올리브 츄이스티 도넛",
+//                description: "올리브 오일을 듬뿍 사용한 바삭한 고소하면서도, 손으로 잡아먹는 재미까지 느낄 수 있어요.",
+//                originInformation: "브라질산 원두, 국내산 우유",
+//                price: 3700,
+//                isSoldOut: true,
+//                menuImageURL: "https://example.com/donut.jpg"
+//            ),
+//            image: UIImage(systemName: "birthday.cake.fill")
+//        )
+//
+//        Divider()
+//
+//        // 이미지 로딩 중인 메뉴
+//        StoreMenuItemCardView(
+//            menu: StoreMenuItemEntity(
+//                menuID: "menu_003",
+//                storeID: "store_123",
+//                category: "디저트",
+//                name: "올리브 츄이스티 도넛",
+//                description: "올리브 오일을 듬뿍 사용한 바삭한 고소하면서도, 손으로 잡아먹는 재미까지 느낄 수 있어요.",
+//                originInformation: "덴마크산 크림치즈",
+//                price: 3700,
+//                isSoldOut: false,
+//                menuImageURL: "https://example.com/donut.jpg"
+//            ),
+//            image: nil
+//        )
+//
+//        Spacer()
+//    }
+//}

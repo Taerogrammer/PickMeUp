@@ -9,6 +9,7 @@ import SwiftUI
 
 struct StoreDetailScreen: View {
     @StateObject private var store: StoreDetailStore
+    @StateObject private var cartManager = CartManager()
 
     init(storeID: String, router: AppRouter) {
         let state = StoreDetailState(
@@ -42,16 +43,20 @@ struct StoreDetailScreen: View {
                         menuListEntity: store.state.storeMenuListEntity,
                         onSelectCategory: { category in
                             store.send(.selectCategory(category))
-                        }
+                        },
+                        cartManager: cartManager
                     )
                     .offset(y: -12)
                 }
             }
 
-            StoreBottomBarView(entity: store.state.storeBottomBarEntity)
-                .frame(maxWidth: .infinity)
-                .background(Color.white)
-                .ignoresSafeArea(.container, edges: .bottom)
+            StoreBottomBarView(
+                entity: store.state.storeBottomBarEntity,
+                cartManager: cartManager
+            )
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
+            .ignoresSafeArea(.container, edges: .bottom)
         }
         .ignoresSafeArea(.all, edges: .top)
         .navigationBarHidden(true)

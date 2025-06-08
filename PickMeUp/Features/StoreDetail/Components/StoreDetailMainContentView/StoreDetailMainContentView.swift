@@ -14,6 +14,7 @@ struct StoreDetailMainContentView: View {
     let categoryTabEntity: StoreMenuCategoryTabEntity
     let menuListEntity: StoreMenuListEntity
     let onSelectCategory: (String) -> Void
+    @ObservedObject var cartManager: CartManager
 
     var body: some View {
         VStack(spacing: 16) {
@@ -23,7 +24,7 @@ struct StoreDetailMainContentView: View {
             StoreNavigationButtonView()
             Divider()
             StoreMenuCategoryTabView(entity: categoryTabEntity, onSelect: onSelectCategory)
-            StoreMenuListView(entity: menuListEntity)
+            StoreMenuListView(entity: menuListEntity, cartManager: cartManager)
         }
         .padding(.top, 12)
         .padding(.horizontal, 16)
