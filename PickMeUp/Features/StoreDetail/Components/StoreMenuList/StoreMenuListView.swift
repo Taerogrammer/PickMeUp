@@ -25,7 +25,7 @@ struct StoreMenuListView: View {
             }
         }
         .padding(.horizontal)
-        .sheet(isPresented: .constant(store.state.isMenuSheetPresented)) {
+        .sheet(isPresented: store.isMenuSheetPresentedBinding) {
             if let selectedMenu = store.state.selectedMenu {
                 MenuDetailSheetView(
                     menu: selectedMenu,

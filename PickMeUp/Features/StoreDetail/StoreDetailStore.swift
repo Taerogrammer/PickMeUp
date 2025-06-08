@@ -13,6 +13,13 @@ final class StoreDetailStore: ObservableObject {
     private let reducer: StoreDetailReducer
     private let router: AppRouter
 
+    var isMenuSheetPresentedBinding: Binding<Bool> {
+        Binding(
+            get: { self.state.isMenuSheetPresented },
+            set: { _ in self.send(.hideMenuDetail) }
+        )
+    }
+
     init(state: StoreDetailState, effect: StoreDetailEffect, reducer: StoreDetailReducer, router: AppRouter) {
         self.state = state
         self.effect = effect
