@@ -14,15 +14,42 @@ struct StoreDetailReducer {
             state.selectedCategory = category
         case .tapLike:
             break
-        case .tapBack: break
-        default: break
+        case .tapBack:
+            break
+        case .tapPay:
+            break
+        case .showMenuDetail(let menu):
+            state.selectedMenu = menu
+            state.tempQuantity = state.cartItems[menu.menuID]?.quantity ?? 1
+            state.isMenuSheetPresented = true
+        case .hideMenuDetail:
+            state.isMenuSheetPresented = false
+            state.selectedMenu = nil
+            state.tempQuantity = 1
+        case .increaseMenuQuantity:
+            state.tempQuantity += 1
+        case .decreaseMenuQuantity:
+            if state.tempQuantity > 1 {
+                state.tempQuantity -= 1
+            }
+        case .addMenuToCart:
+            break // Effect에서 처리
+        case .removeFromCart(let menuID):
+            state.cartItems.removeValue(forKey: menuID)
+        case .clearCart:
+            state.cartItems.removeAll()
+        default:
+            break
         }
     }
 
     func reduce(state: inout StoreDetailState, result: StoreDetailAction.Result) {
         switch result {
         case .fetchedStoreDetail(let response):
-            state = response.toState()
+            let newState = response.toState()
+            let cartItems = state.cartItems
+            state = newState
+            state.cartItems = cartItems
 
         case .loadMenuImageSuccess(let menuID, let image):
             state.loadedMenuImages[menuID] = image
@@ -56,6 +83,66 @@ struct StoreDetailReducer {
 
         case .setLikeLoading(let isLoading):
             state.isLikeLoading = isLoading
+
+        case .menuDetailShown(let menu):
+            state.selectedMenu = menu
+            state.tempQuantity = state.cartItems[menu.menuID]?.quantity ?? 1
+            state.isMenuSheetPresented = true
+
+        case .menuDetailHidden:
+            state.isMenuSheetPresented = false
+            state.selectedMenu = nil
+            state.tempQuantity = 1
+
+        case .menuQuantityUpdated(let quantity):
+            state.tempQuantity = quantity
+
+        case .menuAddedToCart(let cartItem):
+            state.cartItems[cartItem.menu.menuID] = cartItem
+            state.isMenuSheetPresented = false
+            state.selectedMenu = nil
+            state.tempQuantity = 1
+            print("🛒 장바구니에 추가됨: \(cartItem.menu.name) × \(cartItem.quantity)")
+
+        case .menuRemovedFromCart(let menuID):
+            state.cartItems.removeValue(forKey: menuID)
+            print("🗑️ 장바구니에서 제거됨: \(menuID)")
+
+        case .cartCleared:
+            state.cartItems.removeAll()
+            print("🗑️ 장바구니 비워짐")
+
+        case .orderRequestCreated(let orderRequest):
+            print("📦 주문 요청 생성됨:")
+            print("Store ID: \(orderRequest.store_id)")
+            print("Total Price: \(orderRequest.total_price)원")
+            print("Menu Items:")
+            for menuItem in orderRequest.order_menu_list {
+                print("  - Menu ID: \(menuItem.menu_id), Quantity: \(menuItem.quantity)")
+            }
+            if let jsonData = try? JSONEncoder().encode(orderRequest),
+               let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("📄 JSON 형태:")
+                print(jsonString)
+            }
+
+        // 주문 관련 결과 처리 추가
+        case .orderSubmissionStarted:
+            state.isOrderLoading = true
+            print("🚀 주문 제출 시작...")
+
+        case .orderSubmissionSucceeded(let orderResponse):
+            state.isOrderLoading = false
+            state.cartItems.removeAll() // 주문 성공 시 장바구니 비우기
+            print("✅ 주문 성공!")
+            print("주문 ID: \(orderResponse.order_id)")
+            print("주문 코드: \(orderResponse.order_code)")
+            print("결제 금액: \(orderResponse.total_price)원")
+            print("생성일: \(orderResponse.createdAt)")
+
+        case .orderSubmissionFailed(let errorMessage):
+            state.isOrderLoading = false
+            print("❌ 주문 실패: \(errorMessage)")
         }
     }
 }

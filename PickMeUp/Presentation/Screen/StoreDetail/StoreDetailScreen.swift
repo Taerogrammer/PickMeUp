@@ -42,16 +42,20 @@ struct StoreDetailScreen: View {
                         menuListEntity: store.state.storeMenuListEntity,
                         onSelectCategory: { category in
                             store.send(.selectCategory(category))
-                        }
+                        },
+                        store: store
                     )
                     .offset(y: -12)
                 }
             }
 
-            StoreBottomBarView(entity: store.state.storeBottomBarEntity)
-                .frame(maxWidth: .infinity)
-                .background(Color.white)
-                .ignoresSafeArea(.container, edges: .bottom)
+            StoreBottomBarView(
+                entity: store.state.storeBottomBarEntity,
+                store: store
+            )
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
+            .ignoresSafeArea(.container, edges: .bottom)
         }
         .ignoresSafeArea(.all, edges: .top)
         .navigationBarHidden(true)

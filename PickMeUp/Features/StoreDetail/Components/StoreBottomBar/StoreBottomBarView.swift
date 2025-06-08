@@ -9,31 +9,40 @@ import SwiftUI
 
 struct StoreBottomBarView: View {
     let entity: StoreBottomBarEntity
+    @ObservedObject var store: StoreDetailStore
 
     var body: some View {
         HStack {
-            Text("\(entity.totalPrice)원")
+            Text("\(store.state.cartTotalPrice)원")
                 .font(.pretendardTitle1)
             Spacer()
             Button(action: {
-                // TODO: 결제 기능 연결
+                store.send(.tapPay)
             }) {
                 HStack {
-                    if entity.itemCount > 0 {
-                        Text("\(entity.itemCount)")
-                            .padding(6)
-                            .background(Color.white)
-                            .clipShape(Circle())
-                            .foregroundColor(.deepSprout)
+                    if store.state.isOrderLoading {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    } else {
+                        if store.state.cartItemCount > 0 {
+                            Text("\(store.state.cartItemCount)")
+                                .padding(6)
+                                .background(Color.white)
+                                .clipShape(Circle())
+                                .foregroundColor(.deepSprout)
+                        }
+                        Text("결제하기")
+                            .font(.pretendardTitle1)
                     }
-                    Text("결제하기")
-                        .font(.pretendardTitle1)
                 }
                 .padding()
                 .background(Color.deepSprout)
                 .foregroundColor(.white)
                 .cornerRadius(12)
             }
+            .disabled(store.state.cartItemCount == 0 || store.state.isOrderLoading)
+            .opacity(store.state.cartItemCount == 0 || store.state.isOrderLoading ? 0.6 : 1.0)
         }
         .padding()
         .background(Color.white)
@@ -46,6 +55,6 @@ struct StoreBottomBarView: View {
     }
 }
 
-#Preview {
-    StoreBottomBarView(entity: .mock())
-}
+//#Preview {
+//    StoreBottomBarView(entity: .mock())
+//}
