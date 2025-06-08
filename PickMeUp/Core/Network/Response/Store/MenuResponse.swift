@@ -35,16 +35,17 @@ struct MenuResponse: Decodable {
 }
 
 extension MenuResponse {
-    func toMenuItem() -> MenuItem {
-        return MenuItem(
+    func toStoreMenuItemEntity() -> StoreMenuItemEntity {
+        return StoreMenuItemEntity(
+            menuID: menuID,
+            storeID: storeID,
+            category: category,
             name: name,
             description: description,
-            imageURL: menuImageURL,
-            isPopular: tags.contains("인기"),
-            rank: 0,
-            category: category,
+            originInformation: originInformation,
             price: price,
-            isSoldOut: isSoldOut
+            isSoldOut: isSoldOut,
+            menuImageURL: menuImageURL
         )
     }
 }
