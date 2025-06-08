@@ -25,20 +25,20 @@ struct MenuDetailSheetView: View {
             // 메뉴 정보
             VStack(spacing: 12) {
                 Text(menu.name)
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.black)
+                    .font(.pretendardTitle1)
+                    .foregroundColor(.gray90)
                     .multilineTextAlignment(.center)
 
                 Text(menu.description)
-                    .font(.system(size: 15))
-                    .foregroundColor(.gray)
+                    .font(.pretendardCaption1)
+                    .foregroundColor(.gray60)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .padding(.horizontal, 16)
 
                 Text("\(menu.price.formatted())원")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.black)
+                    .font(.pretendardBody1)
+                    .foregroundColor(.gray90)
             }
             .padding(.horizontal, 20)
 
@@ -62,15 +62,15 @@ struct MenuDetailSheetView: View {
                     .disabled(store.state.tempQuantity <= 1)
 
                     Text("\(store.state.tempQuantity)")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.black)
+                        .font(.pretendardBody1)
+                        .foregroundColor(.gray90)
                         .frame(minWidth: 40)
 
                     Button {
                         store.send(.increaseMenuQuantity)
                     } label: {
                         Circle()
-                            .fill(Color.blue)
+                            .fill(Color.deepSprout)
                             .frame(width: 44, height: 44)
                             .overlay(
                                 Image(systemName: "plus")
@@ -96,7 +96,7 @@ struct MenuDetailSheetView: View {
                     .frame(height: 56)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(menu.isSoldOut ? Color.gray : Color.blue)
+                            .fill(menu.isSoldOut ? Color.gray : Color.deepSprout)
                     )
             }
             .disabled(menu.isSoldOut)
