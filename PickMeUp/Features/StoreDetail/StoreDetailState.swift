@@ -25,6 +25,8 @@ struct StoreDetailState {
     var tempQuantity: Int = 1
     var isMenuSheetPresented: Bool = false
 
+    var isOrderLoading: Bool = false
+
     var filteredMenus: [StoreMenuItemEntity] {
         if selectedCategory == "전체" {
             return entity.menuItems
@@ -47,6 +49,23 @@ struct StoreDetailState {
 
     func getCartQuantity(for menuID: String) -> Int {
         return cartItems[menuID]?.quantity ?? 0
+    }
+
+    func createOrderRequest() -> OrderRequest? {
+        guard !cartItems.isEmpty else { return nil }
+
+        let orderMenuList = cartItems.values.map { cartItem in
+            OrderMenuItem(
+                menu_id: cartItem.menu.menuID,
+                quantity: cartItem.quantity
+            )
+        }
+
+        return OrderRequest(
+            store_id: storeID,
+            order_menu_list: orderMenuList,
+            total_price: cartTotalPrice
+        )
     }
 }
 

@@ -23,7 +23,7 @@ enum StoreDetailAction {
         case increaseMenuQuantity
         case decreaseMenuQuantity
         case addMenuToCart
-        case removeFromCart(String) // menuID
+        case removeFromCart(String)
         case clearCart
     }
 
@@ -45,5 +45,10 @@ enum StoreDetailAction {
         case menuAddedToCart(CartItem)
         case menuRemovedFromCart(String)
         case cartCleared
+        case orderRequestCreated(OrderRequest)
+
+        case orderSubmissionStarted
+        case orderSubmissionSucceeded(OrderResponse)
+        case orderSubmissionFailed(String)
     }
 }
