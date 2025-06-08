@@ -18,6 +18,7 @@ enum APIConstants {
         static let users = "/users"
         static let stores = "/stores"
         static let chat = "/chats"
+        static let orders = "/orders"
 
         enum Log {
             static let base = Version.v1 + Path.log
@@ -42,6 +43,10 @@ enum APIConstants {
             static let base = Version.v1 + Path.chat
             static func room(_ id: String) -> String { base + "/\(id)" }
             static func files(_ id: String) -> String { room(id) + "/files" }
+        }
+
+        enum Order {
+            static let base = Version.v1 + Path.orders
         }
     }
     
@@ -80,6 +85,10 @@ enum APIConstants {
             static let chat = Path.Chat.base
             static func chatting(_ roomID: String) -> String { Path.Chat.room(roomID) }
             static func files(_ roomID: String) -> String { Path.Chat.files(roomID) }
+        }
+
+        enum Order {
+            static let submit = Path.Order.base
         }
     }
     
@@ -127,6 +136,14 @@ enum APIConstants {
             static let content = "content"
             static let files = "files"
         }
+
+        enum Order {
+             static let storeID = "store_id"
+             static let orderMenuList = "order_menu_list"
+             static let totalPrice = "total_price"
+             static let menuID = "menu_id"
+             static let quantity = "quantity"
+         }
     }
 
     // MARK: - Query Keys
