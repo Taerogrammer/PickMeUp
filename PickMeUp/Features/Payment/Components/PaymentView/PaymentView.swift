@@ -1,43 +1,22 @@
 //
-//  PaymentTest.swift
+//  PaymentView.swift
 //  PickMeUp
 //
 //  Created by 김태형 on 6/9/25.
 //
-// MARK: - 1. 결제 관련 모델 추가
 
 import SwiftUI
 import WebKit
 import iamport_ios
 
-// 결제 정보 모델
-struct PaymentInfo: Equatable, Hashable {
-    let orderID: String
-    let orderCode: String
-    let totalPrice: Int
-    let storeName: String
-    let menuItems: [CartItem]
-    let createdAt: String
-}
-
-// 결제 결과 모델
-struct PaymentResult {
-    let isSuccess: Bool
-    let impUID: String?
-    let merchantUID: String
-    let errorMessage: String?
-}
-
-// MARK: - PaymentView
 struct PaymentView: View {
     let paymentInfo: PaymentInfo
     @ObservedObject var router: AppRouter
     @State private var isPaymentInProgress = false
     @State private var paymentResult: PaymentResult?
     @State private var showingResult = false
-    @State private var showingWebView = false  // 🚀 추가
+    @State private var showingWebView = false
 
-    // 🚀 WKWebView를 @State로 관리
     @State private var webView: WKWebView?
 
     var body: some View {
@@ -231,140 +210,7 @@ struct PaymentView: View {
         }
     }
 }
-
-// MARK: - WKWebView SwiftUI Wrapper
-struct WebViewRepresentable: UIViewRepresentable {
-    let webView: WKWebView
-
-    func makeUIView(context: Context) -> WKWebView {
-        return webView
-    }
-
-    func updateUIView(_ uiView: WKWebView, context: Context) {
-        // 업데이트가 필요한 경우 구현
-    }
-}
-
-// MARK: - 주문 요약 뷰
-struct OrderSummaryView: View {
-    let paymentInfo: PaymentInfo
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("주문 정보")
-                .font(.headline)
-
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("주문 번호:")
-                    Spacer()
-                    Text(paymentInfo.orderCode)
-                        .fontWeight(.medium)
-                }
-
-                HStack {
-                    Text("매장:")
-                    Spacer()
-                    Text(paymentInfo.storeName)
-                        .fontWeight(.medium)
-                }
-            }
-
-            Divider()
-
-            Text("주문 메뉴")
-                .font(.headline)
-
-            ForEach(paymentInfo.menuItems.indices, id: \.self) { index in
-                let item = paymentInfo.menuItems[index]
-                HStack {
-                    Text(item.menu.name)
-                    Spacer()
-                    Text("\(item.quantity)개")
-                    Text("\(item.totalPrice)원")
-                        .fontWeight(.medium)
-                }
-            }
-
-            Divider()
-
-            HStack {
-                Text("총 결제 금액")
-                    .font(.headline)
-                Spacer()
-                Text("\(paymentInfo.totalPrice)원")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.blue)
-            }
-        }
-        .padding()
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(12)
-        .padding()
-    }
-}
-
-// MARK: - 결제 결과 뷰
-struct PaymentResultView: View {
-    let result: PaymentResult?
-    let onDismiss: () -> Void
-
-    var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: result?.isSuccess == true ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .font(.system(size: 64))
-                .foregroundColor(result?.isSuccess == true ? .green : .red)
-
-            Text(result?.isSuccess == true ? "결제 완료" : "결제 실패")
-                .font(.title)
-                .fontWeight(.bold)
-
-            if let result = result {
-                if result.isSuccess {
-                    Text("결제가 성공적으로 완료되었습니다.")
-                        .multilineTextAlignment(.center)
-
-                    if let impUID = result.impUID {
-                        Text("결제 번호: \(impUID)")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
-                } else {
-                    Text(result.errorMessage ?? "알 수 없는 오류가 발생했습니다.")
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.red)
-                }
-            }
-
-            Button("확인") {
-                onDismiss()
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(12)
-            .padding(.horizontal)
-        }
-        .padding()
-    }
-}
-
-// MARK: - 미리보기
-struct PaymentView_Previews: PreviewProvider {
-    static var previews: some View {
-        let samplePaymentInfo = PaymentInfo(
-            orderID: "test-order-id",
-            orderCode: "TEST123",
-            totalPrice: 15000,
-            storeName: "테스트 매장",
-            menuItems: [],
-            createdAt: "2025-06-09T05:33:27.315Z"
-        )
-
-        // AppRouter의 mock 인스턴스가 필요합니다
-        // PaymentView(paymentInfo: samplePaymentInfo, router: MockAppRouter())
-        Text("PaymentView Preview")
-    }
-}
+//
+//#Preview {
+//    PaymentView()
+//}
