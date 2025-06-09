@@ -45,22 +45,23 @@ struct PaymentEffect {
             store.send(.webViewCreated(wkWebView))
             store.send(.webViewShown)
 
+            let environment = APIEnvironment.production
             // 포트원 결제 데이터 생성
             let payment = IamportPayment(
-                pg: PG.html5_inicis.makePgRawName(pgId: "INIpayTest"),
+                pg: PG.html5_inicis.makePgRawName(pgId: environment.pgID),
                 merchant_uid: store.state.paymentInfo.orderCode,
                 amount: "\(store.state.paymentInfo.totalPrice)"
             ).then {
                 $0.pay_method = PayMethod.card.rawValue
                 $0.name = store.state.paymentInfo.storeName
-                $0.buyer_name = "김태형"
-                $0.app_scheme = "pickmeup"
+                $0.buyer_name = environment.name
+                $0.app_scheme = environment.appScheme
             }
 
             // 포트원 결제 실행
             Iamport.shared.paymentWebView(
                 webViewMode: wkWebView,
-                userCode: "imp14511373",
+                userCode: environment.portOneUserCode,
                 payment: payment
             ) { iamportResponse in
                 Task {
