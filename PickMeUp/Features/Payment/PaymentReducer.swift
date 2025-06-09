@@ -33,7 +33,7 @@ struct PaymentReducer {
             state.showingWebView = false
             state.isPaymentInProgress = false
 
-        case .paymentResponseReceived(let response):
+        case .paymentResponseReceived: break
 
         case .paymentSucceeded(let result):
             state.paymentResult = result
@@ -45,10 +45,10 @@ struct PaymentReducer {
         case .verificationStarted:
             state.isVerifying = true
 
-        case .verificationSucceeded(let response):
+        case .verificationSucceeded:
             state.isVerifying = false
 
-        case .verificationFailed(let errorMessage):
+        case .verificationFailed:
             state.isVerifying = false
 
         case .resultShown(let result):
