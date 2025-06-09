@@ -19,6 +19,7 @@ enum APIConstants {
         static let stores = "/stores"
         static let chat = "/chats"
         static let orders = "/orders"
+        static let payments = "/payments"
 
         enum Log {
             static let base = Version.v1 + Path.log
@@ -47,6 +48,10 @@ enum APIConstants {
 
         enum Order {
             static let base = Version.v1 + Path.orders
+        }
+
+        enum Payment {
+            static let base = Version.v1 + Path.payments
         }
     }
     
@@ -89,6 +94,12 @@ enum APIConstants {
 
         enum Order {
             static let submit = Path.Order.base
+        }
+
+        enum Payment {
+            static let validation = Path.Payment.base + "/validation"
+            static func detail(_ orderCode: String) -> String { Path.Payment.base + "/\(orderCode)" }
+
         }
     }
     
@@ -144,6 +155,11 @@ enum APIConstants {
              static let menuID = "menu_id"
              static let quantity = "quantity"
          }
+
+        enum Payment {
+            static let impUID = "imp_uid"
+            static let orderCode = "order_code"
+        }
     }
 
     // MARK: - Query Keys

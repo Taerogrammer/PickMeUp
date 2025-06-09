@@ -25,6 +25,8 @@ enum StoreDetailAction {
         case addMenuToCart
         case removeFromCart(String)
         case clearCart
+
+        case navigateToPayment(PaymentInfo)
     }
 
     enum Result {
@@ -50,5 +52,7 @@ enum StoreDetailAction {
         case orderSubmissionStarted
         case orderSubmissionSucceeded(OrderResponse)
         case orderSubmissionFailed(String)
+
+        case paymentNavigationTriggered(PaymentInfo)
     }
 }
