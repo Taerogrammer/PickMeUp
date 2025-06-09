@@ -71,4 +71,11 @@ final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding, 
     func makeStoreDetailScreen(storeID: String) -> AnyView {
         return AnyView(StoreDetailScreen(storeID: storeID, router: router))
     }
+
+    func makePaymentView(paymentInfo: PaymentInfo) -> PaymentView {
+        return PaymentView(
+            paymentInfo: paymentInfo,
+            router: router
+        )
+    }
 }

@@ -115,7 +115,7 @@ struct MenuDetailSheetView: View {
 
 
 // MARK: - Cart Item Model
-struct CartItem {
+struct CartItem: Equatable, Hashable {
     let menu: StoreMenuItemEntity
     var quantity: Int
 

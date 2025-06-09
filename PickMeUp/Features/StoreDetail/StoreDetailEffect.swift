@@ -78,7 +78,17 @@ struct StoreDetailEffect {
                         await MainActor.run {
                             if let success = result.success {
                                 store.send(.orderSubmissionSucceeded(success))
-                                
+
+                                // 🚀 주문 성공 후 결제 화면으로 이동
+                                let paymentInfo = PaymentInfo(
+                                    orderID: success.order_id,
+                                    orderCode: success.order_code,
+                                    totalPrice: success.total_price,
+                                    storeName: store.state.entity.summary.name,
+                                    menuItems: Array(store.state.cartItems.values),
+                                    createdAt: success.createdAt
+                                )
+                                store.send(.navigateToPayment(paymentInfo))
 
                             } else if let failure = result.failure {
                                 store.send(.orderSubmissionFailed(failure.message))
@@ -99,6 +109,8 @@ struct StoreDetailEffect {
                 print("❌ 장바구니가 비어있어 주문할 수 없습니다.")
             }
 
+        case .navigateToPayment(_):
+            break
         default:
             break
         }

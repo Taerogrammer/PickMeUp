@@ -110,3 +110,10 @@ extension StoreDetailState {
         )
     }
 }
+
+
+extension StoreDetailState {
+    var currentPaymentInfo: PaymentInfo? {
+        return nil // 필요시 구현
+    }
+}

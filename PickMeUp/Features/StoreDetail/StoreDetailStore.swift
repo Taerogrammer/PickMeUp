@@ -33,6 +33,8 @@ final class StoreDetailStore: ObservableObject {
         case .tapBack:
             print(#function)
             router.pop()
+        case .navigateToPayment(let paymentInfo):
+            router.navigate(to: .payment(paymentInfo))
         default: break
         }
         effect.handle(action, store: self)

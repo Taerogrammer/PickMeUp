@@ -38,6 +38,8 @@ struct StoreDetailReducer {
             state.cartItems.removeValue(forKey: menuID)
         case .clearCart:
             state.cartItems.removeAll()
+        case .navigateToPayment:
+            break
         default:
             break
         }
@@ -120,20 +122,13 @@ struct StoreDetailReducer {
             for menuItem in orderRequest.order_menu_list {
                 print("  - Menu ID: \(menuItem.menu_id), Quantity: \(menuItem.quantity)")
             }
-            if let jsonData = try? JSONEncoder().encode(orderRequest),
-               let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("📄 JSON 형태:")
-                print(jsonString)
-            }
 
-        // 주문 관련 결과 처리 추가
         case .orderSubmissionStarted:
             state.isOrderLoading = true
             print("🚀 주문 제출 시작...")
 
         case .orderSubmissionSucceeded(let orderResponse):
             state.isOrderLoading = false
-            state.cartItems.removeAll() // 주문 성공 시 장바구니 비우기
             print("✅ 주문 성공!")
             print("주문 ID: \(orderResponse.order_id)")
             print("주문 코드: \(orderResponse.order_code)")
@@ -143,6 +138,9 @@ struct StoreDetailReducer {
         case .orderSubmissionFailed(let errorMessage):
             state.isOrderLoading = false
             print("❌ 주문 실패: \(errorMessage)")
+
+        case .paymentNavigationTriggered(let paymentInfo):
+            print("💳 결제 화면으로 이동: \(paymentInfo.orderCode)")
         }
     }
 }

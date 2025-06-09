@@ -45,6 +45,8 @@ struct AppRootView: View {
                     container.makeProfileEditView(user: user)
                 case .storeDetail(let storeID):
                     container.makeStoreDetailScreen(storeID: storeID)
+                case .payment(let paymentInfo):
+                    container.makePaymentView(paymentInfo: paymentInfo)
                 }
             }
         }

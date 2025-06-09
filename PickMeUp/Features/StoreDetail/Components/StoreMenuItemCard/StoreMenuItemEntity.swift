@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct StoreMenuItemEntity {
+struct StoreMenuItemEntity: Equatable, Hashable {
     let menuID: String
     let storeID: String
     let category: String
