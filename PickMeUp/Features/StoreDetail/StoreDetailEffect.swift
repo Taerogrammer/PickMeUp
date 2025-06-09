@@ -109,7 +109,7 @@ struct StoreDetailEffect {
                 print("❌ 장바구니가 비어있어 주문할 수 없습니다.")
             }
 
-        case .navigateToPayment(_):
+        case .navigateToPayment:
             break
         default:
             break
