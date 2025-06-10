@@ -94,6 +94,7 @@ enum APIConstants {
 
         enum Order {
             static let order = Path.Order.base
+            static func orderChange(_ orderCode: String) -> String { Path.Order.base + "/\(orderCode)"}
         }
 
         enum Payment {
@@ -154,6 +155,7 @@ enum APIConstants {
              static let totalPrice = "total_price"
              static let menuID = "menu_id"
              static let quantity = "quantity"
+            static let nextStatus = "nextStatus"
          }
 
         enum Payment {
