@@ -93,7 +93,7 @@ enum APIConstants {
         }
 
         enum Order {
-            static let submit = Path.Order.base
+            static let order = Path.Order.base
         }
 
         enum Payment {

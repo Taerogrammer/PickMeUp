@@ -9,13 +9,16 @@ import Foundation
 
 enum OrderRouter: APIRouter {
     case submitOrder(request: OrderRequest)
+    case orderHistory
 
     var environment: APIEnvironment { .production }
 
     var path: String {
         switch self {
         case .submitOrder:
-            return APIConstants.Endpoints.Order.submit
+            return APIConstants.Endpoints.Order.order
+        case .orderHistory:
+            return APIConstants.Endpoints.Order.order
         }
     }
 
@@ -23,6 +26,8 @@ enum OrderRouter: APIRouter {
         switch self {
         case .submitOrder:
             return .post
+        case .orderHistory:
+            return .get
         }
     }
 
@@ -39,6 +44,8 @@ enum OrderRouter: APIRouter {
                 },
                 APIConstants.Parameters.Order.totalPrice: request.total_price
             ]
+        case .orderHistory:
+            return nil
         }
     }
 
@@ -59,6 +66,8 @@ enum OrderRouter: APIRouter {
     var queryItems: [URLQueryItem]? {
         switch self {
         case .submitOrder:
+            return nil
+        case .orderHistory:
             return nil
         }
     }
