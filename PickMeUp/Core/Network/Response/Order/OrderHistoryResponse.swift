@@ -11,6 +11,12 @@ struct OrderHistoryResponse: Decodable {
     let data: [OrderData]
 }
 
+extension OrderHistoryResponse {
+    func toEntity() -> [OrderStatusEntity] {
+        return data.map { $0.toEntity() }
+    }
+}
+
 struct OrderData: Decodable {
     let orderID: String
     let orderCode: String
@@ -33,6 +39,20 @@ struct OrderData: Decodable {
         case currentOrderStatus = "current_order_status"
         case orderStatusTimeline = "order_status_timeline"
         case paidAt, createdAt, updatedAt
+    }
+}
+
+extension OrderData {
+    func toEntity() -> OrderStatusEntity {
+        return OrderStatusEntity(
+            orderID: orderID,
+            orderCode: orderCode,
+            totalPrice: totalPrice,
+            store: store.toEntity(),
+            orderMenuList: orderMenuList.map { $0.toEntity() },
+            orderStatusTimeline: orderStatusTimeline.map { $0.toEntity() },
+            createdAt: createdAt
+        )
     }
 }
 
@@ -59,6 +79,12 @@ struct Store: Decodable {
     }
 }
 
+extension Store {
+    func toEntity() -> StoreEntity {
+        return StoreEntity(name: name)
+    }
+}
+
 struct Menu: Decodable {
     let id: String
     let category: String
@@ -82,4 +108,14 @@ struct OrderStatusTimeline: Decodable {
     let status: String
     let completed: Bool
     let changedAt: String?
+}
+
+extension OrderStatusTimeline {
+    func toEntity() -> OrderStatusTimelineEntity {
+        return OrderStatusTimelineEntity(
+            status: status,
+            completed: completed,
+            changedAt: changedAt
+        )
+    }
 }

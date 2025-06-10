@@ -11,3 +11,12 @@ struct OrderMenu: Decodable {
     let menu: MenuInfo
     let quantity: Int
 }
+
+extension OrderMenu {
+    func toEntity() -> OrderMenuEntity {
+        return OrderMenuEntity(
+            menu: menu.toEntity(),
+            quantity: quantity
+        )
+    }
+}

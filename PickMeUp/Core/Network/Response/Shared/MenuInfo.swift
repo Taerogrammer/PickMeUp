@@ -25,3 +25,14 @@ struct MenuInfo: Decodable {
         case menuImageUrl = "menu_image_url"
     }
 }
+
+extension MenuInfo {
+    func toEntity() -> MenuInfoEntity {
+        return MenuInfoEntity(
+            id: id,
+            name: name,
+            price: price,
+            menuImageUrl: menuImageUrl
+        )
+    }
+}

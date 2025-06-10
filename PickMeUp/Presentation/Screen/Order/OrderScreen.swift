@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+
 enum OrderType: String, CaseIterable {
     case current = "진행중"
     case past = "과거주문"
@@ -18,21 +19,17 @@ struct OrderScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 세그먼트 컨트롤
-            segmentedControl
+            OrderSegmentedControlView(
+                selectedOrderType: $selectedOrderType,
+                currentOrdersCount: currentOrders.count,
+                pastOrdersCount: pastOrders.count
+            )
 
-            // 선택된 타입에 따른 주문 리스트
-            TabView(selection: $selectedOrderType) {
-                // 진행중인 주문
-                currentOrderListView
-                    .tag(OrderType.current)
-
-                // 과거 주문
-                BeforeOrderListView(orders: pastOrders)
-                    .tag(OrderType.past)
-            }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .animation(.easeInOut(duration: 0.3), value: selectedOrderType)
+            OrderTabView(
+                selectedOrderType: $selectedOrderType,
+                currentOrders: currentOrders,
+                pastOrders: pastOrders
+            )
         }
         .background(Color.gray15.ignoresSafeArea())
         .navigationTitle("주문 내역")
@@ -40,80 +37,6 @@ struct OrderScreen: View {
         .onAppear {
             loadSampleOrders()
         }
-    }
-
-    // MARK: - 커스텀 세그먼트 컨트롤
-    private var segmentedControl: some View {
-        VStack(spacing: 0) {
-            CustomSegmentedControl(
-                preselectedIndex: Binding(
-                    get: { OrderType.allCases.firstIndex(of: selectedOrderType) ?? 0 },
-                    set: { selectedOrderType = OrderType.allCases[$0] }
-                ),
-                options: OrderType.allCases.map { "\($0.rawValue) (\(getOrderCount(for: $0)))" }
-            )
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-
-            // 구분선
-            Rectangle()
-                .fill(Color.gray15)
-                .frame(height: 1)
-        }
-        .background(Color.white)
-    }
-
-    // MARK: - Helper Functions
-    private func getOrderCount(for type: OrderType) -> Int {
-        switch type {
-        case .current:
-            return currentOrders.count
-        case .past:
-            return pastOrders.count
-        }
-    }
-
-    // MARK: - 진행중인 주문 리스트
-    private var currentOrderListView: some View {
-        ScrollView {
-            LazyVStack(spacing: 20) {
-                if currentOrders.isEmpty {
-                    emptyStateView(type: .current)
-                } else {
-                    ForEach(Array(currentOrders.enumerated()), id: \.element.orderID) { index, order in
-                        OrderStatusView(orderData: order)
-                            .id("current_\(index)")
-                            .scrollTransition { content, phase in
-                                content
-                                    .opacity(phase.isIdentity ? 1 : 0.8)
-                                    .scaleEffect(phase.isIdentity ? 1 : 0.98)
-                            }
-                    }
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 20)
-            .scrollTargetLayout()
-        }
-        .scrollTargetBehavior(.viewAligned)
-    }
-
-    // MARK: - Empty State
-    private func emptyStateView(type: OrderType) -> some View {
-        VStack(spacing: 16) {
-            Image(systemName: type == .current ? "clock" : "checkmark.circle")
-                .font(.system(size: 60))
-                .foregroundColor(.gray45)
-
-            Text(type == .current ? "진행중인 주문이 없습니다" : "과거 주문 내역이 없습니다")
-                .font(.pretendardBody1)
-                .foregroundColor(.gray60)
-
-            Text(type == .current ? "새로운 주문을 시작해보세요!" : "주문을 완료하면 여기에 표시됩니다")
-                .font(.pretendardCaption1)
-                .foregroundColor(.gray45)
-        }
-        .padding(.top, 100)
     }
 
     // MARK: - Load Sample Data
@@ -342,55 +265,4 @@ struct OrderScreen: View {
 
 #Preview {
     OrderScreen()
-}
-
-
-struct CustomSegmentedControl: View {
-    @Binding var preselectedIndex: Int
-    var options: [String]
-
-    // 브랜드 컬러 사용
-    let primaryColor = Color.deepSprout
-    let backgroundColor = Color.gray15
-
-    var body: some View {
-        HStack(spacing: 0) {
-            ForEach(options.indices, id: \.self) { index in
-                ZStack {
-                    // 배경
-                    Rectangle()
-                        .fill(backgroundColor)
-
-                    // 선택된 항목 배경
-                    Rectangle()
-                        .fill(primaryColor)
-                        .cornerRadius(16)
-                        .padding(3)
-                        .opacity(preselectedIndex == index ? 1 : 0.01)
-                        .shadow(
-                            color: preselectedIndex == index ? primaryColor.opacity(0.3) : Color.clear,
-                            radius: preselectedIndex == index ? 4 : 0,
-                            x: 0,
-                            y: 2
-                        )
-                }
-                .overlay(
-                    // 텍스트
-                    Text(options[index])
-                        .font(.pretendardBody2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(preselectedIndex == index ? .white : .gray60)
-                        .animation(.easeInOut(duration: 0.2), value: preselectedIndex)
-                )
-                .onTapGesture {
-                    withAnimation(.interactiveSpring(response: 0.5, dampingFraction: 0.8)) {
-                        preselectedIndex = index
-                    }
-                }
-            }
-        }
-        .frame(height: 48)
-        .cornerRadius(20)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
-    }
 }
