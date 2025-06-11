@@ -11,37 +11,46 @@ struct OrderStatusView: View {
     let orderData: OrderData
 
     var body: some View {
-        VStack(spacing: 0) {
-            // 그라데이션 헤더
-            headerSection
-                .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: [Color.deepSprout, Color.brightSprout]),
-                        startPoint: .leading,
-                        endPoint: .trailing
+        if orderData.currentOrderStatus == "PICKED_UP" {
+            EmptyView()
+        } else {
+            VStack(spacing: 0) {
+                // 그라데이션 헤더
+                headerSection
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.deepSprout, Color.brightSprout]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
                     )
-                )
 
-            // 메인 컨텐츠
-            VStack(spacing: 28) {
-                // 주문 정보 섹션
-                orderInfoSection
+                // 메인 컨텐츠
+                VStack(spacing: 28) {
+                    // 주문 정보 섹션
+                    orderInfoSection
 
-                // 주문 상태 타임라인
-                orderTimelineSection
+                    // 주문 상태 타임라인
+                    orderTimelineSection
 
-                // 주문 메뉴 리스트
-                orderMenuSection
+                    // 🔥 상태 변경 버튼 섹션 (타임라인 바로 아래)
+                    if shouldShowStatusButton {
+                        statusActionSection
+                    }
 
-                // 결제 금액
-                paymentSection
+                    // 주문 메뉴 리스트
+                    orderMenuSection
+
+                    // 결제 금액
+                    paymentSection
+                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 28)
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 28)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 4)
         }
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 4)
     }
 
     // MARK: - 헤더 섹션
@@ -153,11 +162,17 @@ struct OrderStatusView: View {
         }
     }
 
+    private var filteredTimeline: [OrderStatusTimeline] {
+        return orderData.orderStatusTimeline.filter { timeline in
+            timeline.status != "PICKED_UP"
+        }
+    }
+
     private var horizontalTimelineView: some View {
         VStack(spacing: 16) {
             // 타임라인 점들과 연결선
             HStack(spacing: 0) {
-                ForEach(Array(orderData.orderStatusTimeline.enumerated()), id: \.offset) { index, timeline in
+                ForEach(Array(filteredTimeline.enumerated()), id: \.offset) { index, timeline in
                     HStack(spacing: 0) {
                         // 타임라인 점
                         ZStack {
@@ -174,9 +189,9 @@ struct OrderStatusView: View {
                         .shadow(color: timeline.completed ? Color.deepSprout.opacity(0.3) : Color.clear, radius: 4, x: 0, y: 2)
 
                         // 연결선 (마지막 항목이 아닌 경우)
-                        if index < orderData.orderStatusTimeline.count - 1 {
+                        if index < filteredTimeline.count - 1 {
                             Rectangle()
-                                .fill(orderData.orderStatusTimeline[index + 1].completed ? Color.deepSprout : Color.gray15)
+                                .fill(filteredTimeline[index + 1].completed ? Color.deepSprout : Color.gray15)
                                 .frame(height: 2)
                                 .frame(maxWidth: .infinity)
                         }
@@ -187,7 +202,7 @@ struct OrderStatusView: View {
 
             // 상태 텍스트들
             HStack {
-                ForEach(Array(orderData.orderStatusTimeline.enumerated()), id: \.offset) { index, timeline in
+                ForEach(Array(filteredTimeline.enumerated()), id: \.offset) { index, timeline in
                     VStack(spacing: 4) {
                         Text(getStatusDisplayName(timeline.status))
                             .font(.pretendardCaption1)
@@ -209,51 +224,58 @@ struct OrderStatusView: View {
         .padding(.vertical, 8)
     }
 
-    private func timelineItem(timeline: OrderStatusTimeline, isLast: Bool) -> some View {
-        HStack(alignment: .center, spacing: 16) {
-            // 상태 아이콘 (개선된 디자인)
-            ZStack {
-                Circle()
-                    .fill(timeline.completed ? Color.deepSprout : Color.gray15)
-                    .frame(width: 24, height: 24)
-
-                if timeline.completed {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.white)
-                } else {
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: 12, height: 12)
-                }
-            }
-            .shadow(color: timeline.completed ? Color.deepSprout.opacity(0.3) : Color.clear, radius: 4, x: 0, y: 2)
-
-            // 상태 텍스트와 시간
-            VStack(alignment: .leading, spacing: 2) {
-                Text(getStatusDisplayName(timeline.status))
-                    .font(.pretendardBody2)
-                    .fontWeight(timeline.completed ? .semibold : .regular)
-                    .foregroundColor(timeline.completed ? .gray90 : .gray45)
-
-                if let changedAt = timeline.changedAt, timeline.completed {
-                    Text(formatTime(changedAt))
-                        .font(.pretendardCaption2)
-                        .foregroundColor(.deepSprout)
-                        .fontWeight(.medium)
-                }
+    // MARK: - 상태 변경 버튼 섹션
+    private var statusActionSection: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Image(systemName: "arrow.clockwise.circle.fill")
+                    .foregroundColor(.deepSprout)
+                Text("주문 진행")
+                    .font(.pretendardBody1)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.gray90)
+                Spacer()
             }
 
-            Spacer()
+            Button(action: {
+                handleStatusButtonTap()
+            }) {
+                HStack(spacing: 12) {
+                    Image(systemName: getButtonIcon())
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(orderData.currentOrderStatus == "READY_FOR_PICKUP" ? .white : .gray15)
+
+                    Text(getButtonText())
+                        .font(.pretendardBody1)
+                        .fontWeight(.semibold)
+                        .foregroundColor(orderData.currentOrderStatus == "READY_FOR_PICKUP" ? .white : .gray15)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(
+                    orderData.currentOrderStatus == "READY_FOR_PICKUP" ?
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.deepSprout, Color.brightSprout]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ) :
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.gray60, Color.gray60]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .shadow(
+                    color: orderData.currentOrderStatus == "READY_FOR_PICKUP" ?
+                           Color.deepSprout.opacity(0.3) : Color.clear,
+                    radius: 8, x: 0, y: 4
+                )
+            }
         }
-        .overlay(
-            // 연결선 (개선된 스타일)
-            !isLast ? Rectangle()
-                .fill(Color.gray15)
-                .frame(width: 2)
-                .offset(x: 11, y: 20)
-            : nil
-        )
+        .padding(20)
+        .background(Color.gray15)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
     // MARK: - 주문 메뉴 섹션
@@ -386,6 +408,131 @@ struct OrderStatusView: View {
         }
     }
 
+    // MARK: - 버튼 관련 Helper 함수들
+    private func getButtonText() -> String {
+        switch orderData.currentOrderStatus {
+        case "PENDING_APPROVAL":
+            return "주문 승인"
+        case "APPROVED":
+            return "조리 시작하기"
+        case "IN_PROGRESS":
+            return "픽업대기"
+        case "READY_FOR_PICKUP":
+            return "픽업 하기"
+        default:
+            return "다음 단계로"
+        }
+    }
+    private func getButtonIcon() -> String {
+        switch orderData.currentOrderStatus {
+        case "PENDING_APPROVAL":
+            return "checkmark.circle.fill"
+        case "APPROVED":
+            return "flame.fill"
+        case "IN_PROGRESS":
+            return "checkmark.shield.fill"
+        case "READY_FOR_PICKUP":
+            return "hand.raised.fill"
+        default:
+            return "arrow.right.circle.fill"
+        }
+    }
+
+    private func getButtonBackground() -> some View {
+        Group {
+            if orderData.currentOrderStatus == "READY_FOR_PICKUP" {
+                LinearGradient(
+                    gradient: Gradient(colors: [Color.deepSprout, Color.brightSprout]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            } else {
+                LinearGradient(
+                    gradient: Gradient(colors: [Color.gray60, Color.gray60]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            }
+        }
+    }
+
+    private func getButtonTextColor() -> Color {
+        return orderData.currentOrderStatus == "READY_FOR_PICKUP" ? .white : .gray15
+    }
+
+    // 버튼 그림자 색상
+    private func getButtonShadowColor() -> Color {
+        return orderData.currentOrderStatus == "READY_FOR_PICKUP" ?
+               Color.deepSprout.opacity(0.3) : Color.clear
+    }
+
+    ///
+    private var shouldShowStatusButton: Bool {
+        return ["PENDING_APPROVAL", "APPROVED", "IN_PROGRESS", "READY_FOR_PICKUP"].contains(orderData.currentOrderStatus)
+    }
+
+    private func handleStatusButtonTap() {
+        switch orderData.currentOrderStatus {
+        case "PENDING_APPROVAL":
+            updateOrderStatus(to: "APPROVED")
+        case "APPROVED":
+            updateOrderStatus(to: "IN_PROGRESS")
+        case "IN_PROGRESS":
+            updateOrderStatus(to: "READY_FOR_PICKUP")
+            sendPickupReadyNotification()
+        case "READY_FOR_PICKUP":
+            updateOrderStatus(to: "PICKED_UP")
+            sendPickupCompletedNotification()
+        default:
+            break
+        }
+    }
+
+    private func sendPickupCompletedNotification() {
+        LocalNotificationManager.shared.scheduleNotification(
+            id: "\(orderData.orderCode)_pickup_completed",
+            title: "픽업이 완료되었습니다! 🎉",
+            body: "[\(orderData.store.name)]\n맛있게 드세요!",
+            timeInterval: 1
+        )
+        print("🔔 픽업 완료 알림 발송: \(orderData.orderCode)")
+    }
+
+    private func updateOrderStatus(to nextStatus: String) {
+        print("🔄 주문 상태 변경: \(orderData.currentOrderStatus) → \(nextStatus)")
+
+        Task {
+            let request = OrderChangeRequest(orderCode: orderData.orderCode, nextStatus: nextStatus)
+
+            do {
+                let response = try await NetworkManager.shared.fetch(
+                    OrderRouter.orderChange(request: request),
+                    successType: EmptyResponse.self,
+                    failureType: CommonMessageResponse.self
+                )
+
+                if response.success != nil {
+                    print("✅ 주문 상태 변경 성공: \(nextStatus)")
+                    // 상태 변경 성공 시 화면 새로고침 필요
+                } else if let error = response.failure {
+                    print("❌ 주문 상태 변경 실패: \(error.message)")
+                }
+            } catch {
+                print("❌ 주문 상태 변경 에러: \(error)")
+            }
+        }
+    }
+
+    private func sendPickupReadyNotification() {
+        LocalNotificationManager.shared.scheduleNotification(
+            id: "\(orderData.orderCode)_pickup_ready",
+            title: "픽업 준비가 완료되었습니다! ✨",
+            body: "[\(orderData.store.name)]\n매장에서 픽업해주세요.",
+            timeInterval: 1
+        )
+        print("🔔 픽업 준비 완료 알림 발송: \(orderData.orderCode)")
+    }
+
     // MARK: - Helper Functions
     private func getStatusDisplayName(_ status: String) -> String {
         switch status {
@@ -433,6 +580,10 @@ struct OrderStatusView: View {
     }
 }
 
+
+
+
+
 // MARK: - Extensions
 extension Int {
     var formattedPrice: String {
@@ -449,6 +600,7 @@ struct OrderStatusView_Previews: PreviewProvider {
             VStack(spacing: 20) {
                 OrderStatusView(orderData: sampleOrderData)
                 OrderStatusView(orderData: sampleOrderData2)
+                OrderStatusView(orderData: sampleOrderData3)
             }
             .padding()
         }
@@ -488,12 +640,12 @@ struct OrderStatusView_Previews: PreviewProvider {
                 quantity: 2
             )
         ],
-        currentOrderStatus: "IN_PROGRESS",
+        currentOrderStatus: "READY_FOR_PICKUP",
         orderStatusTimeline: [
             OrderStatusTimeline(status: "PENDING_APPROVAL", completed: true, changedAt: "2024-01-22T18:24:00.000Z"),
             OrderStatusTimeline(status: "APPROVED", completed: true, changedAt: "2024-01-22T18:27:00.000Z"),
             OrderStatusTimeline(status: "IN_PROGRESS", completed: true, changedAt: "2024-01-22T18:36:00.000Z"),
-            OrderStatusTimeline(status: "READY_FOR_PICKUP", completed: false, changedAt: nil),
+            OrderStatusTimeline(status: "READY_FOR_PICKUP", completed: true, changedAt: nil),
             OrderStatusTimeline(status: "PICKED_UP", completed: false, changedAt: nil)
         ],
         paidAt: "",
@@ -544,6 +696,52 @@ struct OrderStatusView_Previews: PreviewProvider {
         ],
         paidAt: "",
         createdAt: "2024-01-21T15:08:00.000Z",
+        updatedAt: ""
+    )
+
+    static let sampleOrderData3 = OrderData(
+        orderID: "sample_id",
+        orderCode: "A4922",
+        totalPrice: 17200,
+        review: nil,
+        store: Store(
+            id: "store_id",
+            category: "카페",
+            name: "새싹 도넛 가게",
+            close: "22:00",
+            storeImageUrls: [],
+            hashTags: [],
+            geolocation: Geolocation(longitude: 0, latitude: 0),
+            createdAt: "",
+            updatedAt: ""
+        ),
+        orderMenuList: [
+            OrderMenu(
+                menu: MenuInfo(
+                    id: "menu1",
+                    category: "도넛",
+                    name: "올리브 그린 새싹 도넛",
+                    description: "",
+                    originInformation: "",
+                    price: 1600,
+                    tags: [],
+                    menuImageUrl: "",
+                    createdAt: "",
+                    updatedAt: ""
+                ),
+                quantity: 2
+            )
+        ],
+        currentOrderStatus: "IN_PROGRESS",
+        orderStatusTimeline: [
+            OrderStatusTimeline(status: "PENDING_APPROVAL", completed: true, changedAt: "2024-01-22T18:24:00.000Z"),
+            OrderStatusTimeline(status: "APPROVED", completed: true, changedAt: "2024-01-22T18:27:00.000Z"),
+            OrderStatusTimeline(status: "IN_PROGRESS", completed: true, changedAt: "2024-01-22T18:36:00.000Z"),
+            OrderStatusTimeline(status: "READY_FOR_PICKUP", completed: false, changedAt: nil),
+            OrderStatusTimeline(status: "PICKED_UP", completed: false, changedAt: nil)
+        ],
+        paidAt: "",
+        createdAt: "2024-01-22T17:20:00.000Z",
         updatedAt: ""
     )
 }
