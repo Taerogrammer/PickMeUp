@@ -36,21 +36,3 @@ struct StoreInfo: Decodable {
     let createdAt: String
     let updatedAt: String
 }
-
-struct OrderMenu: Decodable {
-    let menu: MenuInfo
-    let quantity: Int
-}
-
-struct MenuInfo: Decodable {
-    let id: String
-    let category: String
-    let name: String
-    let description: String
-    let origin_information: String
-    let price: Int
-    let tags: [String]
-    let menu_image_url: String
-    let createdAt: String
-    let updatedAt: String
-}

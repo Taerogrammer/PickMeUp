@@ -50,7 +50,6 @@ struct ProfileScreen: View {
     }
 }
 
-
 #Preview {
     let state = ProfileState(
         user: MeProfileResponse(
