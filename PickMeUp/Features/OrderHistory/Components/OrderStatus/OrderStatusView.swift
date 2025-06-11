@@ -8,495 +8,500 @@
 import SwiftUI
 
 struct OrderStatusView: View {
-    let orderData: OrderDataEntity // 🔥 Entity로 변경
+    let orderData: OrderDataEntity
     @ObservedObject var store: OrderHistoryStore
 
     var body: some View {
         if orderData.orderStatus == "PICKED_UP" {
             EmptyView()
         } else {
-            VStack(spacing: 0) {
-                // 그라데이션 헤더
-                headerSection
-                    .background(
-                        LinearGradient(
-                            gradient: Gradient(colors: [Color.deepSprout, Color.brightSprout]),
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-
-                // 메인 컨텐츠
-                VStack(spacing: 28) {
-                    // 주문 정보 섹션
-                    orderInfoSection
-
-                    // 주문 상태 타임라인
-                    orderTimelineSection
-
-                    // 🔥 상태 변경 버튼 섹션 (타임라인 바로 아래)
-                    if shouldShowStatusButton {
-                        statusActionSection
-                    }
-
-                    // 주문 메뉴 리스트
-                    orderMenuSection
-
-                    // 결제 금액
-                    paymentSection
-                }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 28)
-            }
-            .background(Color.white)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 4)
+            OrderStatusCard(orderData: orderData, store: store)
         }
     }
+}
 
-    // MARK: - 헤더 섹션
-    private var headerSection: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("주문현황")
-                    .font(.pretendardTitle1)
-                    .foregroundColor(.white)
-                    .fontWeight(.bold)
+// MARK: - OrderStatusCard
+struct OrderStatusCard: View {
+    let orderData: OrderDataEntity
+    @ObservedObject var store: OrderHistoryStore
 
-                Text("Order Status")
-                    .font(.pretendardCaption1)
-                    .foregroundColor(.white.opacity(0.8))
+    var body: some View {
+        VStack(spacing: 0) {
+            OrderStatusHeader(orderData: orderData)
+
+            VStack(spacing: 28) {
+                OrderInfoSection(orderData: orderData)
+                OrderTimelineSection(orderData: orderData)
+
+                if shouldShowStatusButton {
+                    OrderStatusActionSection(orderData: orderData, store: store)
+                }
+
+                OrderMenuSection(orderData: orderData)
+                OrderPaymentSection(orderData: orderData)
             }
-
-            Spacer()
-
-            // 상태 뱃지
-            statusBadge
+            .padding(.horizontal, 24)
+            .padding(.vertical, 28)
         }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 20)
-    }
-
-    private var statusBadge: some View {
-        Text(getStatusDisplayName(orderData.orderStatus))
-            .font(.pretendardCaption1)
-            .fontWeight(.semibold)
-            .foregroundColor(.deepSprout)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(Color.white)
-            .clipShape(Capsule())
-            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-    }
-
-    // MARK: - 주문 정보 섹션
-    private var orderInfoSection: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Image(systemName: "number.circle.fill")
-                    .font(.title2)
-                    .foregroundColor(.deepSprout)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("주문번호")
-                        .font(.pretendardCaption1)
-                        .foregroundColor(.gray60)
-                    Text(orderData.orderCode)
-                        .font(.pretendardBody1)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.gray90)
-                }
-
-                Spacer()
-            }
-
-            Divider()
-                .background(Color.gray15)
-
-            HStack {
-                Image(systemName: "storefront.fill")
-                    .font(.title2)
-                    .foregroundColor(.deepSprout)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("매장명")
-                        .font(.pretendardCaption1)
-                        .foregroundColor(.gray60)
-                    Text(orderData.store.name)
-                        .font(.pretendardBody1)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.gray90)
-                }
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("주문시간")
-                        .font(.pretendardCaption1)
-                        .foregroundColor(.gray60)
-                    Text(formatDate(orderData.createdAt))
-                        .font(.pretendardCaption1)
-                        .foregroundColor(.gray60)
-                }
-            }
-        }
-        .padding(20)
-        .background(Color.gray15)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-    }
-
-    // MARK: - 주문 상태 타임라인
-    private var orderTimelineSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Image(systemName: "clock.fill")
-                    .foregroundColor(.deepSprout)
-                Text("진행 상황")
-                    .font(.pretendardBody1)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.gray90)
-                Spacer()
-            }
-
-            // 가로 타임라인
-            horizontalTimelineView
-        }
-    }
-
-    private var filteredTimeline: [OrderStatusTimelineEntity] { // 🔥 Entity로 변경
-        return orderData.orderStatusTimeline.filter { timeline in
-            timeline.status != "PICKED_UP"
-        }
-    }
-
-    private var horizontalTimelineView: some View {
-        VStack(spacing: 16) {
-            // 타임라인 점들과 연결선
-            HStack(spacing: 0) {
-                ForEach(Array(filteredTimeline.enumerated()), id: \.offset) { index, timeline in
-                    HStack(spacing: 0) {
-                        // 타임라인 점
-                        ZStack {
-                            Circle()
-                                .fill(timeline.completed ? Color.deepSprout : Color.gray15)
-                                .frame(width: 20, height: 20)
-
-                            if timeline.completed {
-                                Image(systemName: "checkmark")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(.white)
-                            }
-                        }
-                        .shadow(color: timeline.completed ? Color.deepSprout.opacity(0.3) : Color.clear, radius: 4, x: 0, y: 2)
-
-                        // 연결선 (마지막 항목이 아닌 경우)
-                        if index < filteredTimeline.count - 1 {
-                            Rectangle()
-                                .fill(filteredTimeline[index + 1].completed ? Color.deepSprout : Color.gray15)
-                                .frame(height: 2)
-                                .frame(maxWidth: .infinity)
-                        }
-                    }
-                }
-            }
-            .padding(.horizontal, 10)
-
-            // 상태 텍스트들
-            HStack {
-                ForEach(Array(filteredTimeline.enumerated()), id: \.offset) { index, timeline in
-                    VStack(spacing: 4) {
-                        Text(getStatusDisplayName(timeline.status))
-                            .font(.pretendardCaption1)
-                            .fontWeight(timeline.completed ? .semibold : .regular)
-                            .foregroundColor(timeline.completed ? .gray90 : .gray45)
-                            .multilineTextAlignment(.center)
-
-                        if let changedAt = timeline.changedAt, timeline.completed {
-                            Text(formatTime(changedAt))
-                                .font(.pretendardCaption2)
-                                .foregroundColor(.deepSprout)
-                                .fontWeight(.medium)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-            }
-        }
-        .padding(.vertical, 8)
-    }
-
-    // MARK: - 상태 변경 버튼 섹션
-    private var statusActionSection: some View {
-        VStack(spacing: 16) {
-            HStack {
-                Image(systemName: "arrow.clockwise.circle.fill")
-                    .foregroundColor(.deepSprout)
-                Text("주문 진행")
-                    .font(.pretendardBody1)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.gray90)
-                Spacer()
-            }
-
-            Button(action: {
-                handleStatusButtonTap()
-            }) {
-                HStack(spacing: 12) {
-                    Image(systemName: getButtonIcon())
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(orderData.orderStatus == "READY_FOR_PICKUP" ? .white : .gray15)
-
-                    Text(getButtonText())
-                        .font(.pretendardBody1)
-                        .fontWeight(.semibold)
-                        .foregroundColor(orderData.orderStatus == "READY_FOR_PICKUP" ? .white : .gray15)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    orderData.orderStatus == "READY_FOR_PICKUP" ?
-                    LinearGradient(
-                        gradient: Gradient(colors: [Color.deepSprout, Color.brightSprout]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    ) :
-                    LinearGradient(
-                        gradient: Gradient(colors: [Color.gray60, Color.gray60]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .shadow(
-                    color: orderData.orderStatus == "READY_FOR_PICKUP" ?
-                           Color.deepSprout.opacity(0.3) : Color.clear,
-                    radius: 8, x: 0, y: 4
-                )
-            }
-        }
-        .padding(20)
-        .background(Color.gray15)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-    }
-
-    // MARK: - 주문 메뉴 섹션
-    private var orderMenuSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Image(systemName: "menucard.fill")
-                    .foregroundColor(.deepSprout)
-                Text("주문 메뉴")
-                    .font(.pretendardBody1)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.gray90)
-                Spacer()
-            }
-
-            VStack(spacing: 12) {
-                ForEach(Array(orderData.orderMenuList.enumerated()), id: \.offset) { index, orderMenu in
-                    menuItem(orderMenu: orderMenu)
-                }
-            }
-        }
-    }
-
-    private func menuItem(orderMenu: OrderMenuEntity) -> some View { // 🔥 Entity로 변경
-        HStack(spacing: 16) {
-            // 메뉴 이미지 (개선된 플레이스홀더)
-            AsyncImage(url: URL(string: "https://your-base-url.com\(orderMenu.menu.menuImageUrl)")) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color.gray15, Color.gray15]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-
-                    Image(systemName: "photo")
-                        .font(.title2)
-                        .foregroundColor(.gray45)
-                }
-            }
-            .frame(width: 70, height: 70)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-
-            // 메뉴 정보
-            VStack(alignment: .leading, spacing: 6) {
-                Text(orderMenu.menu.name)
-                    .font(.pretendardBody1)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.gray90)
-                    .lineLimit(2)
-
-                HStack(spacing: 8) {
-                    Text("\(orderMenu.menu.price.formattedPrice)원")
-                        .font(.pretendardBody2)
-                        .fontWeight(.medium)
-                        .foregroundColor(.deepSprout)
-
-                    Text("×")
-                        .font(.pretendardCaption1)
-                        .foregroundColor(.gray45)
-
-                    Text("\(orderMenu.quantity)")
-                        .font(.pretendardBody2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.deepSprout)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(Color.brightSprout.opacity(0.2))
-                        .clipShape(Capsule())
-                }
-            }
-
-            Spacer()
-        }
-        .padding(16)
         .background(Color.white)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray15, lineWidth: 1)
-        )
-    }
-
-    // MARK: - 결제 금액 섹션
-    private var paymentSection: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Image(systemName: "creditcard.fill")
-                    .foregroundColor(.deepSprout)
-                Text("결제 정보")
-                    .font(.pretendardBody1)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.gray90)
-                Spacer()
-            }
-
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("총 \(getTotalQuantity())개 상품")
-                        .font(.pretendardBody2)
-                        .foregroundColor(.gray60)
-                    Text("결제완료")
-                        .font(.pretendardCaption1)
-                        .foregroundColor(.deepSprout)
-                        .fontWeight(.medium)
-                }
-
-                Spacer()
-
-                Text("\(orderData.totalPrice.formattedPrice)원")
-                    .font(.pretendardTitle1)
-                    .fontWeight(.bold)
-                    .foregroundColor(.gray90)
-            }
-            .padding(20)
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: [Color.brightSprout.opacity(0.1), Color.deepSprout.opacity(0.05)]),
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-        }
-    }
-
-    // MARK: - 버튼 관련 Helper 함수들
-    private func getButtonText() -> String {
-        switch orderData.orderStatus {
-        case "PENDING_APPROVAL":
-            return "주문 승인"
-        case "APPROVED":
-            return "조리 시작하기"
-        case "IN_PROGRESS":
-            return "픽업대기"
-        case "READY_FOR_PICKUP":
-            return "픽업 하기"
-        default:
-            return "다음 단계로"
-        }
-    }
-
-    private func getButtonIcon() -> String {
-        switch orderData.orderStatus {
-        case "PENDING_APPROVAL":
-            return "checkmark.circle.fill"
-        case "APPROVED":
-            return "flame.fill"
-        case "IN_PROGRESS":
-            return "checkmark.shield.fill"
-        case "READY_FOR_PICKUP":
-            return "hand.raised.fill"
-        default:
-            return "arrow.right.circle.fill"
-        }
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 4)
     }
 
     private var shouldShowStatusButton: Bool {
-        return ["PENDING_APPROVAL", "APPROVED", "IN_PROGRESS", "READY_FOR_PICKUP"].contains(orderData.orderStatus)
+        ["PENDING_APPROVAL", "APPROVED", "IN_PROGRESS", "READY_FOR_PICKUP"].contains(orderData.orderStatus)
     }
+}
 
-    // 🔥 Store로 위임 - MVI 패턴 준수
-    private func handleStatusButtonTap() {
-        store.send(.updateOrderStatus(
-            orderCode: orderData.orderCode,
-            currentStatus: orderData.orderStatus
-        ))
+//// MARK: - Header Section
+//struct OrderStatusHeader: View {
+//    let orderData: OrderDataEntity
+//
+//    var body: some View {
+//        HStack {
+//            VStack(alignment: .leading, spacing: 4) {
+//                Text("주문현황")
+//                    .font(.pretendardTitle1)
+//                    .foregroundColor(.white)
+//                    .fontWeight(.bold)
+//
+//                Text("Order Status")
+//                    .font(.pretendardCaption1)
+//                    .foregroundColor(.white.opacity(0.8))
+//            }
+//
+//            Spacer()
+//
+//            OrderStatusBadge(status: orderData.orderStatus)
+//        }
+//        .padding(.horizontal, 24)
+//        .padding(.vertical, 20)
+//        .background(
+//            LinearGradient(
+//                gradient: Gradient(colors: [Color.deepSprout, Color.brightSprout]),
+//                startPoint: .leading,
+//                endPoint: .trailing
+//            )
+//        )
+//    }
+//}
+
+//struct OrderStatusBadge: View {
+//    let status: String
+//
+//    var body: some View {
+//        Text(getStatusDisplayName(status))
+//            .font(.pretendardCaption1)
+//            .fontWeight(.semibold)
+//            .foregroundColor(.deepSprout)
+//            .padding(.horizontal, 12)
+//            .padding(.vertical, 6)
+//            .background(Color.white)
+//            .clipShape(Capsule())
+//            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+//    }
+//}
+
+// MARK: - Order Info Section
+//struct OrderInfoSection: View {
+//    let orderData: OrderDataEntity
+//
+//    var body: some View {
+//        VStack(spacing: 12) {
+//            OrderInfoRow(
+//                icon: "number.circle.fill",
+//                title: "주문번호",
+//                value: orderData.orderCode
+//            )
+//
+//            Divider().background(Color.gray15)
+//
+//            HStack {
+//                OrderInfoRow(
+//                    icon: "storefront.fill",
+//                    title: "매장명",
+//                    value: orderData.store.name
+//                )
+//
+//                Spacer()
+//
+//                VStack(alignment: .trailing, spacing: 2) {
+//                    Text("주문시간")
+//                        .font(.pretendardCaption1)
+//                        .foregroundColor(.gray60)
+//                    Text(formatDate(orderData.createdAt))
+//                        .font(.pretendardCaption1)
+//                        .foregroundColor(.gray60)
+//                }
+//            }
+//        }
+//        .padding(20)
+//        .background(Color.gray15)
+//        .clipShape(RoundedRectangle(cornerRadius: 16))
+//    }
+//}
+
+//struct OrderInfoRow: View {
+//    let icon: String
+//    let title: String
+//    let value: String
+//
+//    var body: some View {
+//        HStack {
+//            Image(systemName: icon)
+//                .font(.title2)
+//                .foregroundColor(.deepSprout)
+//
+//            VStack(alignment: .leading, spacing: 2) {
+//                Text(title)
+//                    .font(.pretendardCaption1)
+//                    .foregroundColor(.gray60)
+//                Text(value)
+//                    .font(.pretendardBody1)
+//                    .fontWeight(.semibold)
+//                    .foregroundColor(.gray90)
+//            }
+//
+//            Spacer()
+//        }
+//    }
+//}
+
+// MARK: - Timeline Section
+//struct OrderTimelineSection: View {
+//    let orderData: OrderDataEntity
+//
+//    private var filteredTimeline: [OrderStatusTimelineEntity] {
+//        orderData.orderStatusTimeline.filter { $0.status != "PICKED_UP" }
+//    }
+//
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 16) {
+//            SectionHeader(icon: "clock.fill", title: "진행 상황")
+//
+//            VStack(spacing: 16) {
+//                // 타임라인 점들과 연결선
+//                HStack(spacing: 0) {
+//                    ForEach(Array(filteredTimeline.enumerated()), id: \.offset) { index, timeline in
+//                        HStack(spacing: 0) {
+//                            TimelineNode(isCompleted: timeline.completed)
+//
+//                            if index < filteredTimeline.count - 1 {
+//                                TimelineConnector(isCompleted: filteredTimeline[index + 1].completed)
+//                            }
+//                        }
+//                    }
+//                }
+//                .padding(.horizontal, 10)
+//
+//                // 상태 텍스트들
+//                HStack {
+//                    ForEach(Array(filteredTimeline.enumerated()), id: \.offset) { index, timeline in
+//                        TimelineLabel(timeline: timeline)
+//                            .frame(maxWidth: .infinity)
+//                    }
+//                }
+//            }
+//            .padding(.vertical, 8)
+//        }
+//    }
+//}
+
+//struct TimelineNode: View {
+//    let isCompleted: Bool
+//
+//    var body: some View {
+//        ZStack {
+//            Circle()
+//                .fill(isCompleted ? Color.deepSprout : Color.gray15)
+//                .frame(width: 20, height: 20)
+//
+//            if isCompleted {
+//                Image(systemName: "checkmark")
+//                    .font(.system(size: 10, weight: .bold))
+//                    .foregroundColor(.white)
+//            }
+//        }
+//        .shadow(color: isCompleted ? Color.deepSprout.opacity(0.3) : Color.clear, radius: 4, x: 0, y: 2)
+//    }
+//}
+//
+//struct TimelineConnector: View {
+//    let isCompleted: Bool
+//
+//    var body: some View {
+//        Rectangle()
+//            .fill(isCompleted ? Color.deepSprout : Color.gray15)
+//            .frame(height: 2)
+//            .frame(maxWidth: .infinity)
+//    }
+//}
+
+//struct TimelineLabel: View {
+//    let timeline: OrderStatusTimelineEntity
+//
+//    var body: some View {
+//        VStack(spacing: 4) {
+//            Text(getStatusDisplayName(timeline.status))
+//                .font(.pretendardCaption1)
+//                .fontWeight(timeline.completed ? .semibold : .regular)
+//                .foregroundColor(timeline.completed ? .gray90 : .gray45)
+//                .multilineTextAlignment(.center)
+//
+//            if let changedAt = timeline.changedAt, timeline.completed {
+//                Text(formatTime(changedAt))
+//                    .font(.pretendardCaption2)
+//                    .foregroundColor(.deepSprout)
+//                    .fontWeight(.medium)
+//            }
+//        }
+//    }
+//}
+
+// MARK: - Status Action Section
+//struct OrderStatusActionSection: View {
+//    let orderData: OrderDataEntity
+//    @ObservedObject var store: OrderHistoryStore
+//
+//    var body: some View {
+//        VStack(spacing: 16) {
+//            SectionHeader(icon: "arrow.clockwise.circle.fill", title: "주문 진행")
+//
+//            Button(action: {
+//                store.send(.updateOrderStatus(
+//                    orderCode: orderData.orderCode,
+//                    currentStatus: orderData.orderStatus
+//                ))
+//            }) {
+//                HStack(spacing: 12) {
+//                    Image(systemName: getButtonIcon(orderData.orderStatus))
+//                        .font(.system(size: 16, weight: .semibold))
+//                        .foregroundColor(isPickupReady ? .white : .gray15)
+//
+//                    Text(getButtonText(orderData.orderStatus))
+//                        .font(.pretendardBody1)
+//                        .fontWeight(.semibold)
+//                        .foregroundColor(isPickupReady ? .white : .gray15)
+//                }
+//                .frame(maxWidth: .infinity)
+//                .padding(.vertical, 16)
+//                .background(buttonBackground)
+//                .clipShape(RoundedRectangle(cornerRadius: 12))
+//                .shadow(color: isPickupReady ? Color.deepSprout.opacity(0.3) : Color.clear, radius: 8, x: 0, y: 4)
+//            }
+//        }
+//        .padding(20)
+//        .background(Color.gray15)
+//        .clipShape(RoundedRectangle(cornerRadius: 16))
+//    }
+//
+//    private var isPickupReady: Bool {
+//        orderData.orderStatus == "READY_FOR_PICKUP"
+//    }
+//
+//    private var buttonBackground: LinearGradient {
+//        LinearGradient(
+//            gradient: Gradient(colors: isPickupReady ? [Color.deepSprout, Color.brightSprout] : [Color.gray60, Color.gray60]),
+//            startPoint: .leading,
+//            endPoint: .trailing
+//        )
+//    }
+//}
+
+// MARK: - Menu Section
+//struct OrderMenuSection: View {
+//    let orderData: OrderDataEntity
+//
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 16) {
+//            SectionHeader(icon: "menucard.fill", title: "주문 메뉴")
+//
+//            VStack(spacing: 12) {
+//                ForEach(Array(orderData.orderMenuList.enumerated()), id: \.offset) { index, menuItem in
+//                    OrderMenuItemView(menuItem: menuItem)
+//                }
+//            }
+//        }
+//    }
+//}
+
+//struct OrderMenuItemView: View {
+//    let menuItem: OrderMenuEntity
+//
+//    var body: some View {
+//        HStack(spacing: 16) {
+//            // 메뉴 이미지 (플레이스홀더만 사용)
+//            ZStack {
+//                RoundedRectangle(cornerRadius: 12)
+//                    .fill(LinearGradient(
+//                        gradient: Gradient(colors: [Color.gray15, Color.gray15]),
+//                        startPoint: .topLeading,
+//                        endPoint: .bottomTrailing
+//                    ))
+//
+//                Image(systemName: "photo")
+//                    .font(.title2)
+//                    .foregroundColor(.gray45)
+//            }
+//            .frame(width: 70, height: 70)
+//            .clipShape(RoundedRectangle(cornerRadius: 12))
+//            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+//
+//            // 메뉴 정보 - OrderMenuEntity의 실제 프로퍼티 사용
+//            VStack(alignment: .leading, spacing: 6) {
+//                Text(menuItem.menu.name)
+//                    .font(.pretendardBody1)
+//                    .fontWeight(.semibold)
+//                    .foregroundColor(.gray90)
+//                    .lineLimit(2)
+//
+//                HStack(spacing: 8) {
+//                    Text("\(menuItem.menu.price.formattedPrice)원")
+//                        .font(.pretendardBody2)
+//                        .fontWeight(.medium)
+//                        .foregroundColor(.deepSprout)
+//
+//                    Text("×")
+//                        .font(.pretendardCaption1)
+//                        .foregroundColor(.gray45)
+//
+//                    Text("\(menuItem.quantity)")
+//                        .font(.pretendardBody2)
+//                        .fontWeight(.semibold)
+//                        .foregroundColor(.deepSprout)
+//                        .padding(.horizontal, 8)
+//                        .padding(.vertical, 2)
+//                        .background(Color.brightSprout.opacity(0.2))
+//                        .clipShape(Capsule())
+//                }
+//            }
+//
+//            Spacer()
+//        }
+//        .padding(16)
+//        .background(Color.white)
+//        .overlay(
+//            RoundedRectangle(cornerRadius: 12)
+//                .stroke(Color.gray15, lineWidth: 1)
+//        )
+//    }
+//}
+
+// MARK: - Payment Section
+//struct OrderPaymentSection: View {
+//    let orderData: OrderDataEntity
+//
+//    var body: some View {
+//        VStack(spacing: 12) {
+//            SectionHeader(icon: "creditcard.fill", title: "결제 정보")
+//
+//            HStack {
+//                VStack(alignment: .leading, spacing: 4) {
+//                    Text("총 \(getTotalQuantity(orderData))개 상품")
+//                        .font(.pretendardBody2)
+//                        .foregroundColor(.gray60)
+//                    Text("결제완료")
+//                        .font(.pretendardCaption1)
+//                        .foregroundColor(.deepSprout)
+//                        .fontWeight(.medium)
+//                }
+//
+//                Spacer()
+//
+//                Text("\(orderData.totalPrice.formattedPrice)원")
+//                    .font(.pretendardTitle1)
+//                    .fontWeight(.bold)
+//                    .foregroundColor(.gray90)
+//            }
+//            .padding(20)
+//            .background(
+//                LinearGradient(
+//                    gradient: Gradient(colors: [Color.brightSprout.opacity(0.1), Color.deepSprout.opacity(0.05)]),
+//                    startPoint: .leading,
+//                    endPoint: .trailing
+//                )
+//            )
+//            .clipShape(RoundedRectangle(cornerRadius: 16))
+//        }
+//    }
+//}
+
+// MARK: - Common Components
+//struct SectionHeader: View {
+//    let icon: String
+//    let title: String
+//
+//    var body: some View {
+//        HStack {
+//            Image(systemName: icon)
+//                .foregroundColor(.deepSprout)
+//            Text(title)
+//                .font(.pretendardBody1)
+//                .fontWeight(.semibold)
+//                .foregroundColor(.gray90)
+//            Spacer()
+//        }
+//    }
+//}
+
+// MARK: - Helper Functions
+private func getStatusDisplayName(_ status: String) -> String {
+    switch status {
+    case "PENDING_APPROVAL": return "승인대기"
+    case "APPROVED": return "주문승인"
+    case "IN_PROGRESS": return "조리 중"
+    case "READY_FOR_PICKUP": return "픽업대기"
+    case "PICKED_UP": return "픽업완료"
+    default: return status
     }
+}
 
-    // MARK: - Helper Functions
-    private func getStatusDisplayName(_ status: String) -> String {
-        switch status {
-        case "PENDING_APPROVAL":
-            return "승인대기"
-        case "APPROVED":
-            return "주문승인"
-        case "IN_PROGRESS":
-            return "조리 중"
-        case "READY_FOR_PICKUP":
-            return "픽업대기"
-        case "PICKED_UP":
-            return "픽업완료"
-        default:
-            return status
-        }
+private func getButtonText(_ status: String) -> String {
+    switch status {
+    case "PENDING_APPROVAL": return "주문 승인"
+    case "APPROVED": return "조리 시작하기"
+    case "IN_PROGRESS": return "픽업대기"
+    case "READY_FOR_PICKUP": return "픽업 하기"
+    default: return "다음 단계로"
     }
+}
 
-    private func formatDate(_ dateString: String) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-
-        if let date = formatter.date(from: dateString) {
-            let displayFormatter = DateFormatter()
-            displayFormatter.dateFormat = "M/d HH:mm"
-            return displayFormatter.string(from: date)
-        }
-        return dateString
+private func getButtonIcon(_ status: String) -> String {
+    switch status {
+    case "PENDING_APPROVAL": return "checkmark.circle.fill"
+    case "APPROVED": return "flame.fill"
+    case "IN_PROGRESS": return "checkmark.shield.fill"
+    case "READY_FOR_PICKUP": return "hand.raised.fill"
+    default: return "arrow.right.circle.fill"
     }
+}
 
-    private func formatTime(_ dateString: String) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+private func formatDate(_ dateString: String) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
 
-        if let date = formatter.date(from: dateString) {
-            let displayFormatter = DateFormatter()
-            displayFormatter.dateFormat = "HH:mm"
-            return displayFormatter.string(from: date)
-        }
-        return dateString
+    if let date = formatter.date(from: dateString) {
+        let displayFormatter = DateFormatter()
+        displayFormatter.dateFormat = "M/d HH:mm"
+        return displayFormatter.string(from: date)
     }
+    return dateString
+}
 
-    private func getTotalQuantity() -> Int {
-        return orderData.orderMenuList.reduce(0) { $0 + $1.quantity }
+private func formatTime(_ dateString: String) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+
+    if let date = formatter.date(from: dateString) {
+        let displayFormatter = DateFormatter()
+        displayFormatter.dateFormat = "HH:mm"
+        return displayFormatter.string(from: date)
     }
+    return dateString
+}
+
+private func getTotalQuantity(_ orderData: OrderDataEntity) -> Int {
+    return orderData.orderMenuList.reduce(0) { $0 + $1.quantity }
 }
 
 
@@ -504,13 +509,13 @@ struct OrderStatusView: View {
 
 
 // MARK: - Extensions
-extension Int {
-    var formattedPrice: String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        return formatter.string(from: NSNumber(value: self)) ?? "\(self)"
-    }
-}
+//extension Int {
+//    var formattedPrice: String {
+//        let formatter = NumberFormatter()
+//        formatter.numberStyle = .decimal
+//        return formatter.string(from: NSNumber(value: self)) ?? "\(self)"
+//    }
+//}
 
 // MARK: - Preview
 struct OrderStatusView_Previews: PreviewProvider {
