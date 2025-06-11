@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct BeforeOrderListView: View {
-    let orders: [OrderData]
+    let orders: [OrderDataEntity]
 
     var body: some View {
         ScrollView {
@@ -46,7 +46,7 @@ struct BeforeOrderListView: View {
 }
 
 struct PastOrderCard: View {
-    let orderData: OrderData
+    let orderData: OrderDataEntity
 
     var body: some View {
         VStack(spacing: 0) {
@@ -167,7 +167,7 @@ struct PastOrderCard: View {
         }
     }
 
-    private func menuSummaryRow(orderMenu: OrderMenu) -> some View {
+    private func menuSummaryRow(orderMenu: OrderMenuEntity) -> some View {
         HStack(spacing: 12) {
             Text(orderMenu.menu.name)
                 .font(.pretendardCaption1)
@@ -281,51 +281,51 @@ struct PastOrderCard: View {
     }
 }
 
-#Preview {
-    BeforeOrderListView(orders: [
-        OrderData(
-            orderID: "past_preview",
-            orderCode: "B5831",
-            totalPrice: 8500,
-            review: Review(id: "review_1", rating: 4),
-            store: Store(
-                id: "store_2",
-                category: "패스트푸드",
-                name: "새싹 피자 창동점",
-                close: "22:00",
-                storeImageUrls: [],
-                hashTags: [],
-                geolocation: Geolocation(longitude: 0, latitude: 0),
-                createdAt: "",
-                updatedAt: ""
-            ),
-            orderMenuList: [
-                OrderMenu(
-                    menu: MenuInfo(
-                        id: "menu3",
-                        category: "피자",
-                        name: "새싹 특제 피자",
-                        description: "",
-                        originInformation: "",
-                        price: 8500,
-                        tags: [],
-                        menuImageUrl: "",
-                        createdAt: "",
-                        updatedAt: ""
-                    ),
-                    quantity: 1
-                )
-            ],
-            currentOrderStatus: "PICKED_UP",
-            orderStatusTimeline: [],
-            paidAt: "",
-            createdAt: "2024-01-20T15:08:00.000Z",
-            updatedAt: ""
-        )
-    ])
-    .padding()
-    .background(Color.gray15)
-}
+//#Preview {
+//    BeforeOrderListView(orders: [
+//        OrderDataEntity(
+//            orderID: "past_preview",
+//            orderCode: "B5831",
+//            totalPrice: 8500,
+//            review: Review(id: "review_1", rating: 4),
+//            store: Store(
+//                id: "store_2",
+//                category: "패스트푸드",
+//                name: "새싹 피자 창동점",
+//                close: "22:00",
+//                storeImageUrls: [],
+//                hashTags: [],
+//                geolocation: Geolocation(longitude: 0, latitude: 0),
+//                createdAt: "",
+//                updatedAt: ""
+//            ),
+//            orderMenuList: [
+//                OrderMenu(
+//                    menu: MenuInfo(
+//                        id: "menu3",
+//                        category: "피자",
+//                        name: "새싹 특제 피자",
+//                        description: "",
+//                        originInformation: "",
+//                        price: 8500,
+//                        tags: [],
+//                        menuImageUrl: "",
+//                        createdAt: "",
+//                        updatedAt: ""
+//                    ),
+//                    quantity: 1
+//                )
+//            ],
+//            orderStatus: "PICKED_UP",
+//            orderStatusTimeline: [],
+//            paidAt: "",
+//            createdAt: "2024-01-20T15:08:00.000Z",
+//            updatedAt: ""
+//        )
+//    ])
+//    .padding()
+//    .background(Color.gray15)
+//}
 
 //#Preview {
 //    BeforeOrderListView()

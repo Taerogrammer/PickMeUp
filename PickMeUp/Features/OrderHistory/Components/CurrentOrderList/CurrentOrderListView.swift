@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct CurrentOrderListView: View {
-    let orders: [OrderData]
+    let orders: [OrderDataEntity] // OrderData → OrderDataEntity로 변경
+    let store: OrderHistoryStore // Store 의존성 추가
 
     var body: some View {
         ScrollView {
@@ -17,7 +18,7 @@ struct CurrentOrderListView: View {
                     OrderEmptyStateView(type: .current)
                 } else {
                     ForEach(Array(orders.enumerated()), id: \.element.orderID) { index, order in
-                        OrderStatusView(orderData: order)
+                        OrderStatusView(orderData: order, store: store) // Store 주입
                             .id("current_\(index)")
                             .scrollTransition { content, phase in
                                 content
@@ -34,6 +35,8 @@ struct CurrentOrderListView: View {
         .scrollTargetBehavior(.viewAligned)
     }
 }
+
+
 
 //#Preview {
 //    CurrentOrderListView()

@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct OrderStatusView: View {
-    let orderData: OrderData
+    let orderData: OrderDataEntity // 🔥 Entity로 변경
+    @ObservedObject var store: OrderHistoryStore
 
     var body: some View {
-        if orderData.currentOrderStatus == "PICKED_UP" {
+        if orderData.orderStatus == "PICKED_UP" {
             EmptyView()
         } else {
             VStack(spacing: 0) {
@@ -77,7 +78,7 @@ struct OrderStatusView: View {
     }
 
     private var statusBadge: some View {
-        Text(getStatusDisplayName(orderData.currentOrderStatus))
+        Text(getStatusDisplayName(orderData.orderStatus))
             .font(.pretendardCaption1)
             .fontWeight(.semibold)
             .foregroundColor(.deepSprout)
@@ -162,7 +163,7 @@ struct OrderStatusView: View {
         }
     }
 
-    private var filteredTimeline: [OrderStatusTimeline] {
+    private var filteredTimeline: [OrderStatusTimelineEntity] { // 🔥 Entity로 변경
         return orderData.orderStatusTimeline.filter { timeline in
             timeline.status != "PICKED_UP"
         }
@@ -243,17 +244,17 @@ struct OrderStatusView: View {
                 HStack(spacing: 12) {
                     Image(systemName: getButtonIcon())
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(orderData.currentOrderStatus == "READY_FOR_PICKUP" ? .white : .gray15)
+                        .foregroundColor(orderData.orderStatus == "READY_FOR_PICKUP" ? .white : .gray15)
 
                     Text(getButtonText())
                         .font(.pretendardBody1)
                         .fontWeight(.semibold)
-                        .foregroundColor(orderData.currentOrderStatus == "READY_FOR_PICKUP" ? .white : .gray15)
+                        .foregroundColor(orderData.orderStatus == "READY_FOR_PICKUP" ? .white : .gray15)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
-                    orderData.currentOrderStatus == "READY_FOR_PICKUP" ?
+                    orderData.orderStatus == "READY_FOR_PICKUP" ?
                     LinearGradient(
                         gradient: Gradient(colors: [Color.deepSprout, Color.brightSprout]),
                         startPoint: .leading,
@@ -267,7 +268,7 @@ struct OrderStatusView: View {
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .shadow(
-                    color: orderData.currentOrderStatus == "READY_FOR_PICKUP" ?
+                    color: orderData.orderStatus == "READY_FOR_PICKUP" ?
                            Color.deepSprout.opacity(0.3) : Color.clear,
                     radius: 8, x: 0, y: 4
                 )
@@ -299,7 +300,7 @@ struct OrderStatusView: View {
         }
     }
 
-    private func menuItem(orderMenu: OrderMenu) -> some View {
+    private func menuItem(orderMenu: OrderMenuEntity) -> some View { // 🔥 Entity로 변경
         HStack(spacing: 16) {
             // 메뉴 이미지 (개선된 플레이스홀더)
             AsyncImage(url: URL(string: "https://your-base-url.com\(orderMenu.menu.menuImageUrl)")) { image in
@@ -410,7 +411,7 @@ struct OrderStatusView: View {
 
     // MARK: - 버튼 관련 Helper 함수들
     private func getButtonText() -> String {
-        switch orderData.currentOrderStatus {
+        switch orderData.orderStatus {
         case "PENDING_APPROVAL":
             return "주문 승인"
         case "APPROVED":
@@ -423,8 +424,9 @@ struct OrderStatusView: View {
             return "다음 단계로"
         }
     }
+
     private func getButtonIcon() -> String {
-        switch orderData.currentOrderStatus {
+        switch orderData.orderStatus {
         case "PENDING_APPROVAL":
             return "checkmark.circle.fill"
         case "APPROVED":
@@ -438,99 +440,16 @@ struct OrderStatusView: View {
         }
     }
 
-    private func getButtonBackground() -> some View {
-        Group {
-            if orderData.currentOrderStatus == "READY_FOR_PICKUP" {
-                LinearGradient(
-                    gradient: Gradient(colors: [Color.deepSprout, Color.brightSprout]),
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            } else {
-                LinearGradient(
-                    gradient: Gradient(colors: [Color.gray60, Color.gray60]),
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            }
-        }
-    }
-
-    private func getButtonTextColor() -> Color {
-        return orderData.currentOrderStatus == "READY_FOR_PICKUP" ? .white : .gray15
-    }
-
-    // 버튼 그림자 색상
-    private func getButtonShadowColor() -> Color {
-        return orderData.currentOrderStatus == "READY_FOR_PICKUP" ?
-               Color.deepSprout.opacity(0.3) : Color.clear
-    }
-
-    ///
     private var shouldShowStatusButton: Bool {
-        return ["PENDING_APPROVAL", "APPROVED", "IN_PROGRESS", "READY_FOR_PICKUP"].contains(orderData.currentOrderStatus)
+        return ["PENDING_APPROVAL", "APPROVED", "IN_PROGRESS", "READY_FOR_PICKUP"].contains(orderData.orderStatus)
     }
 
+    // 🔥 Store로 위임 - MVI 패턴 준수
     private func handleStatusButtonTap() {
-        switch orderData.currentOrderStatus {
-        case "PENDING_APPROVAL":
-            updateOrderStatus(to: "APPROVED")
-        case "APPROVED":
-            updateOrderStatus(to: "IN_PROGRESS")
-        case "IN_PROGRESS":
-            updateOrderStatus(to: "READY_FOR_PICKUP")
-            sendPickupReadyNotification()
-        case "READY_FOR_PICKUP":
-            updateOrderStatus(to: "PICKED_UP")
-            sendPickupCompletedNotification()
-        default:
-            break
-        }
-    }
-
-    private func sendPickupCompletedNotification() {
-        LocalNotificationManager.shared.scheduleNotification(
-            id: "\(orderData.orderCode)_pickup_completed",
-            title: "픽업이 완료되었습니다! 🎉",
-            body: "[\(orderData.store.name)]\n맛있게 드세요!",
-            timeInterval: 1
-        )
-        print("🔔 픽업 완료 알림 발송: \(orderData.orderCode)")
-    }
-
-    private func updateOrderStatus(to nextStatus: String) {
-        print("🔄 주문 상태 변경: \(orderData.currentOrderStatus) → \(nextStatus)")
-
-        Task {
-            let request = OrderChangeRequest(orderCode: orderData.orderCode, nextStatus: nextStatus)
-
-            do {
-                let response = try await NetworkManager.shared.fetch(
-                    OrderRouter.orderChange(request: request),
-                    successType: EmptyResponse.self,
-                    failureType: CommonMessageResponse.self
-                )
-
-                if response.success != nil {
-                    print("✅ 주문 상태 변경 성공: \(nextStatus)")
-                    // 상태 변경 성공 시 화면 새로고침 필요
-                } else if let error = response.failure {
-                    print("❌ 주문 상태 변경 실패: \(error.message)")
-                }
-            } catch {
-                print("❌ 주문 상태 변경 에러: \(error)")
-            }
-        }
-    }
-
-    private func sendPickupReadyNotification() {
-        LocalNotificationManager.shared.scheduleNotification(
-            id: "\(orderData.orderCode)_pickup_ready",
-            title: "픽업 준비가 완료되었습니다! ✨",
-            body: "[\(orderData.store.name)]\n매장에서 픽업해주세요.",
-            timeInterval: 1
-        )
-        print("🔔 픽업 준비 완료 알림 발송: \(orderData.orderCode)")
+        store.send(.updateOrderStatus(
+            orderCode: orderData.orderCode,
+            currentStatus: orderData.orderStatus
+        ))
     }
 
     // MARK: - Helper Functions
@@ -598,147 +517,132 @@ struct OrderStatusView_Previews: PreviewProvider {
     static var previews: some View {
         ScrollView {
             VStack(spacing: 20) {
-                OrderStatusView(orderData: sampleOrderData)
-                OrderStatusView(orderData: sampleOrderData2)
-                OrderStatusView(orderData: sampleOrderData3)
+                OrderStatusView(orderData: sampleOrderData,
+                                store: OrderHistoryStore())
+                OrderStatusView(orderData: sampleOrderData2,
+                                store: OrderHistoryStore())
+                OrderStatusView(orderData: sampleOrderData3,
+                                store: OrderHistoryStore())
             }
             .padding()
         }
         .background(Color.gray15)
     }
 
-    static let sampleOrderData = OrderData(
+    static let sampleOrderData = OrderDataEntity(
         orderID: "sample_id",
         orderCode: "A4922",
         totalPrice: 17200,
         review: nil,
-        store: Store(
+        store: StoreEntity(
             id: "store_id",
             category: "카페",
             name: "새싹 도넛 가게",
             close: "22:00",
             storeImageUrls: [],
             hashTags: [],
-            geolocation: Geolocation(longitude: 0, latitude: 0),
+            geolocation: GeolocationEntity(longitude: 0, latitude: 0),
             createdAt: "",
             updatedAt: ""
         ),
         orderMenuList: [
-            OrderMenu(
-                menu: MenuInfo(
+            OrderMenuEntity(
+                menu: MenuInfoEntity(
                     id: "menu1",
-                    category: "도넛",
                     name: "올리브 그린 새싹 도넛",
-                    description: "",
-                    originInformation: "",
                     price: 1600,
-                    tags: [],
-                    menuImageUrl: "",
-                    createdAt: "",
-                    updatedAt: ""
+                    menuImageUrl: ""
                 ),
                 quantity: 2
             )
         ],
-        currentOrderStatus: "READY_FOR_PICKUP",
+        orderStatus: "READY_FOR_PICKUP",
         orderStatusTimeline: [
-            OrderStatusTimeline(status: "PENDING_APPROVAL", completed: true, changedAt: "2024-01-22T18:24:00.000Z"),
-            OrderStatusTimeline(status: "APPROVED", completed: true, changedAt: "2024-01-22T18:27:00.000Z"),
-            OrderStatusTimeline(status: "IN_PROGRESS", completed: true, changedAt: "2024-01-22T18:36:00.000Z"),
-            OrderStatusTimeline(status: "READY_FOR_PICKUP", completed: true, changedAt: nil),
-            OrderStatusTimeline(status: "PICKED_UP", completed: false, changedAt: nil)
+            OrderStatusTimelineEntity(status: "PENDING_APPROVAL", completed: true, changedAt: "2024-01-22T18:24:00.000Z"),
+            OrderStatusTimelineEntity(status: "APPROVED", completed: true, changedAt: "2024-01-22T18:27:00.000Z"),
+            OrderStatusTimelineEntity(status: "IN_PROGRESS", completed: true, changedAt: "2024-01-22T18:36:00.000Z"),
+            OrderStatusTimelineEntity(status: "READY_FOR_PICKUP", completed: true, changedAt: nil),
+            OrderStatusTimelineEntity(status: "PICKED_UP", completed: false, changedAt: nil)
         ],
         paidAt: "",
         createdAt: "2024-01-22T17:20:00.000Z",
         updatedAt: ""
     )
 
-    static let sampleOrderData2 = OrderData(
+    static let sampleOrderData2 = OrderDataEntity(
         orderID: "sample_id_2",
         orderCode: "B5831",
         totalPrice: 8500,
         review: nil,
-        store: Store(
+        store: StoreEntity(
             id: "store_id_2",
             category: "피자",
             name: "새싹 피자 홍대점",
             close: "22:00",
             storeImageUrls: [],
             hashTags: [],
-            geolocation: Geolocation(longitude: 0, latitude: 0),
+            geolocation: GeolocationEntity(longitude: 0, latitude: 0),
             createdAt: "",
             updatedAt: ""
         ),
         orderMenuList: [
-            OrderMenu(
-                menu: MenuInfo(
+            OrderMenuEntity(
+                menu: MenuInfoEntity(
                     id: "menu2",
-                    category: "피자",
                     name: "새싹 특제 피자",
-                    description: "",
-                    originInformation: "",
                     price: 8500,
-                    tags: [],
-                    menuImageUrl: "",
-                    createdAt: "",
-                    updatedAt: ""
+                    menuImageUrl: ""
                 ),
                 quantity: 1
             )
         ],
-        currentOrderStatus: "PICKED_UP",
+        orderStatus: "PICKED_UP",
         orderStatusTimeline: [
-            OrderStatusTimeline(status: "PENDING_APPROVAL", completed: true, changedAt: "2024-01-21T15:10:00.000Z"),
-            OrderStatusTimeline(status: "APPROVED", completed: true, changedAt: "2024-01-21T15:12:00.000Z"),
-            OrderStatusTimeline(status: "IN_PROGRESS", completed: true, changedAt: "2024-01-21T15:25:00.000Z"),
-            OrderStatusTimeline(status: "READY_FOR_PICKUP", completed: true, changedAt: "2024-01-21T15:40:00.000Z"),
-            OrderStatusTimeline(status: "PICKED_UP", completed: true, changedAt: "2024-01-21T15:45:00.000Z")
+            OrderStatusTimelineEntity(status: "PENDING_APPROVAL", completed: true, changedAt: "2024-01-21T15:10:00.000Z"),
+            OrderStatusTimelineEntity(status: "APPROVED", completed: true, changedAt: "2024-01-21T15:12:00.000Z"),
+            OrderStatusTimelineEntity(status: "IN_PROGRESS", completed: true, changedAt: "2024-01-21T15:25:00.000Z"),
+            OrderStatusTimelineEntity(status: "READY_FOR_PICKUP", completed: true, changedAt: "2024-01-21T15:40:00.000Z"),
+            OrderStatusTimelineEntity(status: "PICKED_UP", completed: true, changedAt: "2024-01-21T15:45:00.000Z")
         ],
         paidAt: "",
         createdAt: "2024-01-21T15:08:00.000Z",
         updatedAt: ""
     )
 
-    static let sampleOrderData3 = OrderData(
+    static let sampleOrderData3 = OrderDataEntity(
         orderID: "sample_id",
         orderCode: "A4922",
         totalPrice: 17200,
         review: nil,
-        store: Store(
+        store: StoreEntity(
             id: "store_id",
             category: "카페",
             name: "새싹 도넛 가게",
             close: "22:00",
             storeImageUrls: [],
             hashTags: [],
-            geolocation: Geolocation(longitude: 0, latitude: 0),
+            geolocation: GeolocationEntity(longitude: 0, latitude: 0),
             createdAt: "",
             updatedAt: ""
         ),
         orderMenuList: [
-            OrderMenu(
-                menu: MenuInfo(
+            OrderMenuEntity(
+                menu: MenuInfoEntity(
                     id: "menu1",
-                    category: "도넛",
                     name: "올리브 그린 새싹 도넛",
-                    description: "",
-                    originInformation: "",
                     price: 1600,
-                    tags: [],
-                    menuImageUrl: "",
-                    createdAt: "",
-                    updatedAt: ""
+                    menuImageUrl: ""
                 ),
                 quantity: 2
             )
         ],
-        currentOrderStatus: "IN_PROGRESS",
+        orderStatus: "IN_PROGRESS",
         orderStatusTimeline: [
-            OrderStatusTimeline(status: "PENDING_APPROVAL", completed: true, changedAt: "2024-01-22T18:24:00.000Z"),
-            OrderStatusTimeline(status: "APPROVED", completed: true, changedAt: "2024-01-22T18:27:00.000Z"),
-            OrderStatusTimeline(status: "IN_PROGRESS", completed: true, changedAt: "2024-01-22T18:36:00.000Z"),
-            OrderStatusTimeline(status: "READY_FOR_PICKUP", completed: false, changedAt: nil),
-            OrderStatusTimeline(status: "PICKED_UP", completed: false, changedAt: nil)
+            OrderStatusTimelineEntity(status: "PENDING_APPROVAL", completed: true, changedAt: "2024-01-22T18:24:00.000Z"),
+            OrderStatusTimelineEntity(status: "APPROVED", completed: true, changedAt: "2024-01-22T18:27:00.000Z"),
+            OrderStatusTimelineEntity(status: "IN_PROGRESS", completed: true, changedAt: "2024-01-22T18:36:00.000Z"),
+            OrderStatusTimelineEntity(status: "READY_FOR_PICKUP", completed: false, changedAt: nil),
+            OrderStatusTimelineEntity(status: "PICKED_UP", completed: false, changedAt: nil)
         ],
         paidAt: "",
         createdAt: "2024-01-22T17:20:00.000Z",

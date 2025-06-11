@@ -9,11 +9,12 @@ import Foundation
 
 struct OrderHistoryState {
     var selectedOrderType: OrderType = .current
-    var currentOrders: [OrderData] = []
-    var pastOrders: [OrderData] = []
+    var currentOrders: [OrderDataEntity] = [] // 🔥 Entity로 변경
+    var pastOrders: [OrderDataEntity] = [] // 🔥 Entity로 변경
     var isLoading: Bool = false
     var isRefreshing: Bool = false
     var errorMessage: String? = nil
+    var hasNotificationPermission: Bool = false
 
     // MARK: - Computed Properties
     var currentOrdersCount: Int {
@@ -33,7 +34,7 @@ struct OrderHistoryState {
         }
     }
 
-    var selectedOrders: [OrderData] {
+    var selectedOrders: [OrderDataEntity] { // 🔥 Entity로 변경
         switch selectedOrderType {
         case .current:
             return currentOrders

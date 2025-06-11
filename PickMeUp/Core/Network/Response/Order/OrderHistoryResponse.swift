@@ -13,7 +13,7 @@ struct OrderHistoryResponse: Decodable {
 
 extension OrderHistoryResponse {
     func toEntity() -> [OrderStatusEntity] {
-        return data.map { $0.toEntity() }
+        return data.map { $0.toStatusEntity() }
     }
 }
 
@@ -24,7 +24,7 @@ struct OrderData: Decodable {
     let review: Review?
     let store: Store
     let orderMenuList: [OrderMenu]
-    let currentOrderStatus: String
+    let orderStatus: String
     let orderStatusTimeline: [OrderStatusTimeline]
     let paidAt: String
     let createdAt: String
@@ -36,14 +36,14 @@ struct OrderData: Decodable {
         case totalPrice = "total_price"
         case review, store
         case orderMenuList = "order_menu_list"
-        case currentOrderStatus = "current_order_status"
+        case orderStatus = "current_order_status"
         case orderStatusTimeline = "order_status_timeline"
         case paidAt, createdAt, updatedAt
     }
 }
 
 extension OrderData {
-    func toEntity() -> OrderStatusEntity {
+    func toStatusEntity() -> OrderStatusEntity {
         return OrderStatusEntity(
             orderID: orderID,
             orderCode: orderCode,
@@ -56,9 +56,36 @@ extension OrderData {
     }
 }
 
+extension OrderData {
+    func toDataEntity() -> OrderDataEntity {
+        return OrderDataEntity(
+            orderID: orderID,
+            orderCode: orderCode,
+            totalPrice: totalPrice,
+            review: review?.toEntity(),
+            store: store.toEntity(),
+            orderMenuList: orderMenuList.map { $0.toEntity() },
+            orderStatus: orderStatus,
+            orderStatusTimeline: orderStatusTimeline.map { $0.toEntity() },
+            paidAt: paidAt,
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        )
+    }
+}
+
 struct Review: Decodable {
     let id: String
     let rating: Int
+}
+
+extension Review {
+    func toEntity() -> ReviewEntity {
+        return ReviewEntity(
+            id: id,
+            rating: rating
+        )
+    }
 }
 
 struct Store: Decodable {
@@ -81,7 +108,17 @@ struct Store: Decodable {
 
 extension Store {
     func toEntity() -> StoreEntity {
-        return StoreEntity(name: name)
+        return StoreEntity(
+            id: id,
+            category: category,
+            name: name,
+            close: close,
+            storeImageUrls: storeImageUrls,
+            hashTags: hashTags,
+            geolocation: geolocation.toEntity(),
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        )
     }
 }
 
@@ -116,6 +153,16 @@ extension OrderStatusTimeline {
             status: status,
             completed: completed,
             changedAt: changedAt
+        )
+    }
+}
+
+
+extension Geolocation {
+    func toEntity() -> GeolocationEntity {
+        return GeolocationEntity(
+            longitude: longitude,
+            latitude: latitude
         )
     }
 }
