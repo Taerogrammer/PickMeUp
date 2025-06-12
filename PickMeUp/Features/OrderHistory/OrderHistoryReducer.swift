@@ -22,6 +22,8 @@ struct OrderHistoryReducer {
             break
         case .requestNotificationPermission:
             break
+        case .loadMenuImage:
+            break
         }
     }
 
@@ -81,6 +83,16 @@ struct OrderHistoryReducer {
 
         case .notificationPermissionUpdated(let granted):
             state.hasNotificationPermission = granted
+
+        // 🔥 이미지 로딩 결과 처리
+        case .menuImageLoaded(let orderCode, let menuID, let image):
+            if state.menuImages[orderCode] == nil {
+                state.menuImages[orderCode] = [:]
+            }
+            state.menuImages[orderCode]?[menuID] = image
+
+        case .menuImageLoadFailed(let orderCode, let menuID, let error):
+            print("❌ 메뉴 이미지 로딩 실패: [\(orderCode)][\(menuID)] \(error)")
         }
     }
 

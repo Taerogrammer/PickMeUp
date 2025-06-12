@@ -5,16 +5,17 @@
 //  Created by 김태형 on 6/10/25.
 //
 
-import Foundation
+import SwiftUI
 
 struct OrderHistoryState {
     var selectedOrderType: OrderType = .current
-    var currentOrders: [OrderDataEntity] = [] // 🔥 Entity로 변경
-    var pastOrders: [OrderDataEntity] = [] // 🔥 Entity로 변경
+    var currentOrders: [OrderDataEntity] = []
+    var pastOrders: [OrderDataEntity] = []
     var isLoading: Bool = false
     var isRefreshing: Bool = false
     var errorMessage: String? = nil
     var hasNotificationPermission: Bool = false
+    var menuImages: [String: [String: UIImage]] = [:]
 
     // MARK: - Computed Properties
     var currentOrdersCount: Int {
@@ -34,7 +35,7 @@ struct OrderHistoryState {
         }
     }
 
-    var selectedOrders: [OrderDataEntity] { // 🔥 Entity로 변경
+    var selectedOrders: [OrderDataEntity] {
         switch selectedOrderType {
         case .current:
             return currentOrders
@@ -53,5 +54,9 @@ struct OrderHistoryState {
 
     var hasPastOrders: Bool {
         return !pastOrders.isEmpty
+    }
+
+    func getMenuImage(orderCode: String, menuID: String) -> UIImage? {
+        return menuImages[orderCode]?[menuID]
     }
 }
