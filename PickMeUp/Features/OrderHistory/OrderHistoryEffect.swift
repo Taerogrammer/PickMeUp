@@ -116,7 +116,52 @@ struct OrderHistoryEffect {
     }
 
     private func refreshAllOrders(store: OrderHistoryStore) async {
-        // refreshAllOrders 구현...
+       do {
+           let response = try await NetworkManager.shared.fetch(
+               OrderRouter.orderHistory,
+               successType: OrderHistoryResponse.self,
+               failureType: CommonMessageResponse.self
+           )
+
+           if let orderHistory = response.success {
+               let allOrderEntities = orderHistory.toEntity()
+
+               let currentOrders = allOrderEntities.filter { order in
+                   let currentStatus = order.orderStatusTimeline.last { $0.completed }?.status ?? "PENDING_APPROVAL"
+                   return ["PENDING_APPROVAL", "APPROVED", "IN_PROGRESS", "READY_FOR_PICKUP"].contains(currentStatus)
+               }
+
+               let pastOrders = allOrderEntities.filter { order in
+                   let currentStatus = order.orderStatusTimeline.last { $0.completed }?.status ?? "PENDING_APPROVAL"
+                   return currentStatus == "PICKED_UP"
+               }
+
+               let currentOrderDataEntities = currentOrders.map { convertToOrderDataEntity($0) }
+               let pastOrderDataEntities = pastOrders.map { convertToOrderDataEntity($0) }
+
+               await MainActor.run {
+                   store.send(.currentOrdersLoaded(currentOrderDataEntities))
+                   store.send(.pastOrdersLoaded(pastOrderDataEntities))
+                   store.send(.refreshCompleted)
+
+                   loadAllMenuImages(orders: currentOrderDataEntities + pastOrderDataEntities, store: store)
+
+                   print("✅ [OrderHistoryEffect] 주문 내역 새로고침 성공 - 진행중: \(currentOrders.count)개, 과거: \(pastOrders.count)개")
+               }
+           } else if let error = response.failure {
+               await MainActor.run {
+                   store.send(.ordersLoadingFailed(error.message))
+                   store.send(.refreshCompleted)
+                   print("❌ [OrderHistoryEffect] 주문 내역 새로고침 실패: \(error.message)")
+               }
+           }
+       } catch {
+           await MainActor.run {
+               store.send(.ordersLoadingFailed(error.localizedDescription))
+               store.send(.refreshCompleted)
+               print("❌ [OrderHistoryEffect] 주문 내역 새로고침 에러: \(error.localizedDescription)")
+           }
+       }
     }
 
     private func convertToOrderDataEntity(_ orderStatusEntity: OrderStatusEntity) -> OrderDataEntity {
@@ -138,19 +183,77 @@ struct OrderHistoryEffect {
     }
 
     private func updateOrderStatus(orderCode: String, currentStatus: String, store: OrderHistoryStore) async {
-        // updateOrderStatus 구현...
+       let nextStatus = getNextStatus(from: currentStatus)
+
+       print("🔄 주문 상태 변경: \(currentStatus) → \(nextStatus)")
+
+       do {
+           let request = OrderChangeRequest(orderCode: orderCode, nextStatus: nextStatus)
+           let response = try await NetworkManager.shared.fetch(
+               OrderRouter.orderChange(request: request),
+               successType: EmptyResponse.self,
+               failureType: CommonMessageResponse.self
+           )
+
+           if response.success != nil {
+               print("✅ 주문 상태 변경 성공: \(nextStatus)")
+
+               await MainActor.run {
+                   if nextStatus == "PICKED_UP" {
+                       store.send(.orderCompleted(orderCode: orderCode))
+                       sendPickupCompletedNotification(orderCode: orderCode, store: store)
+                   } else {
+                       store.send(.orderStatusUpdated(orderCode: orderCode, newStatus: nextStatus))
+
+                       if nextStatus == "READY_FOR_PICKUP" {
+                           sendPickupReadyNotification(orderCode: orderCode, store: store)
+                       }
+                   }
+               }
+           } else if let error = response.failure {
+               await MainActor.run {
+                   store.send(.orderStatusUpdateFailed(orderCode: orderCode, error: error.message))
+               }
+           }
+       } catch {
+           await MainActor.run {
+               store.send(.orderStatusUpdateFailed(orderCode: orderCode, error: error.localizedDescription))
+           }
+       }
     }
 
     private func requestNotificationPermission(store: OrderHistoryStore) async {
-        // requestNotificationPermission 구현...
+       let granted = await LocalNotificationManager.shared.requestPermission()
+       await MainActor.run {
+           store.send(.notificationPermissionUpdated(granted))
+       }
     }
 
     private func sendPickupReadyNotification(orderCode: String, store: OrderHistoryStore) {
-        // sendPickupReadyNotification 구현...
+       let order = store.state.currentOrders.first { $0.orderCode == orderCode }
+       let storeName = order?.store.name ?? "매장"
+
+       LocalNotificationManager.shared.scheduleNotification(
+           id: "\(orderCode)_pickup_ready",
+           title: "픽업 준비가 완료되었습니다! ✨",
+           body: "[\(storeName)]\n매장에서 픽업해주세요.",
+           timeInterval: 1
+       )
+       print("🔔 픽업 준비 완료 알림 발송: \(orderCode)")
     }
 
     private func sendPickupCompletedNotification(orderCode: String, store: OrderHistoryStore) {
-        // sendPickupCompletedNotification 구현...
+       let order = store.state.currentOrders.first { $0.orderCode == orderCode } ??
+                  store.state.pastOrders.first { $0.orderCode == orderCode }
+       let storeName = order?.store.name ?? "매장"
+
+       LocalNotificationManager.shared.scheduleNotification(
+           id: "\(orderCode)_pickup_completed",
+           title: "픽업이 완료되었습니다! 🎉",
+           body: "[\(storeName)]\n맛있게 드세요!",
+           timeInterval: 1
+       )
+       print("🔔 픽업 완료 알림 발송: \(orderCode)")
     }
 
     private func getNextStatus(from currentStatus: String) -> String {
