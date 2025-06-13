@@ -38,17 +38,18 @@ struct OrderSegmentedControlView: View {
 
 struct OrderTabView: View {
     @Binding var selectedOrderType: OrderType
-    let currentOrders: [OrderData]
-    let pastOrders: [OrderData]
+    let currentOrders: [OrderDataEntity] // OrderData → OrderDataEntity 변경
+    let pastOrders: [OrderDataEntity]    // OrderData → OrderDataEntity 필요
+    let store: OrderHistoryStore         // Store 의존성 추가
 
     var body: some View {
         TabView(selection: $selectedOrderType) {
             // 진행중인 주문
-            CurrentOrderListView(orders: currentOrders)
+            CurrentOrderListView(orders: currentOrders, store: store) // Store 주입
                 .tag(OrderType.current)
 
             // 과거 주문
-            BeforeOrderListView(orders: pastOrders)
+            BeforeOrderListView(orders: pastOrders) // BeforeOrderListView도 수정 필요할 수 있음
                 .tag(OrderType.past)
         }
         .tabViewStyle(.page(indexDisplayMode: .never))

@@ -17,24 +17,24 @@ struct OrderStatusEntity {
     let createdAt: String
 }
 
-struct StoreEntity {
-    let name: String
-}
+//struct StoreEntity {
+//    let name: String
+//}
+//
+//struct OrderMenuEntity {
+//    let menu: MenuInfoEntity
+//    let quantity: Int
+//}
+//
+//struct MenuInfoEntity {
+//    let id: String
+//    let name: String
+//    let price: Int
+//    let menuImageUrl: String
+//}
 
-struct OrderMenuEntity {
-    let menu: MenuInfoEntity
-    let quantity: Int
-}
-
-struct MenuInfoEntity {
-    let id: String
-    let name: String
-    let price: Int
-    let menuImageUrl: String
-}
-
-struct OrderStatusTimelineEntity {
-    let status: String
-    let completed: Bool
-    let changedAt: String?
-}
+//struct OrderStatusTimelineEntity {
+//    let status: String
+//    let completed: Bool
+//    let changedAt: String?
+//}

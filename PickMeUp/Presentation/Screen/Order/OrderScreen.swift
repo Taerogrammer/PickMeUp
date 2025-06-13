@@ -34,14 +34,14 @@ struct OrderScreen: View {
                 isLoading: store.state.isLoading,
                 isRefreshing: store.state.isRefreshing,
                 errorMessage: store.state.errorMessage,
+                store: store,
                 onRefresh: {
                     store.send(.pullToRefresh)
-                }
+                },
+                pastOrders: store.state.pastOrders
             )
         }
         .background(Color.gray15.ignoresSafeArea())
-        .navigationTitle("주문 내역")
-        .navigationBarTitleDisplayMode(.large)
         .onAppear {
             store.send(.viewOnAppear)
         }
