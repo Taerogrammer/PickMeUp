@@ -26,29 +26,27 @@ struct OrderStatusCard: View {
     @ObservedObject var store: OrderHistoryStore
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 16) {
             OrderStatusHeader(orderData: orderData)
 
-            VStack(spacing: 28) {
+            VStack(spacing: 20) {
                 OrderInfoSection(orderData: orderData)
                 OrderTimelineSection(orderData: orderData)
+                OrderMenuSection(orderData: orderData, store: store)
+                OrderPaymentSection(orderData: orderData)
 
                 if OrderStatusHelper.shouldShowActionButton(for: orderData.orderStatus) {
                     OrderStatusActionSection(orderData: orderData, store: store)
                 }
-
-                OrderMenuSection(orderData: orderData, store: store) // 🔥 store 전달
-                OrderPaymentSection(orderData: orderData)
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 28)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 20)
         }
         .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 4)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
     }
 }
-
 
 // MARK: - Preview
 struct OrderStatusView_Previews: PreviewProvider {

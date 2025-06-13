@@ -12,7 +12,7 @@ struct OrderStatusActionSection: View {
     @ObservedObject var store: OrderHistoryStore
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             SectionHeader(icon: "arrow.clockwise.circle.fill", title: "주문 진행")
 
             Button(action: {
@@ -21,26 +21,26 @@ struct OrderStatusActionSection: View {
                     currentStatus: orderData.orderStatus
                 ))
             }) {
-                HStack(spacing: 12) {
+                HStack(spacing: 8) {
                     Image(systemName: OrderStatusHelper.getButtonIcon(orderData.orderStatus))
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(isPickupReady ? .white : .gray15)
 
                     Text(OrderStatusHelper.getButtonText(orderData.orderStatus))
-                        .font(.pretendardBody1)
+                        .font(.pretendardCaption1)
                         .fontWeight(.semibold)
                         .foregroundColor(isPickupReady ? .white : .gray15)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
+                .padding(.vertical, 12)
                 .background(buttonBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .shadow(color: isPickupReady ? Color.deepSprout.opacity(0.3) : Color.clear, radius: 8, x: 0, y: 4)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .shadow(color: isPickupReady ? Color.deepSprout.opacity(0.2) : Color.clear, radius: 6, x: 0, y: 2)
             }
         }
-        .padding(20)
+        .padding(16)
         .background(Color.gray15)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     private var isPickupReady: Bool {

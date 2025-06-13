@@ -12,14 +12,15 @@ struct SectionHeader: View {
     let title: String
 
     var body: some View {
-        HStack {
+        HStack(spacing: 6) {
             Image(systemName: icon)
+                .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(.deepSprout)
+
             Text(title)
-                .font(.pretendardBody1)
+                .font(.pretendardCaption1)
                 .fontWeight(.semibold)
                 .foregroundColor(.gray90)
-            Spacer()
         }
     }
 }

@@ -11,36 +11,48 @@ struct OrderInfoSection: View {
     let orderData: OrderDataEntity
 
     var body: some View {
-        VStack(spacing: 12) {
-            OrderInfoRow(
-                icon: "number.circle.fill",
-                title: "주문번호",
-                value: orderData.orderCode
-            )
-
-            Divider().background(Color.gray15)
-
+        VStack(spacing: 8) {
             HStack {
-                OrderInfoRow(
-                    icon: "storefront.fill",
-                    title: "매장명",
-                    value: orderData.store.name
-                )
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("주문시간")
-                        .font(.pretendardCaption1)
-                        .foregroundColor(.gray60)
-                    Text(DateFormattingHelper.formatDate(orderData.createdAt))
+                HStack(spacing: 6) {
+                    Image(systemName: "number.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(.deepSprout)
+                    Text("주문번호")
                         .font(.pretendardCaption1)
                         .foregroundColor(.gray60)
                 }
+
+                Spacer()
+
+                Text(orderData.orderCode)
+                    .font(.pretendardCaption1)
+                    .fontWeight(.medium)
+                    .foregroundColor(.gray90)
+            }
+
+            Divider().background(Color.gray15)
+
+            // 매장명과 주문시간을 한 줄에 표시
+            HStack {
+                HStack(spacing: 6) {
+                    Image(systemName: "storefront.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(.deepSprout)
+                    Text(orderData.store.name)
+                        .font(.pretendardCaption1)
+                        .fontWeight(.medium)
+                        .foregroundColor(.gray90)
+                }
+
+                Spacer()
+
+                Text(DateFormattingHelper.formatDate(orderData.createdAt))
+                    .font(.pretendardCaption2)
+                    .foregroundColor(.gray60)
             }
         }
-        .padding(20)
+        .padding(16)
         .background(Color.gray15)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

@@ -15,33 +15,37 @@ struct OrderTimelineSection: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 12) {
             SectionHeader(icon: "clock.fill", title: "진행 상황")
 
-            VStack(spacing: 16) {
-                // 타임라인 점들과 연결선
-                HStack(spacing: 0) {
+            VStack(spacing: 8) {
+                HStack(alignment: .center, spacing: 0) {
                     ForEach(Array(filteredTimeline.enumerated()), id: \.offset) { index, timeline in
-                        HStack(spacing: 0) {
+                        VStack {
                             TimelineNode(isCompleted: timeline.completed)
+                        }
+                        .frame(maxWidth: .infinity)
 
-                            if index < filteredTimeline.count - 1 {
-                                TimelineConnector(isCompleted: filteredTimeline[index + 1].completed)
-                            }
+                        if index < filteredTimeline.count - 1 {
+                            TimelineConnector(isCompleted: filteredTimeline[index + 1].completed)
+                                .frame(maxWidth: .infinity)
                         }
                     }
                 }
-                .padding(.horizontal, 10)
 
-                // 상태 텍스트들
-                HStack {
+                HStack(spacing: 0) {
                     ForEach(Array(filteredTimeline.enumerated()), id: \.offset) { index, timeline in
                         TimelineLabel(timeline: timeline)
                             .frame(maxWidth: .infinity)
+
+                        if index < filteredTimeline.count - 1 {
+                            Spacer()
+                                .frame(maxWidth: .infinity)
+                        }
                     }
                 }
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, 6)
         }
     }
 }
