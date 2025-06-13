@@ -18,16 +18,14 @@ final class RegisterStore: ObservableObject {
         self.router = router
     }
 
-    func send(_ intent: RegisterIntent) {
-        // 1차 동기 Reducer 적용
+    func send(_ intent: RegisterAction.Intent) {
         RegisterReducer.reduce(state: &state, intent: intent, validator: validator)
 
-        // 2차 비동기 Effect → 결과에 따라 추가 Reducer 실행
         Task {
             if let effect = await RegisterEffect.handle(intent: intent, state: state, validator: validator) {
                 await MainActor.run {
                     effect(&self.state)
-                    RegisterReducer.reduce(state: &self.state, intent: intent, validator: validator)
+                    RegisterReducer.reduce(state: &self.state, intent: intent, validator: self.validator)
                 }
             }
         }

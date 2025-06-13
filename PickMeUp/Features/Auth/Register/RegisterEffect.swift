@@ -8,7 +8,7 @@
 import Foundation
 
 struct RegisterEffect {
-    static func handle(intent: RegisterIntent, state: RegisterState, validator: RegisterValidator) async -> ((inout RegisterState) -> Void)? {
+    static func handle(intent: RegisterAction.Intent, state: RegisterState, validator: RegisterValidator) async -> ((inout RegisterState) -> Void)? {
         switch intent {
         case .validateEmail:
             return await handleValidateEmail(state: state, validator: validator)

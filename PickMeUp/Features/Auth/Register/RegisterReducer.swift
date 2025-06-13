@@ -8,7 +8,7 @@
 import Foundation
 
 struct RegisterReducer {
-    static func reduce(state: inout RegisterState, intent: RegisterIntent, validator: RegisterValidator) {
+    static func reduce(state: inout RegisterState, intent: RegisterAction.Intent, validator: RegisterValidator) {
         switch intent {
         case .updateEmail(let email):
             if state.email != email {

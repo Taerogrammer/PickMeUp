@@ -9,7 +9,7 @@ import SwiftUI
 
 struct EmailVerificationField: View {
     let state: RegisterState
-    let onSend: (RegisterIntent) -> Void
+    let onSend: (RegisterAction.Intent) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
