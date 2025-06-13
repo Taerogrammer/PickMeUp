@@ -61,7 +61,7 @@ struct TabbarView: View {
         case .orders:
             return AnyView(OrderView())
         case .friends:
-            return AnyView(CommunityView())
+            return AnyView(CommunityScreen())
         case .profile:
             return container.makeProfileScreen()
         }

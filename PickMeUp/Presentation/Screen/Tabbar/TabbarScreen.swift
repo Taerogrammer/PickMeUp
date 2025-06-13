@@ -23,7 +23,7 @@ struct TabbarScreen: View {
             case .orders:
                 AnyView(OrderScreen())
             case .friends:
-                AnyView(CommunityView())
+                AnyView(CommunityScreen())
             case .profile:
                 container.makeProfileScreen()
             }
