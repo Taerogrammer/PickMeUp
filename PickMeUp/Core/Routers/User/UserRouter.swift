@@ -44,8 +44,8 @@ enum UserRouter: APIRouter {
 
     var parameters: [String: Any]? {
         switch self {
-        case .validateEmail(let email):
-            return [APIConstants.Parameters.User.email: email]
+        case .validateEmail(let request):
+            return [APIConstants.Parameters.User.email: request.email]
         case .join(let request):
             return [
                 APIConstants.Parameters.User.email: request.email,
