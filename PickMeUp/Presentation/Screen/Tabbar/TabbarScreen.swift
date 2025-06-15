@@ -26,56 +26,49 @@ struct TabbarScreen: View {
 
     var body: some View {
         TabView {
-            NavigationStack(path: $router.storePath) {
+            NavigationStack(path: $router.storeNavigationPath) {
                 storeScreen
             }
             .navigationDestination(for: AppRoute.self) { route in
                 handleNavigation(route: route)
             }
             .tabItem {
-                Image(systemName: "storefront")
-                Text("매장")
+                Image(systemName: TabItem.store.iconName)
             }
 
-            // 주문 탭 - 독립적인 NavigationPath 사용
-            NavigationStack(path: $router.orderPath) {
+            NavigationStack(path: $router.orderNavigationPath) {
                 orderScreen
             }
             .navigationDestination(for: AppRoute.self) { route in
                 handleNavigation(route: route)
             }
             .tabItem {
-                Image(systemName: "list.bullet.clipboard")
-                Text("주문")
+                Image(systemName: TabItem.orders.iconName)
             }
 
-            // 친구 탭 - 독립적인 NavigationPath 사용
-            NavigationStack(path: $router.friendsPath) {
+            NavigationStack(path: $router.friendsNavigationPath) {
                 CommunityScreen()       // TODO: - 수정
             }
             .navigationDestination(for: AppRoute.self) { route in
                 handleNavigation(route: route)
             }
             .tabItem {
-                Image(systemName: "person.2")
-                Text("친구")
+                Image(systemName: TabItem.friends.iconName)
             }
 
-            // 프로필 탭 - 독립적인 NavigationPath 사용
-            NavigationStack(path: $router.profilePath) {
+            NavigationStack(path: $router.profileNavigationPath) {
                 profileScreen
             }
             .navigationDestination(for: AppRoute.self) { route in
                 handleNavigation(route: route)
             }
             .tabItem {
-                Image(systemName: "person.circle")
-                Text("프로필")
+                Image(systemName: TabItem.profile.iconName)
             }
         }
+        .accentColor(.deepSprout)
     }
 
-    // MARK: - Navigation 처리
     @ViewBuilder
     private func handleNavigation(route: AppRoute) -> some View {
         switch route {
