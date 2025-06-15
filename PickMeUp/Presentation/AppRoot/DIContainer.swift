@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding, StoreViewProviding, StoreDetailViewProviding {
+final class DIContainer: TabProviding, AuthViewProviding, OrderViewProviding,  ProfileViewProviding, StoreViewProviding, StoreDetailViewProviding {
     let router = AppRouter()
 
     // MARK: - TabProviding
@@ -29,6 +29,21 @@ final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding, 
     func makeRegisterScreen() -> AnyView {
         let store = RegisterStore(router: router)
         return AnyView(RegisterScreen(store: store))
+    }
+
+    // MARK: - OrderViewProviding
+    func makeOrderScreen() -> AnyView {
+        let state = OrderHistoryState()
+        let effect = OrderHistoryEffect()
+        let reducer = OrderHistoryReducer()
+
+        let store = OrderHistoryStore(
+            state: state,
+            effect: effect,
+            reducer: reducer
+        )
+
+        return AnyView(OrderScreen(store: store))
     }
 
     // MARK: - ProfileViewProviding

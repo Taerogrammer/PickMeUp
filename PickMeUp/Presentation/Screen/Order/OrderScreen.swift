@@ -13,7 +13,11 @@ enum OrderType: String, CaseIterable {
 }
 
 struct OrderScreen: View {
-    @StateObject private var store = OrderHistoryStore()
+    let store: OrderHistoryStore
+
+    init(store: OrderHistoryStore) {
+        self.store = store
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -49,6 +53,6 @@ struct OrderScreen: View {
 }
 
 
-#Preview {
-    OrderScreen()
-}
+//#Preview {
+//    OrderScreen()
+//}

@@ -12,10 +12,14 @@ final class OrderHistoryStore: ObservableObject {
     private let effect: OrderHistoryEffect
     private let reducer: OrderHistoryReducer
 
-    init() {
-        self.state = OrderHistoryState()
-        self.effect = OrderHistoryEffect()
-        self.reducer = OrderHistoryReducer()
+    init(
+        state: OrderHistoryState,
+        effect: OrderHistoryEffect,
+        reducer: OrderHistoryReducer
+    ) {
+        self.state = state
+        self.effect = effect
+        self.reducer = reducer
     }
 
     func send(_ action: OrderHistoryAction.Intent) {

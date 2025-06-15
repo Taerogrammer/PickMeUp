@@ -21,7 +21,7 @@ struct TabbarScreen: View {
             case .store:
                 container.makeStoreScreen()
             case .orders:
-                AnyView(OrderScreen())
+                container.makeOrderScreen()
             case .friends:
                 AnyView(CommunityScreen())
             case .profile:
