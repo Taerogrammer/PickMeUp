@@ -43,7 +43,7 @@ final class DIContainer: TabProviding, AuthViewProviding, OrderViewProviding,  P
             reducer: reducer
         )
 
-        return AnyView(OrderScreen())
+        return AnyView(OrderScreen(store: store))
     }
 
     // MARK: - ProfileViewProviding
