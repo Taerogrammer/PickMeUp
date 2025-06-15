@@ -19,18 +19,13 @@ final class LandingStore: ObservableObject {
         self.appLaunchState = appLaunchState
     }
 
+    @MainActor
     func send(_ intent: LandingAction.Intent) {
-        // 1차: Intent에 대한 즉시 상태 업데이트
         LandingReducer.reduce(state: &state, intent: intent)
 
-        // 특별 처리: 네비게이션
-        if case .registerTapped = intent {
-            router.navigate(to: .register)
-        }
-
         Task {
-            if let result = await LandingEffect.handle(intent: intent, state: state) {
-                await handleResult(result)
+            if let result = await LandingEffect.handle(intent: intent, state: state, router: router) {
+                handleResult(result)
             }
         }
     }

@@ -1,14 +1,14 @@
 import SwiftUI
 
-public struct PasswordField: View {
-    public let title: String
-    public let text: String
-    public let isPasswordVisible: Bool
-    public let validationMessage: String?
-    public let onChange: (String) -> Void
-    public let onToggleVisibility: () -> Void
+struct PasswordField: View {
+    let title: String
+    let text: String
+    let isPasswordVisible: Bool
+    let validationMessage: String?
+    let onChange: (String) -> Void
+    let onToggleVisibility: () -> Void
 
-    public init(
+    init(
         title: String,
         text: String,
         isPasswordVisible: Bool,
@@ -24,7 +24,7 @@ public struct PasswordField: View {
         self.onToggleVisibility = onToggleVisibility
     }
 
-    public var body: some View {
+    var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Group {

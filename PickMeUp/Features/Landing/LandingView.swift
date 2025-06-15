@@ -9,11 +9,9 @@ import SwiftUI
 
 struct LandingView: View {
     @StateObject private var store: LandingStore
-    private let container: DIContainer
 
-    init(store: LandingStore, container: DIContainer) {
+    init(store: LandingStore) {
         _store = StateObject(wrappedValue: store)
-        self.container = container
     }
 
     var body: some View {

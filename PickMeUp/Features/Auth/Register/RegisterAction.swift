@@ -8,7 +8,6 @@
 import Foundation
 
 enum RegisterAction {
-
     enum Intent {
         case updateEmail(String)
         case updateNickname(String)

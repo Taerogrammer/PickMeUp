@@ -8,8 +8,7 @@
 import Foundation
 
 struct LandingEffect {
-
-    static func handle(intent: LandingAction.Intent, state: LandingState) async -> LandingAction.Result? {
+    static func handle(intent: LandingAction.Intent, state: LandingState, router: AppRouter) async -> LandingAction.Result? {
         switch intent {
         case .login:
             return await handleLogin(state: state)
@@ -17,6 +16,9 @@ struct LandingEffect {
             return await handleAppleLogin()
         case .kakaoLoginTapped:
             return await handleKakaoLogin()
+        case .registerTapped:
+            router.navigate(to: .register)
+            return nil
         default: return nil
         }
     }

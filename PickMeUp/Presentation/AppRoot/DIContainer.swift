@@ -23,7 +23,7 @@ final class DIContainer: TabProviding, AuthViewProviding, OrderViewProviding,  P
             router: self.router,
             appLaunchState: appLaunchState
         )
-        return AnyView(LandingView(store: store, container: self))
+        return AnyView(LandingView(store: store))
     }
 
     func makeRegisterScreen() -> AnyView {
