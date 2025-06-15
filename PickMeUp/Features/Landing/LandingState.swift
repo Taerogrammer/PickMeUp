@@ -14,5 +14,10 @@ struct LandingState {
     var isPasswordVisible: Bool = false
     var isShowingRegister: Bool = false
     var loginErrorMessage: String? = nil
+    var successMessage: String? = nil
+
     var isLoading: Bool = false
+    var isLoginLoading: Bool = false
+    var isAppleLoginLoading: Bool = false
+    var isKakaoLoginLoading: Bool = false
 }

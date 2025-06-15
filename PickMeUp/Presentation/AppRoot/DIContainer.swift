@@ -17,8 +17,13 @@ final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding, 
 
     // MARK: - AuthViewProviding
     func makeLandingView(appLaunchState: AppLaunchState) -> AnyView {
-        let viewModel = LandingViewModel(router: self.router, appLaunchState: appLaunchState)
-        return AnyView(LandingView(viewModel: viewModel, container: self))
+        let state = LandingState()
+        let store = LandingStore(
+            initialState: state,
+            router: self.router,
+            appLaunchState: appLaunchState
+        )
+        return AnyView(LandingView(store: store, container: self))
     }
 
     func makeRegisterScreen() -> AnyView {

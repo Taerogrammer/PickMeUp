@@ -31,7 +31,7 @@ enum OrderRouter: APIRouter {
             return .post
         case .orderHistory:
             return .get
-        case .orderChange(request: let request):
+        case .orderChange:
             return .put
         }
     }
