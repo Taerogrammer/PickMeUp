@@ -8,20 +8,25 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @StateObject private var store: ProfileStore
-
-    init(store: ProfileStore) {
-        _store = StateObject(wrappedValue: store)
-    }
+    let store: ProfileStore
 
     var body: some View {
         VStack(spacing: 32) {
-            profileCard
-            Spacer()
+            if store.state.isLoading {
+                ProgressView("프로필을 불러오는 중...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if store.state.hasError {
+                ProfileErrorView(
+                    message: store.state.errorMessage ?? "알 수 없는 오류",
+                    onRetry: { store.send(.onAppear) }
+                )
+            } else {
+                profileCard
+                Spacer()
+            }
         }
         .padding(.top, 20)
-        .background(Color.brightSprout.ignoresSafeArea()) // ✅ 밝은 배경 적용
-        .navigationTitle("설정")
+        .background(Color.brightSprout.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .task {
             store.send(.onAppear)
@@ -32,53 +37,22 @@ struct ProfileView: View {
         let user = store.state.user
 
         return VStack(spacing: 16) {
-            Group {
-                if let image = store.state.profileImage {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                } else {
-                    Image(systemName: "person")
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundColor(.gray45)
-                        .padding(20)
-                }
-            }
-            .frame(width: 100, height: 100)
-            .background(Color.gray0)
-            .clipShape(Circle())
-            .overlay(Circle().stroke(Color.gray30, lineWidth: 2))
-            .shadow(radius: 4)
+            // 프로필 이미지
+            ProfileImageView(
+                image: store.state.profileImage,
+                hasImage: store.state.hasProfileImage
+            )
 
-            VStack(spacing: 4) {
-                Text(user.nick)
-                    .font(.pretendardTitle1)
-                    .foregroundColor(.gray90)
+            // 사용자 정보
+            ProfileInfoView(
+                displayName: store.state.displayName,
+                email: user.email,
+                phoneNumber: user.phoneNum
+            )
 
-                Text(user.email)
-                    .font(.pretendardCaption1)
-                    .foregroundColor(.gray60)
-
-                Text(user.phoneNum)
-                    .font(.pretendardCaption1)
-                    .foregroundColor(.gray60)
-            }
-
-            Button {
+            // 편집 버튼
+            ProfileEditButton {
                 store.send(.editProfileTapped)
-            } label: {
-                HStack {
-                    Text("프로필 수정")
-                        .foregroundColor(.gray90)
-                        .font(.pretendardBody2)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.gray60)
-                }
-                .padding()
-                .background(Color.gray15)
-                .cornerRadius(10)
             }
         }
         .padding()
@@ -86,17 +60,4 @@ struct ProfileView: View {
         .cornerRadius(20)
         .padding(.horizontal)
     }
-}
-
-#Preview {
-    let dummyRouter = AppRouter()
-    let dummyUser = MeProfileResponse.mock
-    let dummyState = ProfileState(user: dummyUser)
-    let store = ProfileStore(
-        state: dummyState,
-        effect: ProfileEffect(),
-        reducer: ProfileReducer(),
-        router: dummyRouter
-    )
-    return ProfileView(store: store)
 }

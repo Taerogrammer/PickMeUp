@@ -11,7 +11,7 @@ final class ProfileStore: ObservableObject {
     @Published private(set) var state: ProfileState
     private let effect: ProfileEffect
     private let reducer: ProfileReducer
-    private let router: AppRouter
+    let router: AppRouter
 
     init(
         state: ProfileState,
@@ -25,21 +25,14 @@ final class ProfileStore: ObservableObject {
         self.router = router
     }
 
-    func send(_ intent: ProfileIntent) {
-        switch intent {
-        case .onAppear:
-            effect.handleOnAppear(store: self)
+    @MainActor
+    func send(_ action: ProfileAction.Intent) {
+        reducer.reduce(state: &state, action: action)
+        effect.handle(action, store: self)
+    }
 
-        case .loadProfileImage(let path):
-            effect.handleLoadProfileImage(store: self, imagePath: path)
-
-        default:
-            reducer.reduce(state: &state, intent: intent)
-
-            if case .editProfileTapped = intent,
-               let profile = state.profile {
-                router.navigate(to: .editProfile(user: profile))
-            }
-        }
+    @MainActor
+    func send(_ result: ProfileAction.Result) {
+        reducer.reduce(state: &state, result: result)
     }
 }

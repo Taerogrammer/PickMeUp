@@ -52,8 +52,8 @@ final class DIContainer: TabProviding, AuthViewProviding, OrderViewProviding,  P
             user: MeProfileResponse.empty,
             profile: MeProfileResponse.empty.toEntity()
         )
-        let reducer = ProfileReducer()
         let effect = ProfileEffect()
+        let reducer = ProfileReducer()
 
         let store = ProfileStore(
             state: state,

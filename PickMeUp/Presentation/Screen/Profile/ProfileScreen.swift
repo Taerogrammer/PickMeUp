@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ProfileScreen: View {
-    let store: ProfileStore
+    @ObservedObject private var store: ProfileStore
 
     init(store: ProfileStore) {
         self.store = store
@@ -35,7 +35,7 @@ struct ProfileScreen: View {
             profileMenuItem(title: "탈퇴하기", textColor: .brightForsythia)
         }
         .padding(.horizontal)
-        .padding(.top, 8) // 약간의 여유 간격만 유지
+        .padding(.top, 8)
     }
 
     @ViewBuilder
@@ -50,23 +50,23 @@ struct ProfileScreen: View {
     }
 }
 
-#Preview {
-    let state = ProfileState(
-        user: MeProfileResponse(
-            user_id: "1",
-            email: "example@example.com",
-            nick: "닉네임",
-            profileImage: "",
-            phoneNum: "010-1234-5678"
-        )
-    )
-    let reducer = ProfileReducer()
-    let effect = ProfileEffect()
-    let store = ProfileStore(
-        state: state,
-        effect: effect,
-        reducer: reducer,
-        router: AppRouter()
-    )
-    ProfileScreen(store: store)
-}
+//#Preview {
+//    let state = ProfileState(
+//        user: MeProfileResponse(
+//            user_id: "1",
+//            email: "example@example.com",
+//            nick: "닉네임",
+//            profileImage: "",
+//            phoneNum: "010-1234-5678"
+//        )
+//    )
+//    let reducer = ProfileReducer()
+//    let effect = ProfileEffect()
+//    let store = ProfileStore(
+//        state: state,
+//        effect: effect,
+//        reducer: reducer,
+//        router: AppRouter()
+//    )
+//    ProfileScreen(store: store)
+//}
