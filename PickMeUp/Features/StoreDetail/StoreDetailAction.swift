@@ -31,6 +31,7 @@ enum StoreDetailAction {
 
     enum Result {
         case fetchedStoreDetail(StoreDetailResponse)
+        case fetchStoreDetailFailed(String)
         case loadCarouselImageSuccess(imageURL: String, image: UIImage)
         case loadCarouselImageFailed(imageURL: String, errorMessage: String)
         case loadMenuImageSuccess(menuID: String, image: UIImage)

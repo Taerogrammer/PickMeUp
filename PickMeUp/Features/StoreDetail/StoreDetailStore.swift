@@ -29,13 +29,16 @@ final class StoreDetailStore: ObservableObject {
 
     func send(_ action: StoreDetailAction.Intent) {
         reducer.reduce(state: &state, action: action)
+
         switch action {
         case .tapBack:
-            print(#function)
             router.pop()
+
         case .navigateToPayment(let paymentInfo):
             router.navigate(to: .payment(paymentInfo))
-        default: break
+
+        default:
+            break
         }
         effect.handle(action, store: self)
     }

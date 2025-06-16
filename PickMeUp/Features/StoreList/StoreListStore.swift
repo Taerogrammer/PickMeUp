@@ -23,7 +23,7 @@ final class StoreListStore: ObservableObject {
     func send(_ action: StoreListAction.Intent) {
         reducer.reduce(state: &state, action: action)
         if case let .tapStore(storeID) = action {
-            router.navigate(to: .storeDetail(storeID: storeID))
+            router.navigate(to: .storeDetail(storeID: storeID), in: .store)
         }
         effect.handle(action, store: self)
     }

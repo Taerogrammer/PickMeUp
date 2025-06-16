@@ -10,37 +10,43 @@ import Foundation
 struct StoreDetailReducer {
     func reduce(state: inout StoreDetailState, action: StoreDetailAction.Intent) {
         switch action {
+        case .onAppear:
+            state.isLoading = true
+
         case .selectCategory(let category):
             state.selectedCategory = category
-        case .tapLike:
+
+        case .tapLike, .tapBack, .tapPay:
             break
-        case .tapBack:
-            break
-        case .tapPay:
-            break
+
         case .showMenuDetail(let menu):
             state.selectedMenu = menu
             state.tempQuantity = state.cartItems[menu.menuID]?.quantity ?? 1
             state.isMenuSheetPresented = true
+
         case .hideMenuDetail:
             state.isMenuSheetPresented = false
             state.selectedMenu = nil
             state.tempQuantity = 1
+
         case .increaseMenuQuantity:
             state.tempQuantity += 1
+
         case .decreaseMenuQuantity:
             if state.tempQuantity > 1 {
                 state.tempQuantity -= 1
             }
+
         case .addMenuToCart:
-            break // Effect에서 처리
+            break
+
         case .removeFromCart(let menuID):
             state.cartItems.removeValue(forKey: menuID)
+
         case .clearCart:
             state.cartItems.removeAll()
-        case .navigateToPayment:
-            break
-        default:
+
+        case .loadMenuImages, .loadCarouselImages, .navigateToPayment, .tapNavigation:
             break
         }
     }
@@ -52,6 +58,10 @@ struct StoreDetailReducer {
             let cartItems = state.cartItems
             state = newState
             state.cartItems = cartItems
+            state.isLoading = false
+
+        case .fetchStoreDetailFailed(let errorMessage):
+            state.isLoading = false
 
         case .loadMenuImageSuccess(let menuID, let image):
             state.loadedMenuImages[menuID] = image
@@ -118,10 +128,6 @@ struct StoreDetailReducer {
             print("📦 주문 요청 생성됨:")
             print("Store ID: \(orderRequest.store_id)")
             print("Total Price: \(orderRequest.total_price)원")
-            print("Menu Items:")
-            for menuItem in orderRequest.order_menu_list {
-                print("  - Menu ID: \(menuItem.menu_id), Quantity: \(menuItem.quantity)")
-            }
 
         case .orderSubmissionStarted:
             state.isOrderLoading = true
@@ -132,8 +138,6 @@ struct StoreDetailReducer {
             print("✅ 주문 성공!")
             print("주문 ID: \(orderResponse.order_id)")
             print("주문 코드: \(orderResponse.order_code)")
-            print("결제 금액: \(orderResponse.total_price)원")
-            print("생성일: \(orderResponse.createdAt)")
 
         case .orderSubmissionFailed(let errorMessage):
             state.isOrderLoading = false

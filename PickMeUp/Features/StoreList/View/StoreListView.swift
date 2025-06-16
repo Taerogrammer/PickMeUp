@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct StoreListView: View {
-    @StateObject var store: StoreListStore
+    @ObservedObject var store: StoreListStore
     @State private var visibleStoreIDs: Set<String> = []
 
     init(store: StoreListStore) {
-        _store = StateObject(wrappedValue: store)
+        self.store = store
     }
 
     var body: some View {

@@ -12,27 +12,7 @@ struct StoreDetailEffect {
         switch action {
         case .onAppear:
             Task {
-                do {
-                    let result = try await NetworkManager.shared.fetch(
-                        StoreRouter.detail(query: StoreIDRequest(id: store.state.storeID)),
-                        successType: StoreDetailResponse.self,
-                        failureType: CommonMessageResponse.self
-                    )
-
-                    if let success = result.success {
-                        await MainActor.run {
-                            store.send(.fetchedStoreDetail(success))
-                            store.send(.loadMenuImages(items: success.toState().entity.menuItems))
-                            store.send(.loadCarouselImages(imageURLs: success.toState().entity.imageCarousel.imageURLs))
-                        }
-                    } else if let failure = result.failure {
-                        print("❌ 서버 오류: \(failure.message)")
-                    } else {
-                        print("❌ 알 수 없는 오류: 응답이 비어 있음")
-                    }
-                } catch {
-                    print("❌ 네트워크 오류: \(error.localizedDescription)")
-                }
+                await fetchStoreDetail(store: store)
             }
 
         case .tapLike:
@@ -46,77 +26,110 @@ struct StoreDetailEffect {
             }
 
         case .loadCarouselImages(let imageURLs):
+            print("⚡ [Effect] loadCarouselImages 처리 - \(imageURLs.count)개 이미지")
             for imageURL in imageURLs {
                 ImageLoader.load(from: imageURL, responder: CarouselImageResponder(imageURL: imageURL, store: store))
             }
 
         case .addMenuToCart:
-            guard let menu = store.state.selectedMenu else { return }
-
+            guard let menu = store.state.selectedMenu else {
+                return
+            }
             let cartItem = CartItem(menu: menu, quantity: store.state.tempQuantity)
-            print("🛒 장바구니에 추가: \(menu.name) × \(store.state.tempQuantity)")
-
             store.send(.menuAddedToCart(cartItem))
 
         case .tapPay:
-            if let orderRequest = store.state.createOrderRequest() {
-                store.send(.orderRequestCreated(orderRequest))
-
-                // 주문 API 호출
-                Task {
-                    await MainActor.run {
-                        store.send(.orderSubmissionStarted)
-                    }
-
-                    do {
-                        let result = try await NetworkManager.shared.fetch(
-                            OrderRouter.submitOrder(request: orderRequest),
-                            successType: OrderResponse.self,
-                            failureType: CommonMessageResponse.self
-                        )
-
-                        await MainActor.run {
-                            if let success = result.success {
-                                store.send(.orderSubmissionSucceeded(success))
-
-                                // 🚀 주문 성공 후 결제 화면으로 이동
-                                let paymentInfo = PaymentInfo(
-                                    orderID: success.order_id,
-                                    orderCode: success.order_code,
-                                    totalPrice: success.total_price,
-                                    storeName: store.state.entity.summary.name,
-                                    menuItems: Array(store.state.cartItems.values),
-                                    createdAt: success.createdAt
-                                )
-                                store.send(.navigateToPayment(paymentInfo))
-
-                            } else if let failure = result.failure {
-                                store.send(.orderSubmissionFailed(failure.message))
-
-                            } else {
-                                store.send(.orderSubmissionFailed("알 수 없는 오류가 발생했습니다."))
-                            }
-                        }
-
-                    } catch {
-                        await MainActor.run {
-                            store.send(.orderSubmissionFailed("네트워크 오류: \(error.localizedDescription)"))
-                        }
-                    }
-                }
-
-            } else {
-                print("❌ 장바구니가 비어있어 주문할 수 없습니다.")
+            Task {
+                await handleOrderSubmission(store: store)
             }
 
-        case .navigateToPayment:
+        case .tapBack, .navigateToPayment:
             break
+
         default:
             break
         }
     }
 
-    // MARK: - 🚀 Optimistic UI 좋아요 처리
+    // MARK: - Private Methods
+    private func fetchStoreDetail(store: StoreDetailStore) async {
+
+        do {
+            let result = try await NetworkManager.shared.fetch(
+                StoreRouter.detail(query: StoreIDRequest(id: store.state.storeID)),
+                successType: StoreDetailResponse.self,
+                failureType: CommonMessageResponse.self
+            )
+
+            if let success = result.success {
+                await MainActor.run {
+                    store.send(.fetchedStoreDetail(success))
+
+                    let stateEntity = success.toState().entity
+                    store.send(.loadMenuImages(items: stateEntity.menuItems))
+                    store.send(.loadCarouselImages(imageURLs: stateEntity.imageCarousel.imageURLs))
+                }
+            } else if let failure = result.failure {
+                await MainActor.run {
+                    store.send(.fetchStoreDetailFailed("서버 오류: \(failure.message)"))
+                }
+            } else {
+                await MainActor.run {
+                    store.send(.fetchStoreDetailFailed("알 수 없는 오류: 응답이 비어 있음"))
+                }
+            }
+        } catch {
+            await MainActor.run {
+                store.send(.fetchStoreDetailFailed("네트워크 오류: \(error.localizedDescription)"))
+            }
+        }
+    }
+
+    private func handleOrderSubmission(store: StoreDetailStore) async {
+        guard let orderRequest = store.state.createOrderRequest() else {
+            print("❌ 장바구니가 비어있어 주문할 수 없습니다.")
+            return
+        }
+
+        await MainActor.run {
+            store.send(.orderRequestCreated(orderRequest))
+            store.send(.orderSubmissionStarted)
+        }
+
+        do {
+            let result = try await NetworkManager.shared.fetch(
+                OrderRouter.submitOrder(request: orderRequest),
+                successType: OrderResponse.self,
+                failureType: CommonMessageResponse.self
+            )
+
+            await MainActor.run {
+                if let success = result.success {
+                    store.send(.orderSubmissionSucceeded(success))
+
+                    let paymentInfo = PaymentInfo(
+                        orderID: success.order_id,
+                        orderCode: success.order_code,
+                        totalPrice: success.total_price,
+                        storeName: store.state.entity.summary.name,
+                        menuItems: Array(store.state.cartItems.values),
+                        createdAt: success.createdAt
+                    )
+                    store.send(.navigateToPayment(paymentInfo))
+
+                } else if let failure = result.failure {
+                    store.send(.orderSubmissionFailed(failure.message))
+                } else {
+                    store.send(.orderSubmissionFailed("알 수 없는 오류가 발생했습니다."))
+                }
+            }
+        } catch {
+            await MainActor.run {
+                store.send(.orderSubmissionFailed("네트워크 오류: \(error.localizedDescription)"))
+            }
+        }
+    }
+
     private func handleLikeOptimistic(store: StoreDetailStore) async {
         let currentLikeStatus = store.state.entity.imageCarousel.isLiked
         let newLikeStatus = !currentLikeStatus

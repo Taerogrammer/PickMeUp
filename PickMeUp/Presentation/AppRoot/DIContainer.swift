@@ -89,13 +89,24 @@ final class DIContainer: TabProviding, AuthViewProviding, OrderViewProviding,  P
 
     // MARK: - StoreDetailViewProviding
     func makeStoreDetailScreen(storeID: String) -> AnyView {
-        return AnyView(StoreDetailScreen(storeID: storeID, router: router))
+        let state = StoreDetailState(
+            storeID: storeID,
+            entity: StoreDetailScreenEntity.placeholder(storeID: storeID),
+            isLikeLoading: false
+        )
+        let store = StoreDetailStore(
+            state: state,
+            effect: StoreDetailEffect(),
+            reducer: StoreDetailReducer(),
+            router: self.router
+        )
+        return AnyView(StoreDetailScreen(store: store))
     }
 
-    func makePaymentView(paymentInfo: PaymentInfo) -> PaymentView {
-        return PaymentView(
+    func makePaymentView(paymentInfo: PaymentInfo) -> AnyView {
+        return AnyView(PaymentView(
             paymentInfo: paymentInfo,
             router: router
-        )
+        ))
     }
 }

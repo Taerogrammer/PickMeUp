@@ -11,59 +11,40 @@ struct TabbarScreen: View {
     private let container: DIContainer
     @ObservedObject private var router: AppRouter
 
-    private let storeScreen: AnyView
-    private let orderScreen: AnyView
-    private let profileScreen: AnyView
-
     init(container: DIContainer) {
         self.container = container
         self.router = container.router
-
-        self.storeScreen = container.makeStoreScreen()
-        self.orderScreen = container.makeOrderScreen()
-        self.profileScreen = container.makeProfileScreen()
     }
 
     var body: some View {
-        TabView {
-            NavigationStack(path: $router.storeNavigationPath) {
-                storeScreen
-            }
-            .navigationDestination(for: AppRoute.self) { route in
-                handleNavigation(route: route)
-            }
-            .tabItem {
-                Image(systemName: TabItem.store.iconName)
-            }
+        NavigationStack(path: $router.currentNavigationPath) {
+            TabView(selection: $router.currentTab) {
+                container.makeStoreScreen()
+                    .tabItem {
+                        Image(systemName: TabItem.store.iconName)
+                    }
+                    .tag(TabItem.store)
 
-            NavigationStack(path: $router.orderNavigationPath) {
-                orderScreen
-            }
-            .navigationDestination(for: AppRoute.self) { route in
-                handleNavigation(route: route)
-            }
-            .tabItem {
-                Image(systemName: TabItem.orders.iconName)
-            }
+                container.makeOrderScreen()
+                    .tabItem {
+                        Image(systemName: TabItem.orders.iconName)
+                    }
+                    .tag(TabItem.orders)
 
-            NavigationStack(path: $router.friendsNavigationPath) {
-                CommunityScreen()       // TODO: - 수정
-            }
-            .navigationDestination(for: AppRoute.self) { route in
-                handleNavigation(route: route)
-            }
-            .tabItem {
-                Image(systemName: TabItem.friends.iconName)
-            }
+                CommunityScreen()
+                    .tabItem {
+                        Image(systemName: TabItem.friends.iconName)
+                    }
+                    .tag(TabItem.friends)
 
-            NavigationStack(path: $router.profileNavigationPath) {
-                profileScreen
+                container.makeProfileScreen()
+                    .tabItem {
+                        Image(systemName: TabItem.profile.iconName)
+                    }
+                    .tag(TabItem.profile)
             }
             .navigationDestination(for: AppRoute.self) { route in
                 handleNavigation(route: route)
-            }
-            .tabItem {
-                Image(systemName: TabItem.profile.iconName)
             }
         }
         .accentColor(.deepSprout)
@@ -83,7 +64,6 @@ struct TabbarScreen: View {
         }
     }
 }
-
 #Preview {
     TabbarScreen(container: DIContainer())
 }

@@ -13,6 +13,7 @@ struct StoreDetailState {
     var isLikeLoading: Bool
 
     var selectedCategory: String = "전체"
+    var isLoading: Bool = false
     var images: [UIImage] = []
     var totalPrice: Int = 0
     var totalCount: Int = 0
@@ -39,7 +40,7 @@ struct StoreDetailState {
     }
 
     var cartItemCount: Int {
-        return cartItems.count // 메뉴 종류 수
+        return cartItems.count
     }
 
     var menuTotalPrice: Int {
