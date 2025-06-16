@@ -81,8 +81,8 @@ final class DIContainer: TabProviding, AuthViewProviding, OrderViewProviding,  P
     // MARK: - StoreViewProviding
     func makeStoreScreen() -> AnyView {
         let state = StoreListState()
-        let reducer = StoreListReducer()
         let effect = StoreListEffect()
+        let reducer = StoreListReducer()
         let store = StoreListStore(
             state: state,
             effect: effect,
@@ -99,10 +99,12 @@ final class DIContainer: TabProviding, AuthViewProviding, OrderViewProviding,  P
             entity: StoreDetailScreenEntity.placeholder(storeID: storeID),
             isLikeLoading: false
         )
+        let effect = StoreDetailEffect()
+        let reducer = StoreDetailReducer()
         let store = StoreDetailStore(
             state: state,
-            effect: StoreDetailEffect(),
-            reducer: StoreDetailReducer(),
+            effect: effect,
+            reducer: reducer,
             router: self.router
         )
         return AnyView(StoreDetailScreen(store: store))

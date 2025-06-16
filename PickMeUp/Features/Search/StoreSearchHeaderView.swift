@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// TODO: - 구현 예정
 struct StoreSearchHeaderView: View {
     @State private var searchText: String = ""
 
