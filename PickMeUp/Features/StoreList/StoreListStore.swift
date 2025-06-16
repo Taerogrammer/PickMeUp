@@ -11,7 +11,7 @@ final class StoreListStore: ObservableObject {
     @Published private(set) var state: StoreListState
     private let effect: StoreListEffect
     private let reducer: StoreListReducer
-    private let router: AppRouter
+    let router: AppRouter
 
     init(state: StoreListState, effect: StoreListEffect, reducer: StoreListReducer, router: AppRouter) {
         self.state = state
@@ -20,14 +20,13 @@ final class StoreListStore: ObservableObject {
         self.router = router
     }
 
+    @MainActor
     func send(_ action: StoreListAction.Intent) {
         reducer.reduce(state: &state, action: action)
-        if case let .tapStore(storeID) = action {
-            router.navigate(to: .storeDetail(storeID: storeID), in: .store)
-        }
         effect.handle(action, store: self)
     }
 
+    @MainActor
     func send(_ result: StoreListAction.Result) {
         reducer.reduce(state: &state, result: result)
     }
