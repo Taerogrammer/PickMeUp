@@ -9,5 +9,5 @@ import SwiftUI
 
 protocol ProfileViewProviding {
     func makeProfileScreen() -> AnyView
-    func makeProfileEditView(user: ProfileEntity) -> AnyView
+    func makeProfileEditScreen(user: ProfileEntity) -> AnyView
 }

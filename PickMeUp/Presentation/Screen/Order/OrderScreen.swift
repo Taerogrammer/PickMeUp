@@ -13,7 +13,11 @@ enum OrderType: String, CaseIterable {
 }
 
 struct OrderScreen: View {
-    @StateObject private var store = OrderHistoryStore()
+    @ObservedObject private var store: OrderHistoryStore
+
+    init(store: OrderHistoryStore) {
+        self.store = store
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -29,12 +33,12 @@ struct OrderScreen: View {
 
             // 주문 리스트
             OrderHistoryContentView(
+                store: store,
                 selectedOrderType: store.state.selectedOrderType,
                 selectedOrders: store.state.selectedOrders,
                 isLoading: store.state.isLoading,
                 isRefreshing: store.state.isRefreshing,
                 errorMessage: store.state.errorMessage,
-                store: store,
                 onRefresh: {
                     store.send(.pullToRefresh)
                 },
@@ -43,12 +47,11 @@ struct OrderScreen: View {
         }
         .background(Color.gray15.ignoresSafeArea())
         .onAppear {
-            store.send(.viewOnAppear)
+            store.send(.onAppear)
         }
     }
 }
 
-
-#Preview {
-    OrderScreen()
-}
+//#Preview {
+//    OrderScreen()
+//}

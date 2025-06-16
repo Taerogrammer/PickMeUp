@@ -18,7 +18,7 @@ struct AppRootView: View {
     }
 
     var body: some View {
-        NavigationStack(path: $router.path) {
+        NavigationStack(path: $router.currentNavigationPath) {
             Group {
                 if !launchState.didCheckSession {
                     ProgressView("세션 확인 중...")
@@ -31,23 +31,14 @@ struct AppRootView: View {
                         }
                 } else {
                     if launchState.isSessionValid {
-                        container.makeTabbarScreen()
+                        TabbarScreen(container: container)
                     } else {
                         container.makeLandingView(appLaunchState: launchState)
                     }
                 }
             }
             .navigationDestination(for: AppRoute.self) { route in
-                switch route {
-                case .register:
-                    container.makeRegisterScreen()
-                case .editProfile(let user):
-                    container.makeProfileEditView(user: user)
-                case .storeDetail(let storeID):
-                    container.makeStoreDetailScreen(storeID: storeID)
-                case .payment(let paymentInfo):
-                    container.makePaymentView(paymentInfo: paymentInfo)
-                }
+                container.handleNavigation(route: route)
             }
         }
     }

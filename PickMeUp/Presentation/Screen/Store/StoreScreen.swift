@@ -8,7 +8,12 @@
 import SwiftUI
 
 struct StoreScreen: View {
-    let store: StoreListStore
+    @ObservedObject private var store: StoreListStore
+
+    init(store: StoreListStore) {
+        self.store = store
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             StoreSearchHeaderView()
@@ -18,6 +23,6 @@ struct StoreScreen: View {
     }
 }
 
-#Preview {
-    StoreScreen(store: .preview)
-}
+//#Preview {
+//    StoreScreen(store: .preview)
+//}

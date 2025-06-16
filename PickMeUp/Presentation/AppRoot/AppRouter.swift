@@ -8,13 +8,29 @@
 import SwiftUI
 
 final class AppRouter: ObservableObject {
-    @Published var path = NavigationPath()
+    @Published var currentTab: TabItem = .store
+    @Published var currentNavigationPath = NavigationPath()
 
-    func navigate(to route: AppRoute) { path.append(route) }
-
-    func reset() { path = NavigationPath() }
+    func navigate(to route: AppRoute) {
+        navigate(to: route, in: currentTab)
+    }
 
     func pop() {
-        if !path.isEmpty { path.removeLast() }
+        if !currentNavigationPath.isEmpty {
+            currentNavigationPath.removeLast()
+        }
+    }
+
+    func reset() {
+        currentNavigationPath = NavigationPath()
+    }
+
+    func navigate(to route: AppRoute, in tab: TabItem) {
+        currentTab = tab
+        currentNavigationPath.append(route)
+    }
+
+    func currentPathCount() -> Int {
+        return currentNavigationPath.count
     }
 }

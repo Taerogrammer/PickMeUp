@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding, StoreViewProviding, StoreDetailViewProviding {
+final class DIContainer: TabProviding, AuthViewProviding, OrderViewProviding,  ProfileViewProviding, StoreViewProviding, StoreDetailViewProviding {
     let router = AppRouter()
 
     // MARK: - TabProviding
@@ -17,13 +17,33 @@ final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding, 
 
     // MARK: - AuthViewProviding
     func makeLandingView(appLaunchState: AppLaunchState) -> AnyView {
-        let viewModel = LandingViewModel(router: self.router, appLaunchState: appLaunchState)
-        return AnyView(LandingView(viewModel: viewModel, container: self))
+        let state = LandingState()
+        let store = LandingStore(
+            initialState: state,
+            router: self.router,
+            appLaunchState: appLaunchState
+        )
+        return AnyView(LandingView(store: store))
     }
 
     func makeRegisterScreen() -> AnyView {
         let store = RegisterStore(router: router)
         return AnyView(RegisterScreen(store: store))
+    }
+
+    // MARK: - OrderViewProviding
+    func makeOrderScreen() -> AnyView {
+        let state = OrderHistoryState()
+        let effect = OrderHistoryEffect()
+        let reducer = OrderHistoryReducer()
+
+        let store = OrderHistoryStore(
+            state: state,
+            effect: effect,
+            reducer: reducer
+        )
+
+        return AnyView(OrderScreen(store: store))
     }
 
     // MARK: - ProfileViewProviding
@@ -32,8 +52,8 @@ final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding, 
             user: MeProfileResponse.empty,
             profile: MeProfileResponse.empty.toEntity()
         )
-        let reducer = ProfileReducer()
         let effect = ProfileEffect()
+        let reducer = ProfileReducer()
 
         let store = ProfileStore(
             state: state,
@@ -45,19 +65,24 @@ final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding, 
         return AnyView(ProfileScreen(store: store))
     }
 
-    func makeProfileEditView(user: ProfileEntity) -> AnyView {
+    func makeProfileEditScreen(user: ProfileEntity) -> AnyView {
         let state = ProfileEditState(profile: user)
-        let reducer = ProfileEditReducer()
         let effect = ProfileEditEffect()
-        let store = ProfileEditStore(state: state, reducer: reducer, effect: effect, router: router)
-        return AnyView(ProfileEditView(store: store))
+        let reducer = ProfileEditReducer()
+        let store = ProfileEditStore(
+            state: state,
+            reducer: reducer,
+            effect: effect,
+            router: self.router
+        )
+        return AnyView(ProfileEditScreen(store: store))
     }
 
     // MARK: - StoreViewProviding
     func makeStoreScreen() -> AnyView {
         let state = StoreListState()
-        let reducer = StoreListReducer()
         let effect = StoreListEffect()
+        let reducer = StoreListReducer()
         let store = StoreListStore(
             state: state,
             effect: effect,
@@ -69,13 +94,43 @@ final class DIContainer: TabProviding, AuthViewProviding, ProfileViewProviding, 
 
     // MARK: - StoreDetailViewProviding
     func makeStoreDetailScreen(storeID: String) -> AnyView {
-        return AnyView(StoreDetailScreen(storeID: storeID, router: router))
+        let state = StoreDetailState(
+            storeID: storeID,
+            entity: StoreDetailScreenEntity.placeholder(storeID: storeID),
+            isLikeLoading: false
+        )
+        let effect = StoreDetailEffect()
+        let reducer = StoreDetailReducer()
+        let store = StoreDetailStore(
+            state: state,
+            effect: effect,
+            reducer: reducer,
+            router: self.router
+        )
+        return AnyView(StoreDetailScreen(store: store))
     }
 
-    func makePaymentView(paymentInfo: PaymentInfo) -> PaymentView {
-        return PaymentView(
+    func makePaymentView(paymentInfo: PaymentInfoEntity) -> AnyView {
+        return AnyView(PaymentView(
             paymentInfo: paymentInfo,
             router: router
-        )
+        ))
     }
 }
+
+extension DIContainer {
+    @ViewBuilder
+    func handleNavigation(route: AppRoute) -> some View {
+        switch route {
+        case .register:
+            makeRegisterScreen()
+        case .editProfile(let user):
+            makeProfileEditScreen(user: user)
+        case .storeDetail(let storeID):
+            makeStoreDetailScreen(storeID: storeID)
+        case .payment(let paymentInfo):
+            makePaymentView(paymentInfo: paymentInfo)
+        }
+    }
+}
+

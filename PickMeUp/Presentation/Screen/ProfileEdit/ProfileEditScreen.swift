@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct ProfileEditScreen: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
-}
+    @ObservedObject private var store: ProfileEditStore
 
-#Preview {
-    ProfileEditScreen()
+    init(store: ProfileEditStore) {
+        self.store = store
+    }
+
+    var body: some View {
+        ProfileEditView(store: store)
+    }
 }
