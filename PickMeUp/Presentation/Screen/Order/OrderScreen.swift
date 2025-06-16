@@ -33,12 +33,12 @@ struct OrderScreen: View {
 
             // 주문 리스트
             OrderHistoryContentView(
+                store: store,
                 selectedOrderType: store.state.selectedOrderType,
                 selectedOrders: store.state.selectedOrders,
                 isLoading: store.state.isLoading,
                 isRefreshing: store.state.isRefreshing,
                 errorMessage: store.state.errorMessage,
-                store: store,
                 onRefresh: {
                     store.send(.pullToRefresh)
                 },

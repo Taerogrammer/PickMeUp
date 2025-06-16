@@ -43,14 +43,14 @@ struct OrderHistorySegmentedControlView: View {
 
 
 struct OrderHistoryContentView: View {
+    let store: OrderHistoryStore
     let selectedOrderType: OrderType
-    let selectedOrders: [OrderDataEntity] // OrderData → OrderDataEntity 변경
+    let selectedOrders: [OrderDataEntity]
     let isLoading: Bool
     let isRefreshing: Bool
     let errorMessage: String?
-    let store: OrderHistoryStore // Store 의존성 추가
     let onRefresh: () -> Void
-    let pastOrders: [OrderDataEntity] // pastOrders 파라미터 추가
+    let pastOrders: [OrderDataEntity]
 
     var body: some View {
         if isLoading && selectedOrders.isEmpty {
@@ -68,31 +68,31 @@ struct OrderHistoryContentView: View {
         } else {
             // 주문 리스트
             OrderHistoryListView(
+                store: store,
                 orders: selectedOrders,
                 orderType: selectedOrderType,
                 isRefreshing: isRefreshing,
-                onRefresh: onRefresh,
-                store: store
+                onRefresh: onRefresh
             )
         }
     }
 }
 
 struct OrderHistoryListView: View {
-    let orders: [OrderDataEntity]    // OrderData → OrderDataEntity 변경
+    let store: OrderHistoryStore
+    let orders: [OrderDataEntity]
     let orderType: OrderType
     let isRefreshing: Bool
     let onRefresh: () -> Void
-    let store: OrderHistoryStore     // Store 의존성 추가
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 20) {
                 ForEach(Array(orders.enumerated()), id: \.element.orderID) { index, order in
                     if orderType == .current {
-                        OrderStatusView(orderData: order, store: store) // Store 주입
+                        OrderStatusView(store: store, orderData: order)
                     } else {
-                        PastOrderCard(orderData: order) // 개별 order 전달
+                        PastOrderCard(orderData: order)
                     }
                 }
             }

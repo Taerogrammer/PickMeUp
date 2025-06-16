@@ -8,22 +8,22 @@
 import SwiftUI
 
 struct OrderStatusView: View {
-    let orderData: OrderDataEntity
     @ObservedObject var store: OrderHistoryStore
+    let orderData: OrderDataEntity
 
     var body: some View {
         if orderData.orderStatus == "PICKED_UP" {
             EmptyView()
         } else {
-            OrderStatusCard(orderData: orderData, store: store)
+            OrderStatusCard(store: store, orderData: orderData)
         }
     }
 }
 
 // MARK: - OrderStatusCard
 struct OrderStatusCard: View {
-    let orderData: OrderDataEntity
     @ObservedObject var store: OrderHistoryStore
+    let orderData: OrderDataEntity
 
     var body: some View {
         VStack(spacing: 16) {
@@ -32,11 +32,11 @@ struct OrderStatusCard: View {
             VStack(spacing: 20) {
                 OrderInfoSection(orderData: orderData)
                 OrderTimelineSection(orderData: orderData)
-                OrderMenuSection(orderData: orderData, store: store)
+                OrderMenuSection(store: store, orderData: orderData)
                 OrderPaymentSection(orderData: orderData)
 
                 if OrderStatusHelper.shouldShowActionButton(for: orderData.orderStatus) {
-                    OrderStatusActionSection(orderData: orderData, store: store)
+                    OrderStatusActionSection(store: store, orderData: orderData)
                 }
             }
             .padding(.horizontal, 20)

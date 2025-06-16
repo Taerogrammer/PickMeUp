@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+//TODO: - Binding 해결
 struct OrderSegmentedControlView: View {
     @Binding var selectedOrderType: OrderType
     let currentOrdersCount: Int
@@ -37,15 +38,15 @@ struct OrderSegmentedControlView: View {
 }
 
 struct OrderTabView: View {
+    let store: OrderHistoryStore
     @Binding var selectedOrderType: OrderType
-    let currentOrders: [OrderDataEntity] // OrderData → OrderDataEntity 변경
-    let pastOrders: [OrderDataEntity]    // OrderData → OrderDataEntity 필요
-    let store: OrderHistoryStore         // Store 의존성 추가
+    let currentOrders: [OrderDataEntity]
+    let pastOrders: [OrderDataEntity]
 
     var body: some View {
         TabView(selection: $selectedOrderType) {
             // 진행중인 주문
-            CurrentOrderListView(orders: currentOrders, store: store) // Store 주입
+            CurrentOrderListView(store: store, orders: currentOrders) // Store 주입
                 .tag(OrderType.current)
 
             // 과거 주문

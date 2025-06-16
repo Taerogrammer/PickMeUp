@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct OrderMenuSection: View {
+    let store: OrderHistoryStore
     let orderData: OrderDataEntity
-    @ObservedObject var store: OrderHistoryStore // 🔥 Store 추가
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -18,9 +18,9 @@ struct OrderMenuSection: View {
             VStack(spacing: 12) {
                 ForEach(Array(orderData.orderMenuList.enumerated()), id: \.offset) { index, menuItem in
                     OrderMenuItemView(
+                        store: store,
                         menuItem: menuItem,
-                        orderCode: orderData.orderCode, // 🔥 orderCode 전달
-                        store: store // 🔥 store 전달
+                        orderCode: orderData.orderCode
                     )
                 }
             }

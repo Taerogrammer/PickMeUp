@@ -32,7 +32,6 @@ struct OrderInfoSection: View {
 
             Divider().background(Color.gray15)
 
-            // 매장명과 주문시간을 한 줄에 표시
             HStack {
                 HStack(spacing: 6) {
                     Image(systemName: "storefront.fill")

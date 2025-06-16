@@ -8,11 +8,7 @@
 import SwiftUI
 
 struct RegisterView: View {
-    @ObservedObject private var store: RegisterStore
-
-    init(store: RegisterStore) {
-        self.store = store
-    }
+    let store: RegisterStore
 
     public var body: some View {
         VStack(spacing: 16) {

@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct OrderStatusActionSection: View {
+    let store: OrderHistoryStore
     let orderData: OrderDataEntity
-    @ObservedObject var store: OrderHistoryStore
 
     var body: some View {
         VStack(spacing: 12) {

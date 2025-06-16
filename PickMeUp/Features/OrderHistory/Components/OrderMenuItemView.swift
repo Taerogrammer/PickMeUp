@@ -8,16 +8,14 @@
 import SwiftUI
 
 struct OrderMenuItemView: View {
+    let store: OrderHistoryStore
     let menuItem: OrderMenuEntity
     let orderCode: String
-    @ObservedObject var store: OrderHistoryStore
 
     var body: some View {
         HStack(spacing: 16) {
-            // 🔥 실제 이미지 또는 플레이스홀더
             menuImageView
 
-            // 메뉴 정보
             VStack(alignment: .leading, spacing: 6) {
                 Text(menuItem.menu.name)
                     .font(.pretendardBody1)
@@ -66,11 +64,9 @@ struct OrderMenuItemView: View {
         }
     }
 
-    // 🔥 메뉴 이미지 뷰
     @ViewBuilder
     private var menuImageView: some View {
         if let image = store.state.getMenuImage(orderCode: orderCode, menuID: menuItem.menu.id) {
-            // 로딩된 이미지 표시
             Image(uiImage: image)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
@@ -78,7 +74,6 @@ struct OrderMenuItemView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
         } else {
-            // 플레이스홀더
             ZStack {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(LinearGradient(
