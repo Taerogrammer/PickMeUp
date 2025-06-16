@@ -11,7 +11,7 @@ final class StoreDetailStore: ObservableObject {
     @Published private(set) var state: StoreDetailState
     private let effect: StoreDetailEffect
     private let reducer: StoreDetailReducer
-    private let router: AppRouter
+    let router: AppRouter
 
     init(state: StoreDetailState, effect: StoreDetailEffect, reducer: StoreDetailReducer, router: AppRouter) {
         self.state = state
@@ -23,26 +23,21 @@ final class StoreDetailStore: ObservableObject {
     var isMenuSheetPresentedBinding: Binding<Bool> {
         Binding(
             get: { self.state.isMenuSheetPresented },
-            set: { _ in self.send(.hideMenuDetail) }
+            set: { _ in
+                Task { @MainActor in
+                    self.send(.hideMenuDetail)
+                }
+            }
         )
     }
 
+    @MainActor
     func send(_ action: StoreDetailAction.Intent) {
         reducer.reduce(state: &state, action: action)
-
-        switch action {
-        case .tapBack:
-            router.pop()
-
-        case .navigateToPayment(let paymentInfo):
-            router.navigate(to: .payment(paymentInfo))
-
-        default:
-            break
-        }
         effect.handle(action, store: self)
     }
 
+    @MainActor
     func send(_ result: StoreDetailAction.Result) {
         reducer.reduce(state: &state, result: result)
     }

@@ -32,19 +32,28 @@ struct StoreDetailEffect {
             }
 
         case .addMenuToCart:
-            guard let menu = store.state.selectedMenu else {
-                return
+            Task { @MainActor in
+                guard let menu = store.state.selectedMenu else {
+                    return
+                }
+                let cartItem = CartItem(menu: menu, quantity: store.state.tempQuantity)
+                store.send(.menuAddedToCart(cartItem))
             }
-            let cartItem = CartItem(menu: menu, quantity: store.state.tempQuantity)
-            store.send(.menuAddedToCart(cartItem))
 
         case .tapPay:
             Task {
                 await handleOrderSubmission(store: store)
             }
 
-        case .tapBack, .navigateToPayment:
-            break
+        case .tapBack:
+            Task { @MainActor in
+                store.router.pop()
+            }
+
+        case .navigateToPayment(let paymentInfo):
+            Task { @MainActor in
+                store.router.navigate(to: .payment(paymentInfo))
+            }
 
         default:
             break
@@ -52,8 +61,8 @@ struct StoreDetailEffect {
     }
 
     // MARK: - Private Methods
+    @MainActor
     private func fetchStoreDetail(store: StoreDetailStore) async {
-
         do {
             let result = try await NetworkManager.shared.fetch(
                 StoreRouter.detail(query: StoreIDRequest(id: store.state.storeID)),
@@ -62,39 +71,30 @@ struct StoreDetailEffect {
             )
 
             if let success = result.success {
-                await MainActor.run {
-                    store.send(.fetchedStoreDetail(success))
+                store.send(.fetchedStoreDetail(success))
 
-                    let stateEntity = success.toState().entity
-                    store.send(.loadMenuImages(items: stateEntity.menuItems))
-                    store.send(.loadCarouselImages(imageURLs: stateEntity.imageCarousel.imageURLs))
-                }
+                let stateEntity = success.toState().entity
+                store.send(.loadMenuImages(items: stateEntity.menuItems))
+                store.send(.loadCarouselImages(imageURLs: stateEntity.imageCarousel.imageURLs))
             } else if let failure = result.failure {
-                await MainActor.run {
-                    store.send(.fetchStoreDetailFailed("서버 오류: \(failure.message)"))
-                }
+                store.send(.fetchStoreDetailFailed("서버 오류: \(failure.message)"))
             } else {
-                await MainActor.run {
-                    store.send(.fetchStoreDetailFailed("알 수 없는 오류: 응답이 비어 있음"))
-                }
+                store.send(.fetchStoreDetailFailed("알 수 없는 오류: 응답이 비어 있음"))
             }
         } catch {
-            await MainActor.run {
-                store.send(.fetchStoreDetailFailed("네트워크 오류: \(error.localizedDescription)"))
-            }
+            store.send(.fetchStoreDetailFailed("네트워크 오류: \(error.localizedDescription)"))
         }
     }
 
+    @MainActor
     private func handleOrderSubmission(store: StoreDetailStore) async {
         guard let orderRequest = store.state.createOrderRequest() else {
             print("❌ 장바구니가 비어있어 주문할 수 없습니다.")
             return
         }
 
-        await MainActor.run {
-            store.send(.orderRequestCreated(orderRequest))
-            store.send(.orderSubmissionStarted)
-        }
+        store.send(.orderRequestCreated(orderRequest))
+        store.send(.orderSubmissionStarted)
 
         do {
             let result = try await NetworkManager.shared.fetch(
@@ -103,43 +103,38 @@ struct StoreDetailEffect {
                 failureType: CommonMessageResponse.self
             )
 
-            await MainActor.run {
-                if let success = result.success {
-                    store.send(.orderSubmissionSucceeded(success))
+            if let success = result.success {
+                store.send(.orderSubmissionSucceeded(success))
 
-                    let paymentInfo = PaymentInfoEntity(
-                        orderID: success.order_id,
-                        orderCode: success.order_code,
-                        totalPrice: success.total_price,
-                        storeName: store.state.entity.summary.name,
-                        menuItems: Array(store.state.cartItems.values),
-                        createdAt: success.createdAt
-                    )
-                    store.send(.navigateToPayment(paymentInfo))
+                let paymentInfo = PaymentInfoEntity(
+                    orderID: success.order_id,
+                    orderCode: success.order_code,
+                    totalPrice: success.total_price,
+                    storeName: store.state.entity.summary.name,
+                    menuItems: Array(store.state.cartItems.values),
+                    createdAt: success.createdAt
+                )
+                store.send(.navigateToPayment(paymentInfo))
 
-                } else if let failure = result.failure {
-                    store.send(.orderSubmissionFailed(failure.message))
-                } else {
-                    store.send(.orderSubmissionFailed("알 수 없는 오류가 발생했습니다."))
-                }
+            } else if let failure = result.failure {
+                store.send(.orderSubmissionFailed(failure.message))
+            } else {
+                store.send(.orderSubmissionFailed("알 수 없는 오류가 발생했습니다."))
             }
         } catch {
-            await MainActor.run {
-                store.send(.orderSubmissionFailed("네트워크 오류: \(error.localizedDescription)"))
-            }
+            store.send(.orderSubmissionFailed("네트워크 오류: \(error.localizedDescription)"))
         }
     }
 
+    @MainActor
     private func handleLikeOptimistic(store: StoreDetailStore) async {
         let currentLikeStatus = store.state.entity.imageCarousel.isLiked
         let newLikeStatus = !currentLikeStatus
 
         print("🚀 [Optimistic UI 시작] \(currentLikeStatus) → \(newLikeStatus)")
 
-        await MainActor.run {
-            store.send(.likeOptimistic(isLiked: newLikeStatus))
-            store.send(.setLikeLoading(isLoading: true))
-        }
+        store.send(.likeOptimistic(isLiked: newLikeStatus))
+        store.send(.setLikeLoading(isLoading: true))
 
         let request = StoreLikeRequest(like_status: newLikeStatus)
 
@@ -150,29 +145,25 @@ struct StoreDetailEffect {
                 failureType: CommonMessageResponse.self
             )
 
-            await MainActor.run {
-                store.send(.setLikeLoading(isLoading: false))
+            store.send(.setLikeLoading(isLoading: false))
 
-                if let success = result.success {
-                    if success.like_status != newLikeStatus {
-                        print("⚠️ 서버와 로컬 상태 불일치 - 서버 상태로 복구")
-                        store.send(.likeSuccess(isLiked: success.like_status))
-                    } else {
-                        print("✅ 서버와 로컬 상태 일치 - Optimistic UI 성공")
-                    }
-                } else if let failure = result.failure {
-                    print("❌ 좋아요 실패 - 원래 상태로 복구: \(failure.message)")
-                    store.send(.likeRollback(isLiked: currentLikeStatus))
-                    store.send(.likeFailed(errorMessage: failure.message))
+            if let success = result.success {
+                if success.like_status != newLikeStatus {
+                    print("⚠️ 서버와 로컬 상태 불일치 - 서버 상태로 복구")
+                    store.send(.likeSuccess(isLiked: success.like_status))
+                } else {
+                    print("✅ 서버와 로컬 상태 일치 - Optimistic UI 성공")
                 }
+            } else if let failure = result.failure {
+                print("❌ 좋아요 실패 - 원래 상태로 복구: \(failure.message)")
+                store.send(.likeRollback(isLiked: currentLikeStatus))
+                store.send(.likeFailed(errorMessage: failure.message))
             }
         } catch {
             print("📦 [네트워크 에러 - 롤백]: \(error)")
-            await MainActor.run {
-                store.send(.setLikeLoading(isLoading: false))
-                store.send(.likeRollback(isLiked: currentLikeStatus))
-                store.send(.likeFailed(errorMessage: error.localizedDescription))
-            }
+            store.send(.setLikeLoading(isLoading: false))
+            store.send(.likeRollback(isLiked: currentLikeStatus))
+            store.send(.likeFailed(errorMessage: error.localizedDescription))
         }
     }
 }
