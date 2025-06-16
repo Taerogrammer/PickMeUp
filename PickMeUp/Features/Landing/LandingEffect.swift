@@ -17,9 +17,12 @@ struct LandingEffect {
         case .kakaoLoginTapped:
             return await handleKakaoLogin()
         case .registerTapped:
-            router.navigate(to: .register)
+            await MainActor.run {
+                router.navigate(to: .register)
+            }
             return nil
-        default: return nil
+        default:
+            return nil
         }
     }
 

@@ -110,3 +110,20 @@ final class DIContainer: TabProviding, AuthViewProviding, OrderViewProviding,  P
         ))
     }
 }
+
+extension DIContainer {
+    @ViewBuilder
+    func handleNavigation(route: AppRoute) -> some View {
+        switch route {
+        case .register:
+            makeRegisterScreen()
+        case .editProfile(let user):
+            makeProfileEditView(user: user)
+        case .storeDetail(let storeID):
+            makeStoreDetailScreen(storeID: storeID)
+        case .payment(let paymentInfo):
+            makePaymentView(paymentInfo: paymentInfo)
+        }
+    }
+}
+
