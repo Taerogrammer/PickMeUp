@@ -50,9 +50,9 @@
 			path = Presentation;
 			sourceTree = "<group>";
 		};
-		1624FD202DEABE54005ABB6C /* Utilities */ = {
+		163047CB2E00490B0059BFE7 /* Shared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Utilities;
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		164E9A472DCE545200C348AB /* App */ = {
@@ -86,16 +86,6 @@
 				16F1011D2DD0B380001562D9 /* Exceptions for "Resources" folder in "PickMeUp" target */,
 			);
 			path = Resources;
-			sourceTree = "<group>";
-		};
-		164E9ACE2DD085D900C348AB /* Components */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Components;
-			sourceTree = "<group>";
-		};
-		167A43C62DD09C3C00A7C968 /* DesignSystem */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = DesignSystem;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -132,12 +122,10 @@
 				165FE7B32DE1904100BD15BD /* PickMeUp.entitlements */,
 				164E9A472DCE545200C348AB /* App */,
 				164E9A762DCE5F7000C348AB /* Core */,
-				164E9ACE2DD085D900C348AB /* Components */,
-				167A43C62DD09C3C00A7C968 /* DesignSystem */,
 				164E9AC92DD081E300C348AB /* Features */,
 				1624FC222DEA054B005ABB6C /* Presentation */,
 				164E9ACD2DD083C500C348AB /* Resources */,
-				1624FD202DEABE54005ABB6C /* Utilities */,
+				163047CB2E00490B0059BFE7 /* Shared */,
 				164E9A582DCE545400C348AB /* PickMeUpTests */,
 				164E9A622DCE545400C348AB /* PickMeUpUITests */,
 				164E9A462DCE545200C348AB /* Products */,
@@ -171,13 +159,11 @@
 			);
 			fileSystemSynchronizedGroups = (
 				1624FC222DEA054B005ABB6C /* Presentation */,
-				1624FD202DEABE54005ABB6C /* Utilities */,
+				163047CB2E00490B0059BFE7 /* Shared */,
 				164E9A472DCE545200C348AB /* App */,
 				164E9A762DCE5F7000C348AB /* Core */,
 				164E9AC92DD081E300C348AB /* Features */,
 				164E9ACD2DD083C500C348AB /* Resources */,
-				164E9ACE2DD085D900C348AB /* Components */,
-				167A43C62DD09C3C00A7C968 /* DesignSystem */,
 			);
 			name = PickMeUp;
 			packageProductDependencies = (
