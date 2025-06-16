@@ -10,16 +10,16 @@ import SwiftUI
 struct OrderHistoryEffect {
     func handle(_ action: OrderHistoryAction.Intent, store: OrderHistoryStore) {
         switch action {
-        case .viewOnAppear:
+        case .onAppear:
             Task {
                 await loadInitialOrders(store: store)
                 await requestNotificationPermission(store: store)
             }
 
-        case .selectOrderType(let orderType):
-            store.send(.orderTypeSelected(orderType))
+        case .selectOrderType:
+            break
 
-        case .refreshOrders:
+        case .refresh:
             Task {
                 await refreshAllOrders(store: store)
             }
@@ -44,15 +44,15 @@ struct OrderHistoryEffect {
         }
     }
 
+    // MARK: - Private Methods
     private func loadMenuImage(orderCode: String, menuID: String, imageUrl: String, store: OrderHistoryStore) {
         let responder = OrderMenuImageResponder(orderCode: orderCode, menuID: menuID, store: store)
         ImageLoader.load(from: imageUrl, responder: responder)
     }
 
+    @MainActor
     private func loadInitialOrders(store: OrderHistoryStore) async {
-        await MainActor.run {
-            store.send(.ordersLoading)
-        }
+        store.send(.ordersLoading)
 
         do {
             let response = try await NetworkManager.shared.fetch(
@@ -77,30 +77,23 @@ struct OrderHistoryEffect {
                 let currentOrderDataEntities = currentOrders.map { convertToOrderDataEntity($0) }
                 let pastOrderDataEntities = pastOrders.map { convertToOrderDataEntity($0) }
 
-                await MainActor.run {
-                    store.send(.currentOrdersLoaded(currentOrderDataEntities))
-                    store.send(.pastOrdersLoaded(pastOrderDataEntities))
+                store.send(.currentOrdersLoaded(currentOrderDataEntities))
+                store.send(.pastOrdersLoaded(pastOrderDataEntities))
 
-                    loadAllMenuImages(orders: currentOrderDataEntities + pastOrderDataEntities, store: store)
+                loadAllMenuImages(orders: currentOrderDataEntities + pastOrderDataEntities, store: store)
 
-                    print("✅ [OrderHistoryEffect] 주문 내역 로드 성공 - 진행중: \(currentOrders.count)개, 과거: \(pastOrders.count)개")
-                }
+                print("✅ [OrderHistoryEffect] 주문 내역 로드 성공 - 진행중: \(currentOrders.count)개, 과거: \(pastOrders.count)개")
             } else if let error = response.failure {
-                await MainActor.run {
-                    store.send(.ordersLoadingFailed(error.message))
-                    print("❌ [OrderHistoryEffect] 주문 내역 로드 실패: \(error.message)")
-                }
+                store.send(.ordersLoadingFailed(error.message))
+                print("❌ [OrderHistoryEffect] 주문 내역 로드 실패: \(error.message)")
             }
         } catch {
-            await MainActor.run {
-                store.send(.ordersLoadingFailed(error.localizedDescription))
-                print("❌ [OrderHistoryEffect] 주문 내역 로드 에러: \(error.localizedDescription)")
-            }
+            store.send(.ordersLoadingFailed(error.localizedDescription))
+            print("❌ [OrderHistoryEffect] 주문 내역 로드 에러: \(error.localizedDescription)")
         }
     }
 
-    // 🔥 모든 메뉴 이미지 로딩
-    private func loadAllMenuImages(orders: [OrderDataEntity], store: OrderHistoryStore) {
+    @MainActor private func loadAllMenuImages(orders: [OrderDataEntity], store: OrderHistoryStore) {
        for order in orders {
            for menuItem in order.orderMenuList {
                let imageUrl = menuItem.menu.menuImageUrl
@@ -115,6 +108,7 @@ struct OrderHistoryEffect {
        }
     }
 
+    @MainActor
     private func refreshAllOrders(store: OrderHistoryStore) async {
        do {
            let response = try await NetworkManager.shared.fetch(
@@ -139,28 +133,22 @@ struct OrderHistoryEffect {
                let currentOrderDataEntities = currentOrders.map { convertToOrderDataEntity($0) }
                let pastOrderDataEntities = pastOrders.map { convertToOrderDataEntity($0) }
 
-               await MainActor.run {
-                   store.send(.currentOrdersLoaded(currentOrderDataEntities))
-                   store.send(.pastOrdersLoaded(pastOrderDataEntities))
-                   store.send(.refreshCompleted)
+               store.send(.currentOrdersLoaded(currentOrderDataEntities))
+               store.send(.pastOrdersLoaded(pastOrderDataEntities))
+               store.send(.refreshCompleted)
 
-                   loadAllMenuImages(orders: currentOrderDataEntities + pastOrderDataEntities, store: store)
+               loadAllMenuImages(orders: currentOrderDataEntities + pastOrderDataEntities, store: store)
 
-                   print("✅ [OrderHistoryEffect] 주문 내역 새로고침 성공 - 진행중: \(currentOrders.count)개, 과거: \(pastOrders.count)개")
-               }
+               print("✅ [OrderHistoryEffect] 주문 내역 새로고침 성공 - 진행중: \(currentOrders.count)개, 과거: \(pastOrders.count)개")
            } else if let error = response.failure {
-               await MainActor.run {
-                   store.send(.ordersLoadingFailed(error.message))
-                   store.send(.refreshCompleted)
-                   print("❌ [OrderHistoryEffect] 주문 내역 새로고침 실패: \(error.message)")
-               }
+               store.send(.ordersLoadingFailed(error.message))
+               store.send(.refreshCompleted)
+               print("❌ [OrderHistoryEffect] 주문 내역 새로고침 실패: \(error.message)")
            }
        } catch {
-           await MainActor.run {
-               store.send(.ordersLoadingFailed(error.localizedDescription))
-               store.send(.refreshCompleted)
-               print("❌ [OrderHistoryEffect] 주문 내역 새로고침 에러: \(error.localizedDescription)")
-           }
+           store.send(.ordersLoadingFailed(error.localizedDescription))
+           store.send(.refreshCompleted)
+           print("❌ [OrderHistoryEffect] 주문 내역 새로고침 에러: \(error.localizedDescription)")
        }
     }
 
@@ -182,6 +170,7 @@ struct OrderHistoryEffect {
         )
     }
 
+    @MainActor
     private func updateOrderStatus(orderCode: String, currentStatus: String, store: OrderHistoryStore) async {
        let nextStatus = getNextStatus(from: currentStatus)
 
@@ -198,35 +187,28 @@ struct OrderHistoryEffect {
            if response.success != nil {
                print("✅ 주문 상태 변경 성공: \(nextStatus)")
 
-               await MainActor.run {
-                   if nextStatus == "PICKED_UP" {
-                       store.send(.orderCompleted(orderCode: orderCode))
-                       sendPickupCompletedNotification(orderCode: orderCode, store: store)
-                   } else {
-                       store.send(.orderStatusUpdated(orderCode: orderCode, newStatus: nextStatus))
+               if nextStatus == "PICKED_UP" {
+                   store.send(.orderCompleted(orderCode: orderCode))
+                   sendPickupCompletedNotification(orderCode: orderCode, store: store)
+               } else {
+                   store.send(.orderStatusUpdated(orderCode: orderCode, newStatus: nextStatus))
 
-                       if nextStatus == "READY_FOR_PICKUP" {
-                           sendPickupReadyNotification(orderCode: orderCode, store: store)
-                       }
+                   if nextStatus == "READY_FOR_PICKUP" {
+                       sendPickupReadyNotification(orderCode: orderCode, store: store)
                    }
                }
            } else if let error = response.failure {
-               await MainActor.run {
-                   store.send(.orderStatusUpdateFailed(orderCode: orderCode, error: error.message))
-               }
+               store.send(.orderStatusUpdateFailed(orderCode: orderCode, error: error.message))
            }
        } catch {
-           await MainActor.run {
-               store.send(.orderStatusUpdateFailed(orderCode: orderCode, error: error.localizedDescription))
-           }
+           store.send(.orderStatusUpdateFailed(orderCode: orderCode, error: error.localizedDescription))
        }
     }
 
+    @MainActor
     private func requestNotificationPermission(store: OrderHistoryStore) async {
        let granted = await LocalNotificationManager.shared.requestPermission()
-       await MainActor.run {
-           store.send(.notificationPermissionUpdated(granted))
-       }
+       store.send(.notificationPermissionUpdated(granted))
     }
 
     private func sendPickupReadyNotification(orderCode: String, store: OrderHistoryStore) {
@@ -267,7 +249,7 @@ struct OrderHistoryEffect {
     }
 }
 
-final class OrderMenuImageResponder: ImageLoadRespondable {
+final class OrderMenuImageResponder: @preconcurrency ImageLoadRespondable {
     private let orderCode: String
     private let menuID: String
     private let store: OrderHistoryStore
@@ -278,11 +260,11 @@ final class OrderMenuImageResponder: ImageLoadRespondable {
         self.store = store
     }
 
-    func onImageLoaded(_ image: UIImage) {
+    @MainActor func onImageLoaded(_ image: UIImage) {
         store.send(.menuImageLoaded(orderCode: orderCode, menuID: menuID, image: image))
     }
 
-    func onImageLoadFailed(_ errorMessage: String) {
+    @MainActor func onImageLoadFailed(_ errorMessage: String) {
         store.send(.menuImageLoadFailed(orderCode: orderCode, menuID: menuID, error: errorMessage))
     }
 }

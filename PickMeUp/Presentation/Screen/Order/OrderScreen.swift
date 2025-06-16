@@ -47,7 +47,7 @@ struct OrderScreen: View {
         }
         .background(Color.gray15.ignoresSafeArea())
         .onAppear {
-            store.send(.viewOnAppear)
+            store.send(.onAppear)
         }
     }
 }

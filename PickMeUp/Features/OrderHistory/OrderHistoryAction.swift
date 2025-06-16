@@ -9,9 +9,9 @@ import SwiftUI
 
 enum OrderHistoryAction {
     enum Intent {
-        case viewOnAppear
+        case onAppear
         case selectOrderType(OrderType)
-        case refreshOrders
+        case refresh
         case pullToRefresh
         case updateOrderStatus(orderCode: String, currentStatus: String)
         case requestNotificationPermission
@@ -23,7 +23,6 @@ enum OrderHistoryAction {
         case currentOrdersLoaded([OrderDataEntity])
         case pastOrdersLoaded([OrderDataEntity])
         case ordersLoadingFailed(String)
-        case orderTypeSelected(OrderType)
         case refreshCompleted
         case orderStatusUpdated(orderCode: String, newStatus: String)
         case orderStatusUpdateFailed(orderCode: String, error: String)

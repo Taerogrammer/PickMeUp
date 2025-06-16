@@ -22,11 +22,13 @@ final class OrderHistoryStore: ObservableObject {
         self.reducer = reducer
     }
 
+    @MainActor
     func send(_ action: OrderHistoryAction.Intent) {
         reducer.reduce(state: &state, action: action)
         effect.handle(action, store: self)
     }
 
+    @MainActor
     func send(_ result: OrderHistoryAction.Result) {
         reducer.reduce(state: &state, result: result)
     }

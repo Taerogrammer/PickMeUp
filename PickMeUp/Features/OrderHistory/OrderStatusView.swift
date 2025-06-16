@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct OrderStatusView: View {
-    @ObservedObject var store: OrderHistoryStore
+    let store: OrderHistoryStore
     let orderData: OrderDataEntity
 
     var body: some View {
@@ -22,7 +22,7 @@ struct OrderStatusView: View {
 
 // MARK: - OrderStatusCard
 struct OrderStatusCard: View {
-    @ObservedObject var store: OrderHistoryStore
+    let store: OrderHistoryStore
     let orderData: OrderDataEntity
 
     var body: some View {
