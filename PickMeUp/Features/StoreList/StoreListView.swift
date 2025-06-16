@@ -51,7 +51,6 @@ struct StoreListView: View {
                                 storeData: storeData
                             )
                             .onAppear {
-                                // 화면에 나타날 때
                                 if !visibleStoreIDs.contains(storeData.storeID) {
                                     visibleStoreIDs.insert(storeData.storeID)
                                     checkIfMatchesNextCursor(storeData: storeData, index: index)
@@ -59,14 +58,12 @@ struct StoreListView: View {
                                 }
                             }
                             .onDisappear {
-                                // 화면에서 사라질 때
                                 if visibleStoreIDs.contains(storeData.storeID) {
                                     visibleStoreIDs.remove(storeData.storeID)
                                 }
                             }
                         }
 
-                        // 🔑 로딩 인디케이터를 최하단으로 이동
                         if store.state.isLoadingMore {
                             HStack {
                                 ProgressView()
@@ -78,7 +75,6 @@ struct StoreListView: View {
                             .padding(.vertical, 16)
                         }
 
-                        // 🔑 마지막 페이지 도달 메시지
                         if store.state.hasReachedEnd && !store.state.stores.isEmpty {
                             Text("모든 가게를 불러왔습니다.")
                                 .font(.caption)
@@ -99,11 +95,7 @@ struct StoreListView: View {
 
     private func checkAndLoadNextPage(currentIndex: Int) {
         let totalCount = store.state.filteredStores.count
-
-        // 마지막에서 2번째 아이템이 나타나면 다음 페이지 로드
         if currentIndex >= totalCount - 2 {
-
-            // 다음 페이지 로드 조건 확인
             if !store.state.isLoadingMore &&
                !store.state.hasReachedEnd &&
                store.state.nextCursor != nil &&
@@ -113,13 +105,8 @@ struct StoreListView: View {
         }
     }
 
-    // 🔑 nextCursor와 일치하는 가게 확인
     private func checkIfMatchesNextCursor(storeData: StorePresentable, index: Int) {
-        guard let nextCursor = store.state.nextCursor else { return }
-    }
-
-    private func printCurrentlyVisible() {
-        let visibleStores = store.state.filteredStores.filter { visibleStoreIDs.contains($0.storeID) }
+        guard store.state.nextCursor != nil else { return }
     }
 }
 

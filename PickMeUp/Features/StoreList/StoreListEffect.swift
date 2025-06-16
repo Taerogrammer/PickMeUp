@@ -51,7 +51,6 @@ struct StoreListEffect {
             if let storeResponse = response.success {
                 let entities = storeResponse.data.map { $0.toStoreListEntity() }
                 store.send(.fetchStoresWithCursor(entities, nextCursor: storeResponse.nextCursor))
-                print("🔄 API 응답에서 받은 nextCursor: \(storeResponse.nextCursor ?? "nil")")
             } else if let error = response.failure {
                 store.send(.fetchFailed(error.message))
             }
@@ -62,14 +61,10 @@ struct StoreListEffect {
 
     @MainActor
     private func loadNextPage(store: StoreListStore) async {
-        // 🔑 Reducer에서 이미 조건을 체크했으므로, Effect에서는 nextCursor만 확인
         guard let nextCursor = store.state.nextCursor else {
-            print("❌ nextCursor가 없음")
             store.send(.loadMoreFailed("nextCursor가 없습니다"))
             return
         }
-
-        print("🚀 다음 페이지 로드 시작 - cursor: \(nextCursor)")
 
         let query = StoreListRequest(
             category: nil,
@@ -90,15 +85,11 @@ struct StoreListEffect {
             if let storeResponse = response.success {
                 let entities = storeResponse.data.map { $0.toStoreListEntity() }
                 store.send(.loadMoreSuccess(entities, nextCursor: storeResponse.nextCursor))
-                print("✅ 다음 페이지 로드 성공 - \(entities.count)개 추가")
-                print("🔄 새로운 nextCursor: \(storeResponse.nextCursor ?? "nil")")
             } else if let error = response.failure {
                 store.send(.loadMoreFailed(error.message))
-                print("❌ 다음 페이지 로드 실패: \(error.message)")
             }
         } catch {
             store.send(.loadMoreFailed(error.localizedDescription))
-            print("❌ 다음 페이지 로드 에러: \(error.localizedDescription)")
         }
     }
 }

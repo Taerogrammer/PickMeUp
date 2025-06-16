@@ -11,7 +11,6 @@ struct StoreListState {
     var stores: [StorePresentable] = []
     var loadedImages: [String: [UIImage]] = [:]
 
-    // 🔑 페이지네이션 상태 추가
     var nextCursor: String? = nil
     var isLoadingMore: Bool = false
     var hasReachedEnd: Bool = false
