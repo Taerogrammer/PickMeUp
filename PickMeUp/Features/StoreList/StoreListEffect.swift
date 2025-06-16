@@ -24,7 +24,6 @@ struct StoreListEffect {
                 ImageLoader.load(from: path, responder: responder)
             }
 
-        // 🔑 다음 페이지 로드 처리
         case .loadNextPage:
             Task { await loadNextPage(store: store) }
 
@@ -32,7 +31,6 @@ struct StoreListEffect {
         }
     }
 
-    // 첫 페이지 로드
     private func fetchStores(store: StoreListStore) async {
         let query = StoreListRequest(category: nil, latitude: nil, longitude: nil, next: nil, limit: 5, orderBy: .distance)
         do {
@@ -55,7 +53,6 @@ struct StoreListEffect {
         }
     }
 
-    // 🔑 다음 페이지 로드 함수 (중복 체크 제거)
     private func loadNextPage(store: StoreListStore) async {
         // 🔑 Reducer에서 이미 조건을 체크했으므로, Effect에서는 nextCursor만 확인
         guard let nextCursor = store.state.nextCursor else {

@@ -25,7 +25,6 @@ struct StoreListReducer {
             }
         case .tapStore: break
         case .loadImage: break
-        // 🔑 페이지네이션 Intent 처리
         case .loadNextPage:
             if !state.isLoadingMore && !state.hasReachedEnd && state.nextCursor != nil {
                 state.isLoadingMore = true

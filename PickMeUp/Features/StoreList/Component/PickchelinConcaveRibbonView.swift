@@ -2,7 +2,7 @@
 //  PickchelinConcaveRibbonView.swift
 //  PickMeUp
 //
-//  Created by 김태형 on 6/2/25.
+//  Created by 김태형 on 6/16/25.
 //
 
 import SwiftUI
