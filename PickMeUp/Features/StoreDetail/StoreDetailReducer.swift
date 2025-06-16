@@ -60,7 +60,7 @@ struct StoreDetailReducer {
             state.cartItems = cartItems
             state.isLoading = false
 
-        case .fetchStoreDetailFailed(let errorMessage):
+        case .fetchStoreDetailFailed:
             state.isLoading = false
 
         case .loadMenuImageSuccess(let menuID, let image):
