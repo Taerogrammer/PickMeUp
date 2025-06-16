@@ -7,10 +7,6 @@
 
 import Foundation
 
-struct TabbarState {
-    var selectedTab: TabItem = .store
-}
-
 enum TabItem: Hashable, CaseIterable {
     case store, orders, friends, profile
 
