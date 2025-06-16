@@ -10,6 +10,7 @@ import SwiftUI
 struct StoreListState {
     var stores: [StorePresentable] = []
     var loadedImages: [String: [UIImage]] = [:]
+    var imageLoadErrors: [String: String] = [:]
 
     var nextCursor: String? = nil
     var isLoadingMore: Bool = false

@@ -19,12 +19,8 @@ struct StoreListReducer {
             state.isMyPickOn.toggle()
         case .sortByDistance:
             state.stores.sort { $0.distance < $1.distance }
-        case .storeItemOnAppear(let storeID, _):
-            if state.loadedImages[storeID] == nil {
-                // 여기선 상태만 봄, loadImage는 Effect에서 실행
-            }
+        case .storeItemOnAppear: break
         case .tapStore: break
-        case .loadImage: break
         case .loadNextPage:
             if !state.isLoadingMore && !state.hasReachedEnd && state.nextCursor != nil {
                 state.isLoadingMore = true
@@ -34,18 +30,15 @@ struct StoreListReducer {
 
     func reduce(state: inout StoreListState, result: StoreListAction.Result) {
         switch result {
-        case .fetchStores(let stores):
-            state.stores = stores
-            state.errorMessage = nil
-
         case .fetchFailed(let message):
             state.errorMessage = message
 
         case .loadImageSuccess(let storeID, let images):
             state.loadedImages[storeID] = images.compactMap { $0 }
+            state.imageLoadErrors.removeValue(forKey: storeID)
 
-        case .loadImageFailed(_, let errorMessage):
-            state.errorMessage = errorMessage
+        case .loadImageFailed(let storeID, let errorMessage):
+            state.imageLoadErrors[storeID] = errorMessage
 
         case .fetchStoresWithCursor(let stores, let nextCursor):
             state.stores = stores
@@ -54,7 +47,7 @@ struct StoreListReducer {
             state.errorMessage = nil
 
         case .loadMoreSuccess(let newStores, let nextCursor):
-            state.stores.append(contentsOf: newStores)  // 기존 데이터에 추가
+            state.stores.append(contentsOf: newStores)
             state.nextCursor = nextCursor
             state.hasReachedEnd = (nextCursor == nil || nextCursor == "0")
             state.isLoadingMore = false

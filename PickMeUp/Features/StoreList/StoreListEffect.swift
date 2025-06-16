@@ -15,15 +15,10 @@ struct StoreListEffect {
 
         case .storeItemOnAppear(let storeID, let imagePaths):
             if store.state.loadedImages[storeID] == nil {
-                Task { @MainActor in
-                    store.send(.loadImage(storeID: storeID, imagePaths: imagePaths))
+                let responder = StoreListImageResponder(storeID: storeID, store: store, expectedCount: min(imagePaths.count, 3))
+                for path in imagePaths.prefix(3) {
+                    ImageLoader.load(from: path, responder: responder)
                 }
-            }
-
-        case .loadImage(let storeID, let imagePaths):
-            let responder = StoreListImageResponder(storeID: storeID, store: store, expectedCount: min(imagePaths.count, 3))
-            for path in imagePaths.prefix(3) {
-                ImageLoader.load(from: path, responder: responder)
             }
 
         case .loadNextPage:

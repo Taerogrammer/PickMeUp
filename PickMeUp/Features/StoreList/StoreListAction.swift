@@ -15,13 +15,11 @@ enum StoreListAction {
         case toggleMyPick
         case sortByDistance
         case storeItemOnAppear(storeID: String, imagePaths: [String])
-        case loadImage(storeID: String, imagePaths: [String])
         case tapStore(storeID: String)
         case loadNextPage
     }
 
     enum Result {
-        case fetchStores([StorePresentable])
         case fetchFailed(String)
         case loadImageSuccess(storeID: String, images: [UIImage?])
         case loadImageFailed(storeID: String, errorMessage: String)
