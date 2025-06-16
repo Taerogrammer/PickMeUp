@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct RegisterView: View {
-    @StateObject private var store: RegisterStore
+    @ObservedObject private var store: RegisterStore
 
     init(store: RegisterStore) {
-        _store = StateObject(wrappedValue: store)
+        self.store = store
     }
 
     public var body: some View {
