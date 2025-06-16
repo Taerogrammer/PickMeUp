@@ -9,9 +9,9 @@ import Foundation
 import WebKit
 
 struct PaymentState {
-    let paymentInfo: PaymentInfo
+    let paymentInfo: PaymentInfoEntity
     var isPaymentInProgress: Bool = false
-    var paymentResult: PaymentResult?
+    var paymentResult: PaymentResultEntity?
     var showingResult: Bool = false
     var showingWebView: Bool = false
     var webView: WKWebView?

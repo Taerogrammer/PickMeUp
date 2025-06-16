@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct OrderSummaryView: View {
-    let paymentInfo: PaymentInfo
+    let paymentInfo: PaymentInfoEntity
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {

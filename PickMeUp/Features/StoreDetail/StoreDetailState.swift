@@ -114,7 +114,7 @@ extension StoreDetailState {
 
 
 extension StoreDetailState {
-    var currentPaymentInfo: PaymentInfo? {
+    var currentPaymentInfo: PaymentInfoEntity? {
         return nil // 필요시 구현
     }
 }

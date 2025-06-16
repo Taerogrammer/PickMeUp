@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PaymentResultView: View {
-    let result: PaymentResult?
+    let result: PaymentResultEntity?
     let onDismiss: () -> Void
 
     var body: some View {

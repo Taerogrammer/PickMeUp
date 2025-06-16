@@ -13,7 +13,7 @@ final class PaymentStore: ObservableObject {
     private let reducer: PaymentReducer
     private let router: AppRouter
 
-    init(paymentInfo: PaymentInfo, router: AppRouter) {
+    init(paymentInfo: PaymentInfoEntity, router: AppRouter) {
         self.state = PaymentState(paymentInfo: paymentInfo)
         self.effect = PaymentEffect()
         self.reducer = PaymentReducer()

@@ -78,7 +78,7 @@ struct PaymentEffect {
 
     private func handlePaymentResponse(_ response: IamportResponse?, store: PaymentStore) async {
         guard let response = response else {
-            let failureResult = PaymentResult(
+            let failureResult = PaymentResultEntity(
                 isSuccess: false,
                 impUID: nil,
                 merchantUID: store.state.paymentInfo.orderCode,
@@ -94,7 +94,7 @@ struct PaymentEffect {
 
         if response.success == true {
             // 결제 성공
-            let successResult = PaymentResult(
+            let successResult = PaymentResultEntity(
                 isSuccess: true,
                 impUID: response.imp_uid,
                 merchantUID: response.merchant_uid ?? store.state.paymentInfo.orderCode,
@@ -111,7 +111,7 @@ struct PaymentEffect {
 
         } else {
             // 결제 실패
-            let failureResult = PaymentResult(
+            let failureResult = PaymentResultEntity(
                 isSuccess: false,
                 impUID: response.imp_uid,
                 merchantUID: response.merchant_uid ?? store.state.paymentInfo.orderCode,
@@ -143,7 +143,7 @@ struct PaymentEffect {
                     store.send(.verificationSucceeded(success))
 
                     // 검증 성공 시 결제 결과 업데이트
-                    let finalResult = PaymentResult(
+                    let finalResult = PaymentResultEntity(
                         isSuccess: true,
                         impUID: store.state.paymentResult?.impUID,
                         merchantUID: store.state.paymentResult?.merchantUID ?? store.state.paymentInfo.orderCode,
@@ -156,7 +156,7 @@ struct PaymentEffect {
                     store.send(.verificationFailed(failure.message))
 
                     // 검증 실패 시 결제 실패 처리
-                    let finalResult = PaymentResult(
+                    let finalResult = PaymentResultEntity(
                         isSuccess: false,
                         impUID: store.state.paymentResult?.impUID,
                         merchantUID: store.state.paymentResult?.merchantUID ?? store.state.paymentInfo.orderCode,
@@ -171,7 +171,7 @@ struct PaymentEffect {
                 store.send(.verificationFailed("네트워크 오류: \(error.localizedDescription)"))
 
                 // 네트워크 오류 시 결제 실패 처리
-                let finalResult = PaymentResult(
+                let finalResult = PaymentResultEntity(
                     isSuccess: false,
                     impUID: store.state.paymentResult?.impUID,
                     merchantUID: store.state.paymentResult?.merchantUID ?? store.state.paymentInfo.orderCode,

@@ -12,7 +12,7 @@ import iamport_ios
 struct PaymentView: View {
     @ObservedObject private var store: PaymentStore
 
-    init(paymentInfo: PaymentInfo, router: AppRouter) {
+    init(paymentInfo: PaymentInfoEntity, router: AppRouter) {
         self.store = PaymentStore(paymentInfo: paymentInfo, router: router)
     }
 

@@ -11,5 +11,5 @@ enum AppRoute: Hashable {
     case register
     case editProfile(user: ProfileEntity)
     case storeDetail(storeID: String)
-    case payment(PaymentInfo)
+    case payment(PaymentInfoEntity)
 }

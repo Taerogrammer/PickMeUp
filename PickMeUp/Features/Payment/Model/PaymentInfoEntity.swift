@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct PaymentInfo: Equatable, Hashable {
+struct PaymentInfoEntity: Equatable, Hashable {
     let orderID: String
     let orderCode: String
     let totalPrice: Int

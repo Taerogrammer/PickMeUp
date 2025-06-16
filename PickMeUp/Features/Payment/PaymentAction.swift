@@ -24,12 +24,12 @@ enum PaymentAction {
         case webViewShown
         case webViewHidden
         case paymentResponseReceived(IamportResponse?)
-        case paymentSucceeded(PaymentResult)
-        case paymentFailed(PaymentResult)
+        case paymentSucceeded(PaymentResultEntity)
+        case paymentFailed(PaymentResultEntity)
         case verificationStarted
         case verificationSucceeded(PaymentValidationResponse)
         case verificationFailed(String)
-        case resultShown(PaymentResult)
+        case resultShown(PaymentResultEntity)
         case resultDismissed
     }
 }

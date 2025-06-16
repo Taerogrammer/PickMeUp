@@ -107,7 +107,7 @@ struct StoreDetailEffect {
                 if let success = result.success {
                     store.send(.orderSubmissionSucceeded(success))
 
-                    let paymentInfo = PaymentInfo(
+                    let paymentInfo = PaymentInfoEntity(
                         orderID: success.order_id,
                         orderCode: success.order_code,
                         totalPrice: success.total_price,

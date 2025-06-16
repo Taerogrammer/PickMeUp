@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct PaymentResult {
+struct PaymentResultEntity {
     let isSuccess: Bool
     let impUID: String?
     let merchantUID: String
