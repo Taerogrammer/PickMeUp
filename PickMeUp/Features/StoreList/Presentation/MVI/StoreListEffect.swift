@@ -15,9 +15,8 @@ struct StoreListEffect {
 
         case .storeItemOnAppear(let storeID, let imagePaths):
             if store.state.loadedImages[storeID] == nil {
-                let responder = StoreListImageResponder(storeID: storeID, store: store, expectedCount: min(imagePaths.count, 3))
-                for path in imagePaths.prefix(3) {
-                    ImageLoader.load(from: path, responder: responder)
+                Task {
+                    await loadImagesParallel(storeID: storeID, imagePaths: imagePaths, store: store)
                 }
             }
 
@@ -87,43 +86,62 @@ struct StoreListEffect {
             store.send(.loadMoreFailed(error.localizedDescription))
         }
     }
+
+    // MARK: - 병렬 이미지 로딩
+    private func loadImagesParallel(storeID: String, imagePaths: [String], store: StoreListStore) async {
+        let maxImages = min(imagePaths.count, 3)
+        let pathsToLoad = Array(imagePaths.prefix(maxImages))
+
+        // TaskGroup을 사용하여 이미지 병렬화
+        let images = await withTaskGroup(of: (Int, UIImage?).self, returning: [UIImage?].self) { group in
+            var results: [UIImage?] = Array(repeating: nil, count: maxImages)
+
+            // 각 이미지를 병렬로 코딩
+            for (index, path) in pathsToLoad.enumerated() {
+                group.addTask {
+                    let image = await loadSingleImage(from: path)
+                    return (index, image)
+                }
+            }
+
+            for await (index, image) in group {
+                if index < results.count {
+                    results[index] = image
+                }
+            }
+
+            return results
+        }
+
+        await MainActor.run {
+            store.send(.loadImageSuccess(storeID: storeID, images: images))
+        }
+    }
+
+    // MARK: - 단일 이미지 비동기 처리
+    private func loadSingleImage(from path: String, accessTokenKey: String = TokenType.accessToken.rawValue) async -> UIImage? {
+        return await withCheckedContinuation { continuation in
+            let responder = SingleImageResponder { result in
+                continuation.resume(returning: result)
+            }
+            ImageLoader.load(from: path, accessTokenKey: accessTokenKey, responder: responder)
+        }
+    }
 }
 
-final class StoreListImageResponder: ImageLoadRespondable {
-    private let storeID: String
-    private let store: StoreListStore
-    private var index: Int = 0
-    private var images: [UIImage?]
-    private let expectedCount: Int
+final class SingleImageResponder: ImageLoadRespondable {
+    private let completion: (UIImage?) -> Void
 
-    init(storeID: String, store: StoreListStore, expectedCount: Int) {
-        self.storeID = storeID
-        self.store = store
-        self.expectedCount = expectedCount
-        self.images = Array(repeating: nil, count: expectedCount)
+    init(completion: @escaping (UIImage?) -> Void) {
+        self.completion = completion
     }
 
     func onImageLoaded(_ image: UIImage) {
-        if index < expectedCount {
-            images[index] = image
-            index += 1
-        }
-        checkAndSend()
+        completion(image)
     }
 
     func onImageLoadFailed(_ errorMessage: String) {
-        if index < expectedCount {
-            images[index] = nil
-            index += 1
-        }
-        checkAndSend()
-    }
-
-    private func checkAndSend() {
-        if index == expectedCount {
-            Task { @MainActor in
-                store.send(.loadImageSuccess(storeID: storeID, images: images))
-            }
-        }
+        print("이미지 로딩 실패: \(errorMessage)")
+        completion(nil)
     }
 }
