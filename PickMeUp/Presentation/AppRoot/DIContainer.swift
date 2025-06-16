@@ -65,12 +65,17 @@ final class DIContainer: TabProviding, AuthViewProviding, OrderViewProviding,  P
         return AnyView(ProfileScreen(store: store))
     }
 
-    func makeProfileEditView(user: ProfileEntity) -> AnyView {
+    func makeProfileEditScreen(user: ProfileEntity) -> AnyView {
         let state = ProfileEditState(profile: user)
-        let reducer = ProfileEditReducer()
         let effect = ProfileEditEffect()
-        let store = ProfileEditStore(state: state, reducer: reducer, effect: effect, router: router)
-        return AnyView(ProfileEditView(store: store))
+        let reducer = ProfileEditReducer()
+        let store = ProfileEditStore(
+            state: state,
+            reducer: reducer,
+            effect: effect,
+            router: self.router
+        )
+        return AnyView(ProfileEditScreen(store: store))
     }
 
     // MARK: - StoreViewProviding
@@ -118,7 +123,7 @@ extension DIContainer {
         case .register:
             makeRegisterScreen()
         case .editProfile(let user):
-            makeProfileEditView(user: user)
+            makeProfileEditScreen(user: user)
         case .storeDetail(let storeID):
             makeStoreDetailScreen(storeID: storeID)
         case .payment(let paymentInfo):

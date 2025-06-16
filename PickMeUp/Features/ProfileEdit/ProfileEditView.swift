@@ -8,11 +8,7 @@
 import SwiftUI
 
 struct ProfileEditView: View {
-    @StateObject private var store: ProfileEditStore
-
-    init(store: ProfileEditStore) {
-        _store = StateObject(wrappedValue: store)
-    }
+    let store: ProfileEditStore
 
     var body: some View {
         VStack(spacing: 32) {
