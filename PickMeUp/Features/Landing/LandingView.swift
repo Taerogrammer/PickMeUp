@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct LandingView: View {
-    @StateObject private var store: LandingStore
+    @ObservedObject private var store: LandingStore
 
     init(store: LandingStore) {
-        _store = StateObject(wrappedValue: store)
+        self.store = store
     }
 
     var body: some View {
