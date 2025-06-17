@@ -87,23 +87,36 @@ struct StoreListEffect {
         }
     }
 
-    // MARK: - 병렬 이미지 로딩
+    // WWDC 공식 다운샘플링을 적용한 병렬 이미지 로딩
     private func loadImagesParallel(storeID: String, imagePaths: [String], store: StoreListStore) async {
         let maxImages = min(imagePaths.count, 3)
         let pathsToLoad = Array(imagePaths.prefix(maxImages))
 
-        // TaskGroup을 사용하여 이미지 병렬화
+        // WWDC에서 권장하는 실제 표시 크기에 맞춘 이미지 크기들
+        let imageSizes = [
+            CGSize(width: 260, height: 120),
+            CGSize(width: 92, height: 62),
+            CGSize(width: 92, height: 62)
+        ]
+
+        // TaskGroup을 사용한 병렬 처리 (Swift Concurrency + WWDC 다운샘플링)
         let images = await withTaskGroup(of: (Int, UIImage?).self, returning: [UIImage?].self) { group in
             var results: [UIImage?] = Array(repeating: nil, count: maxImages)
 
-            // 각 이미지를 병렬로 코딩
+            // 각 이미지를 병렬로 다운샘플링 처리
             for (index, path) in pathsToLoad.enumerated() {
                 group.addTask {
-                    let image = await loadSingleImage(from: path)
+                    let targetSize = index < imageSizes.count ? imageSizes[index] : CGSize(width: 92, height: 62)
+                    let image = await loadSingleImageWithWWDCDownsampling(
+                        from: path,
+                        targetSize: targetSize,
+                        scale: UIScreen.main.scale
+                    )
                     return (index, image)
                 }
             }
 
+            // 완료된 순서대로 결과 수집 후 원래 순서로 정렬
             for await (index, image) in group {
                 if index < results.count {
                     results[index] = image
@@ -113,18 +126,32 @@ struct StoreListEffect {
             return results
         }
 
+        // 메인 스레드에서 UI 업데이트
         await MainActor.run {
             store.send(.loadImageSuccess(storeID: storeID, images: images))
         }
     }
 
-    // MARK: - 단일 이미지 비동기 처리
-    private func loadSingleImage(from path: String, accessTokenKey: String = TokenType.accessToken.rawValue) async -> UIImage? {
+    // WWDC 공식 방식으로 단일 이미지 로딩 (withCheckedContinuation 사용)
+    private func loadSingleImageWithWWDCDownsampling(
+        from path: String,
+        targetSize: CGSize,
+        scale: CGFloat,
+        accessTokenKey: String = TokenType.accessToken.rawValue
+    ) async -> UIImage? {
         return await withCheckedContinuation { continuation in
-            let responder = SingleImageResponder { result in
-                continuation.resume(returning: result)
+            let responder = SingleImageResponder { image in
+                continuation.resume(returning: image)
             }
-            ImageLoader.load(from: path, accessTokenKey: accessTokenKey, responder: responder)
+
+            // WWDC 공식 다운샘플링이 적용된 ImageLoader 사용
+            ImageLoader.load(
+                from: path,
+                targetSize: targetSize,      // 정확한 UI 크기로 다운샘플링
+                scale: scale,                // 레티나 디스플레이 대응
+                accessTokenKey: accessTokenKey,
+                responder: responder
+            )
         }
     }
 }

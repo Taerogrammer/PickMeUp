@@ -10,7 +10,9 @@ import SwiftUI
 enum ImageLoader {
     static func load(
         from path: String,
-        accessTokenKey: String = "accessToken",
+        targetSize: CGSize = CGSize(width: 160, height: 120),
+        scale: CGFloat = UIScreen.main.scale,
+        accessTokenKey: String = TokenType.accessToken.rawValue,
         responder: ImageLoadRespondable
     ) {
         Task {
@@ -38,9 +40,9 @@ enum ImageLoader {
                     print("🌐 HTTP Status:", httpResponse.statusCode)
                 }
 
-                if let image = UIImage(data: data) {
+                if let downsampledImage = ImageDownSampler.downsampleImage(from: data, to: targetSize, scale: scale) {
                     await MainActor.run {
-                        responder.onImageLoaded(image)
+                        responder.onImageLoaded(downsampledImage)
                     }
                 } else {
                     await MainActor.run {

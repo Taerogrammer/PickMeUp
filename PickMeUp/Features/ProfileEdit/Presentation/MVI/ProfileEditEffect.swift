@@ -89,6 +89,7 @@ struct ProfileEditEffect {
 
         ImageLoader.load(
             from: path,
+            targetSize: CGSize(width: 120, height: 120),
             accessTokenKey: "accessToken",
             responder: store
         )
