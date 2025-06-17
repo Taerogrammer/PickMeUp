@@ -37,7 +37,20 @@ enum ImageLoader {
                 let (data, response) = try await URLSession.shared.data(for: request)
 
                 if let httpResponse = response as? HTTPURLResponse {
-                    print("🌐 HTTP Status:", httpResponse.statusCode)
+//                    print("🌐 HTTP Status:", httpResponse.statusCode)
+
+                    // ETag 확인 및 출력
+                    if let etag = httpResponse.value(forHTTPHeaderField: "ETag") {
+                        print("🏷️ ETag:", etag)
+                    } else {
+                        print("⚠️ ETag 헤더가 없습니다")
+                    }
+
+                    // 모든 응답 헤더 출력 (디버깅용)
+                    print("📋 Response Headers:")
+                    for (key, value) in httpResponse.allHeaderFields {
+                        print("  \(key): \(value)")
+                    }
                 }
 
                 if let downsampledImage = ImageDownSampler.downsampleImage(from: data, to: targetSize, scale: scale) {
