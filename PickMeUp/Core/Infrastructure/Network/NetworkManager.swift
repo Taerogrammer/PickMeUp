@@ -26,8 +26,8 @@ final class NetworkManager {
 
         let (data, response) = try await session.data(for: urlRequest)
 
-        print("[HTTP Request + Response]")
-        debugFullResponse(request: urlRequest, response: response, data: data)
+//        print("[HTTP Request + Response]")
+//        debugFullResponse(request: urlRequest, response: response, data: data)
 
         let isFromCache = checkCacheStatus(metrics: delegate.lastMetrics)
 
@@ -55,13 +55,13 @@ final class NetworkManager {
 
         switch firstTransaction.resourceFetchType {
         case .localCache:
-            print("💾 [캐시]: 서버에서 304 응답 → URLSession이 캐시 사용")
+//            print("💾 [캐시]: 서버에서 304 응답 → URLSession이 캐시 사용")
             return true
         case .networkLoad:
-            print("🌐 [네트워크]: 서버에서 새로 로드됨")
+//            print("🌐 [네트워크]: 서버에서 새로 로드됨")
             return false
         default:
-            print("❓ [기타]: \(firstTransaction.resourceFetchType)")
+//            print("❓ [기타]: \(firstTransaction.resourceFetchType)")
             return false
         }
     }
