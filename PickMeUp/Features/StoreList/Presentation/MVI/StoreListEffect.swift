@@ -12,6 +12,7 @@ struct StoreListEffect {
         switch intent {
         case .onAppear:
             Task { await fetchStores(store: store) }
+//            CachingStrategyTest.testAllStrategies()
 
         case .storeItemOnAppear(let storeID, let imagePaths):
             if store.state.loadedImages[storeID] == nil {
@@ -42,6 +43,14 @@ struct StoreListEffect {
                 successType: StoreListResponse.self,
                 failureType: CommonMessageResponse.self
             )
+
+            // 캐시 상태 확인
+            if response.isFromCache {
+                print("캐시된 데이터: 304")
+            } else {
+                print("새로운 데이터: 200")
+            }
+
             if let storeResponse = response.success {
                 let entities = storeResponse.data.map { $0.toStoreListEntity() }
                 store.send(.fetchStoresWithCursor(entities, nextCursor: storeResponse.nextCursor))
