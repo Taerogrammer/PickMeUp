@@ -12,12 +12,15 @@ struct StoreListEffect {
         switch intent {
         case .onAppear:
             Task { await fetchStores(store: store) }
+            // 캐시 테스트는 개발 중에만 실행
+            #if DEBUG
 //            CachingStrategyTest.testAllStrategies()
+            #endif
 
         case .storeItemOnAppear(let storeID, let imagePaths):
             if store.state.loadedImages[storeID] == nil {
                 Task {
-                    await loadImagesParallel(storeID: storeID, imagePaths: imagePaths, store: store)
+                    await loadImagesWithCache(storeID: storeID, imagePaths: imagePaths, store: store)
                 }
             }
 
@@ -96,8 +99,8 @@ struct StoreListEffect {
         }
     }
 
-    // WWDC 공식 다운샘플링을 적용한 병렬 이미지 로딩
-    private func loadImagesParallel(storeID: String, imagePaths: [String], store: StoreListStore) async {
+    // MARK: - 캐싱이 적용된 이미지 로딩
+    private func loadImagesWithCache(storeID: String, imagePaths: [String], store: StoreListStore) async {
         let maxImages = min(imagePaths.count, 3)
         let pathsToLoad = Array(imagePaths.prefix(maxImages))
 
@@ -108,32 +111,10 @@ struct StoreListEffect {
             CGSize(width: 92, height: 62)
         ]
 
-        // TaskGroup을 사용한 병렬 처리 (Swift Concurrency + WWDC 다운샘플링)
-        let images = await withTaskGroup(of: (Int, UIImage?).self, returning: [UIImage?].self) { group in
-            var results: [UIImage?] = Array(repeating: nil, count: maxImages)
-
-            // 각 이미지를 병렬로 다운샘플링 처리
-            for (index, path) in pathsToLoad.enumerated() {
-                group.addTask {
-                    let targetSize = index < imageSizes.count ? imageSizes[index] : CGSize(width: 92, height: 62)
-                    let image = await loadSingleImageWithWWDCDownsampling(
-                        from: path,
-                        targetSize: targetSize,
-                        scale: UIScreen.main.scale
-                    )
-                    return (index, image)
-                }
-            }
-
-            // 완료된 순서대로 결과 수집 후 원래 순서로 정렬
-            for await (index, image) in group {
-                if index < results.count {
-                    results[index] = image
-                }
-            }
-
-            return results
-        }
+        let images = await ImageLoader.loadMultiple(
+            paths: pathsToLoad,
+            targetSizes: imageSizes
+        )
 
         // 메인 스레드에서 UI 업데이트
         await MainActor.run {
@@ -141,24 +122,21 @@ struct StoreListEffect {
         }
     }
 
-    // WWDC 공식 방식으로 단일 이미지 로딩 (withCheckedContinuation 사용)
+    // MARK: - 기존 방식 (호환성을 위해 유지)
     private func loadSingleImageWithWWDCDownsampling(
         from path: String,
         targetSize: CGSize,
         scale: CGFloat,
         accessTokenKey: String = TokenType.accessToken.rawValue
     ) async -> UIImage? {
-        return await withCheckedContinuation { continuation in
+        return await withCheckedContinuation { (continuation: CheckedContinuation<UIImage?, Never>) in
             let responder = SingleImageResponder { image in
                 continuation.resume(returning: image)
             }
 
-            // WWDC 공식 다운샘플링이 적용된 ImageLoader 사용
             ImageLoader.load(
                 from: path,
-                targetSize: targetSize,      // 정확한 UI 크기로 다운샘플링
-                scale: scale,                // 레티나 디스플레이 대응
-                accessTokenKey: accessTokenKey,
+                targetSize: targetSize,
                 responder: responder
             )
         }
