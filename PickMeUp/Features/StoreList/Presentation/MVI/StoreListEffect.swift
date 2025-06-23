@@ -47,6 +47,8 @@ struct StoreListEffect {
                 failureType: CommonMessageResponse.self
             )
 
+            NetworkManager.shared.printCurrentNetworkStatus()
+
             // 캐시 상태 확인
             if response.isFromCache {
                 print("캐시된 데이터: 304")
