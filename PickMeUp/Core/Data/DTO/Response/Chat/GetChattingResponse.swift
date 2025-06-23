@@ -1,5 +1,5 @@
 //
-//  LastChatResponse.swift
+//  GetChattingResponse.swift
 //  PickMeUp
 //
 //  Created by 김태형 on 6/23/25.
@@ -7,7 +7,11 @@
 
 import Foundation
 
-struct LastChatResponse: Decodable {
+struct GetChattingResponse: Decodable {
+    let data: [ChatHistoryResponse]
+}
+
+struct ChatHistoryResponse: Decodable {
     let chatID: String
     let roomID: String
     let content: String
@@ -23,16 +27,16 @@ struct LastChatResponse: Decodable {
     }
 }
 
-extension LastChatResponse {
-    func toEntity() -> LastChatEntity {
+extension ChatHistoryResponse {
+    func toEntity() -> ChatMessageEntity {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
 
         let createdDate = formatter.date(from: createdAt) ?? Date()
         let updatedDate = formatter.date(from: updatedAt) ?? Date()
 
-        return LastChatEntity(
-            chatID: chatID,
+        return ChatMessageEntity(
+            id: chatID,
             roomID: roomID,
             content: content,
             createdAt: createdDate,
@@ -40,16 +44,5 @@ extension LastChatResponse {
             sender: sender.toEntity(),
             files: files ?? []
         )
-    }
-}
-
-enum ConversionError: Error, LocalizedError {
-    case invalidDateFormat
-
-    var errorDescription: String? {
-        switch self {
-        case .invalidDateFormat:
-            return "날짜 형식을 변환할 수 없습니다."
-        }
     }
 }

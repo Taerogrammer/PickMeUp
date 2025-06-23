@@ -10,4 +10,9 @@ import Foundation
 struct GetChattingRequest: Encodable {
     let roomID: String
     let next: String
+
+    enum CodingKeys: String, CodingKey {
+        case roomID = "room_id"
+        case next
+    }
 }

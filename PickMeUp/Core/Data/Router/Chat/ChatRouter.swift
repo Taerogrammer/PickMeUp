@@ -49,7 +49,7 @@ enum ChatRouter: APIRouter {
         case .postChatting(let request):
             return [
                 APIConstants.Parameters.Chat.content: request.content,
-                APIConstants.Parameters.Chat.files: request.files
+                APIConstants.Parameters.Chat.files: request.files ?? []
             ]
         case .postFile(let request):
             return [
@@ -62,11 +62,10 @@ enum ChatRouter: APIRouter {
         var baseHeaders: [String: String] = [
             APIConstants.Headers.sesacKey: APIConstants.Headers.Values.sesacKeyValue()
         ]
-
-        if let refreshToken = KeychainManager.shared.load(key: KeychainType.refreshToken.rawValue) {
-            baseHeaders[APIConstants.Headers.authorization] = refreshToken
+        if let accessToken = KeychainManager.shared.load(key: KeychainType.accessToken.rawValue) {
+            baseHeaders[APIConstants.Headers.authorization] = accessToken
         } else {
-            print(APIConstants.ErrorMessages.missingRefreshToken)
+            print("❌ AccessToken이 없습니다.")
         }
 
         return baseHeaders

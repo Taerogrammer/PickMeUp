@@ -10,5 +10,5 @@ import Foundation
 struct SenderEntity: Equatable, Hashable {
     let userID: String
     let nick: String
-    let profileImage: String
+    let profileImage: String?
 }
