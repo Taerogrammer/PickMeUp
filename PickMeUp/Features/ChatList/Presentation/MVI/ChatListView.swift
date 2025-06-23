@@ -51,16 +51,6 @@ struct ChatListView: View {
                 Text(errorMessage)
             }
         }
-        .sheet(item: Binding<ChatRoomEntity?>(
-            get: { store.state.selectedChatRoom },
-            set: { _ in store.send(.dismissChatRoom) }
-        )) { chatRoom in
-            ChatDetailView(
-                chatRoom: chatRoom,
-                currentUserID: store.state.currentUserID ?? ""
-            )
-        }
-
     }
 
     // MARK: - Loading View
@@ -297,30 +287,6 @@ struct ChatRoomRow: View {
         }
     }
 }
-
-// MARK: - 수정된 ChatDetailView
-struct ChatDetailView: View {
-    let chatRoom: ChatRoomEntity  // Entity로 변경
-    let currentUserID: String
-
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationView {
-            Text("채팅방: \(chatRoom.roomID)")
-                .navigationTitle("채팅")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("닫기") {
-                            dismiss()
-                        }
-                    }
-                }
-        }
-    }
-}
-
 
 //#Preview {
 //    ChatListView()

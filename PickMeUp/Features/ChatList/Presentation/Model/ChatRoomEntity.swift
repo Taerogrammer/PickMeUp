@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ChatRoomEntity: Identifiable {
+struct ChatRoomEntity: Equatable, Hashable, Identifiable {
     var id: String { roomID }
 
     let roomID: String

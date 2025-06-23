@@ -9,9 +9,11 @@ import Foundation
 
 final class ChatListStore: ObservableObject {
     @Published private(set) var state: ChatListState
+    private let router: AppRouter
 
-    init(state: ChatListState) {
+    init(state: ChatListState, router: AppRouter) {
         self.state = state
+        self.router = router
     }
 
     @MainActor
@@ -19,7 +21,7 @@ final class ChatListStore: ObservableObject {
         ChatListReducer.reduce(state: &state, intent: intent)
 
         Task {
-            if let result = await ChatListEffect.handle(intent: intent, state: state) {
+            if let result = await ChatListEffect.handle(intent: intent, state: state, router: router) {
                 handleResult(result)
             }
         }

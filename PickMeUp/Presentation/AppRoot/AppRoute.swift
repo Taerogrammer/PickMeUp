@@ -12,4 +12,5 @@ enum AppRoute: Hashable {
     case editProfile(user: ProfileEntity)
     case storeDetail(storeID: String)
     case payment(PaymentInfoEntity)
+    case chatDetail(chatRoom: ChatRoomEntity, currentUserID: String)
 }

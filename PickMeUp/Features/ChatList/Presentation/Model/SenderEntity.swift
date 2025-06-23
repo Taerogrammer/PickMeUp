@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct SenderEntity {
+struct SenderEntity: Equatable, Hashable {
     let userID: String
     let nick: String
     let profileImage: String

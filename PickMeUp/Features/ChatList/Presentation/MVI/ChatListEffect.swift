@@ -8,11 +8,18 @@
 import Foundation
 
 struct ChatListEffect {
-    static func handle(intent: ChatListAction.Intent, state: ChatListState) async -> ChatListAction.Result? {
+    static func handle(intent: ChatListAction.Intent, state: ChatListState, router: AppRouter) async -> ChatListAction.Result? {
         switch intent {
         case .onAppear, .loadChatList, .refreshChatList:
             return await handleLoadChatList()
-        case .selectChatRoom, .dismissChatRoom, .dismissError, .startNewChat:
+        case .selectChatRoom(let chatRoom):
+            if let currentUserID = state.currentUserID {
+                await MainActor.run {
+                    router.navigate(to: .chatDetail(chatRoom: chatRoom, currentUserID: currentUserID))
+                }
+            }
+            return nil
+        case .dismissChatRoom, .dismissError, .startNewChat:
             return nil
         }
     }

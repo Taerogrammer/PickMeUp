@@ -83,8 +83,16 @@ final class DIContainer: AuthViewProviding, OrderViewProviding, StoreViewProvidi
     // MARK: - ChattingViewProviding
     func makeChatScreen() -> AnyView {
         let state = ChatListState()
-        let store = ChatListStore(state: state)
+        let store = ChatListStore(state: state, router: self.router)
         return AnyView(ChatScreen(store: store))
+    }
+
+    // 채팅 상세 뷰 추가
+    func makeChatDetailView(chatRoom: ChatRoomEntity, currentUserID: String) -> AnyView {
+        return AnyView(ChatDetailView(
+            chatRoom: chatRoom,
+            currentUserID: currentUserID
+        ))
     }
 
     // MARK: - ProfileViewProviding
@@ -133,6 +141,8 @@ extension DIContainer {
             makeStoreDetailScreen(storeID: storeID)
         case .payment(let paymentInfo):
             makePaymentView(paymentInfo: paymentInfo)
+        case .chatDetail(let chatRoom, let currentUserID):
+            makeChatDetailView(chatRoom: chatRoom, currentUserID: currentUserID)
         }
     }
 }
