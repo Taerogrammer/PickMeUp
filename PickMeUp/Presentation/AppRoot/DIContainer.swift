@@ -7,13 +7,8 @@
 
 import SwiftUI
 
-final class DIContainer: TabProviding, AuthViewProviding, OrderViewProviding,  ProfileViewProviding, StoreViewProviding, StoreDetailViewProviding {
+final class DIContainer: AuthViewProviding, OrderViewProviding,  ProfileViewProviding, StoreViewProviding, StoreDetailViewProviding {
     let router = AppRouter()
-
-    // MARK: - TabProviding
-    func makeTabbarScreen() -> AnyView {
-        AnyView(TabbarScreen(container: self))
-    }
 
     // MARK: - AuthViewProviding
     func makeLandingView(appLaunchState: AppLaunchState) -> AnyView {
