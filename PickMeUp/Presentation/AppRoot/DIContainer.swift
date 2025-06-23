@@ -82,7 +82,9 @@ final class DIContainer: AuthViewProviding, OrderViewProviding, StoreViewProvidi
 
     // MARK: - ChattingViewProviding
     func makeChatScreen() -> AnyView {
-        return AnyView(ChatScreen())
+        let state = ChatListState()
+        let store = ChatListStore(state: state)
+        return AnyView(ChatScreen(store: store))
     }
 
     // MARK: - ProfileViewProviding
