@@ -129,7 +129,7 @@ struct StoreListEffect {
         from path: String,
         targetSize: CGSize,
         scale: CGFloat,
-        accessTokenKey: String = TokenType.accessToken.rawValue
+        accessTokenKey: String = KeychainType.accessToken.rawValue
     ) async -> UIImage? {
         return await withCheckedContinuation { (continuation: CheckedContinuation<UIImage?, Never>) in
             let responder = SingleImageResponder { image in

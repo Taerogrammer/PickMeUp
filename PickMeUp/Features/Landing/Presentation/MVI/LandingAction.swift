@@ -19,11 +19,11 @@ enum LandingAction {
     }
 
     enum Result {
-        case loginSuccess(accessToken: String, refreshToken: String, message: String)
+        case loginSuccess(accessToken: String, refreshToken: String, userID: String, message: String)
         case loginFailed(String)
-        case appleLoginSuccess(accessToken: String, refreshToken: String, message: String)
+        case appleLoginSuccess(accessToken: String, refreshToken: String, userID: String, message: String)
         case appleLoginFailed(String)
-        case kakaoLoginSuccess(accessToken: String, refreshToken: String, message: String)
+        case kakaoLoginSuccess(accessToken: String, refreshToken: String, userID: String, message: String)
         case kakaoLoginFailed(String)
     }
 }

@@ -13,7 +13,7 @@ enum ImageLoader {
         from path: String,
         targetSize: CGSize = CGSize(width: 160, height: 120),
         scale: CGFloat = UIScreen.main.scale,
-        accessTokenKey: String = TokenType.accessToken.rawValue,
+        accessTokenKey: String = KeychainType.accessToken.rawValue,
         responder: ImageLoadRespondable
     ) {
         Task {
@@ -34,7 +34,7 @@ enum ImageLoader {
         from path: String,
         targetSize: CGSize = CGSize(width: 160, height: 120),
         scale: CGFloat = 3.0,   // 대부분의 현대 기기 3x 스케일 사용
-        accessTokenKey: String = TokenType.accessToken.rawValue
+        accessTokenKey: String = KeychainType.accessToken.rawValue
     ) async -> UIImage? {
         return await ImageCacheManager.shared.loadImage(from: path, targetSize: targetSize)
     }

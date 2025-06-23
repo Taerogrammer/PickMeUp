@@ -47,7 +47,7 @@ enum PaymentRouter: APIRouter {
             APIConstants.Headers.sesacKey: APIConstants.Headers.Values.sesacKeyValue()
         ]
 
-        if let token = KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) {
+        if let token = KeychainManager.shared.load(key: KeychainType.refreshToken.rawValue) {
             baseHeaders[APIConstants.Headers.authorization] = token
         } else {
             print(APIConstants.ErrorMessages.missingRefreshToken)

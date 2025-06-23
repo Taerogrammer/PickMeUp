@@ -92,7 +92,7 @@ enum UserRouter: APIRouter {
             return baseHeaders
 
         case .uploadProfileImage:
-            if let refreshToken = KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) {
+            if let refreshToken = KeychainManager.shared.load(key: KeychainType.refreshToken.rawValue) {
                 baseHeaders[APIConstants.Headers.authorization] = refreshToken
                 baseHeaders["Content-Type"] = "multipart/form-data; boundary=\(UUID().uuidString)"
             } else {
@@ -101,7 +101,7 @@ enum UserRouter: APIRouter {
             return baseHeaders
 
         default:
-            if let refreshToken = KeychainManager.shared.load(key: TokenType.refreshToken.rawValue) {
+            if let refreshToken = KeychainManager.shared.load(key: KeychainType.refreshToken.rawValue) {
                 baseHeaders[APIConstants.Headers.authorization] = refreshToken
             } else {
                 print(APIConstants.ErrorMessages.missingRefreshToken)
