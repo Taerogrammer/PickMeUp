@@ -22,13 +22,13 @@ struct StoreDetailEffect {
 
         case .loadMenuImages(let items):
             for item in items {
-                ImageLoader.load(from: item.menuImageURL, responder: MenuImageResponder(menuID: item.menuID, store: store))
+                ImageLoader.load(from: item.menuImageURL, targetSize: CGSize(width: 160, height: 120), responder: MenuImageResponder(menuID: item.menuID, store: store))
             }
 
         case .loadCarouselImages(let imageURLs):
             print("⚡ [Effect] loadCarouselImages 처리 - \(imageURLs.count)개 이미지")
             for imageURL in imageURLs {
-                ImageLoader.load(from: imageURL, responder: CarouselImageResponder(imageURL: imageURL, store: store))
+                ImageLoader.load(from: imageURL, targetSize: CGSize(width: 750, height: 500), responder: CarouselImageResponder(imageURL: imageURL, store: store))
             }
 
         case .addMenuToCart:

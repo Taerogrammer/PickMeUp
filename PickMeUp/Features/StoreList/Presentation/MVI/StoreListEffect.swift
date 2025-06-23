@@ -12,12 +12,15 @@ struct StoreListEffect {
         switch intent {
         case .onAppear:
             Task { await fetchStores(store: store) }
+            // 캐시 테스트는 개발 중에만 실행
+            #if DEBUG
+//            CachingStrategyTest.testAllStrategies()
+            #endif
 
         case .storeItemOnAppear(let storeID, let imagePaths):
             if store.state.loadedImages[storeID] == nil {
-                let responder = StoreListImageResponder(storeID: storeID, store: store, expectedCount: min(imagePaths.count, 3))
-                for path in imagePaths.prefix(3) {
-                    ImageLoader.load(from: path, responder: responder)
+                Task {
+                    await loadImagesWithCache(storeID: storeID, imagePaths: imagePaths, store: store)
                 }
             }
 
@@ -43,6 +46,16 @@ struct StoreListEffect {
                 successType: StoreListResponse.self,
                 failureType: CommonMessageResponse.self
             )
+
+            NetworkManager.shared.printCurrentNetworkStatus()
+
+            // 캐시 상태 확인
+            if response.isFromCache {
+                print("캐시된 데이터: 304")
+            } else {
+                print("새로운 데이터: 200")
+            }
+
             if let storeResponse = response.success {
                 let entities = storeResponse.data.map { $0.toStoreListEntity() }
                 store.send(.fetchStoresWithCursor(entities, nextCursor: storeResponse.nextCursor))
@@ -87,43 +100,64 @@ struct StoreListEffect {
             store.send(.loadMoreFailed(error.localizedDescription))
         }
     }
+
+    // MARK: - 캐싱이 적용된 이미지 로딩
+    private func loadImagesWithCache(storeID: String, imagePaths: [String], store: StoreListStore) async {
+        let maxImages = min(imagePaths.count, 3)
+        let pathsToLoad = Array(imagePaths.prefix(maxImages))
+
+        // WWDC에서 권장하는 실제 표시 크기에 맞춘 이미지 크기들
+        let imageSizes = [
+            CGSize(width: 260, height: 120),
+            CGSize(width: 92, height: 62),
+            CGSize(width: 92, height: 62)
+        ]
+
+        let images = await ImageLoader.loadMultiple(
+            paths: pathsToLoad,
+            targetSizes: imageSizes
+        )
+
+        // 메인 스레드에서 UI 업데이트
+        await MainActor.run {
+            store.send(.loadImageSuccess(storeID: storeID, images: images))
+        }
+    }
+
+    // MARK: - 기존 방식 (호환성을 위해 유지)
+    private func loadSingleImageWithWWDCDownsampling(
+        from path: String,
+        targetSize: CGSize,
+        scale: CGFloat,
+        accessTokenKey: String = TokenType.accessToken.rawValue
+    ) async -> UIImage? {
+        return await withCheckedContinuation { (continuation: CheckedContinuation<UIImage?, Never>) in
+            let responder = SingleImageResponder { image in
+                continuation.resume(returning: image)
+            }
+
+            ImageLoader.load(
+                from: path,
+                targetSize: targetSize,
+                responder: responder
+            )
+        }
+    }
 }
 
-final class StoreListImageResponder: ImageLoadRespondable {
-    private let storeID: String
-    private let store: StoreListStore
-    private var index: Int = 0
-    private var images: [UIImage?]
-    private let expectedCount: Int
+final class SingleImageResponder: ImageLoadRespondable {
+    private let completion: (UIImage?) -> Void
 
-    init(storeID: String, store: StoreListStore, expectedCount: Int) {
-        self.storeID = storeID
-        self.store = store
-        self.expectedCount = expectedCount
-        self.images = Array(repeating: nil, count: expectedCount)
+    init(completion: @escaping (UIImage?) -> Void) {
+        self.completion = completion
     }
 
     func onImageLoaded(_ image: UIImage) {
-        if index < expectedCount {
-            images[index] = image
-            index += 1
-        }
-        checkAndSend()
+        completion(image)
     }
 
     func onImageLoadFailed(_ errorMessage: String) {
-        if index < expectedCount {
-            images[index] = nil
-            index += 1
-        }
-        checkAndSend()
-    }
-
-    private func checkAndSend() {
-        if index == expectedCount {
-            Task { @MainActor in
-                store.send(.loadImageSuccess(storeID: storeID, images: images))
-            }
-        }
+        print("이미지 로딩 실패: \(errorMessage)")
+        completion(nil)
     }
 }

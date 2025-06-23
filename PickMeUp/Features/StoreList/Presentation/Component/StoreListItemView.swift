@@ -24,9 +24,13 @@ struct StoreListItemView: View {
                     MainImageView(
                         image: store.state.loadedImages[storeData.storeID]?.first,
                         isPick: storeData.isPick,
-                        isPicchelin: storeData.isPicchelin
+                        isPicchelin: storeData.isPicchelin,
+                        imagePath: storeData.storeImageURLs.first
                     )
-                    ThumbnailImagesView(images: Array(loadedImages.dropFirst()))
+                    ThumbnailImagesView(
+                        images: Array(loadedImages.dropFirst()),
+                        imagePaths: Array(storeData.storeImageURLs.dropFirst())
+                    )
                 }
                 .frame(maxWidth: .infinity, maxHeight: 128)
 
@@ -42,6 +46,7 @@ struct StoreListItemView: View {
         }
         .buttonStyle(.plain)
         .onAppear {
+            // 🔄 변경: 기존 코드 유지하되, 캐시 시스템이 백그라운드에서 작동
             store.send(.storeItemOnAppear(
                 storeID: storeData.storeID,
                 imagePaths: storeData.storeImageURLs
@@ -55,10 +60,18 @@ private struct MainImageView: View {
     var isPick: Bool
     var isPicchelin: Bool
 
+    @State private var loadedImage: UIImage?
+    let imagePath: String? // 🆕 이미지 경로 추가
+
     var body: some View {
         ZStack(alignment: .topLeading) {
             Group {
-                if let image = image {
+                // 🔄 변경: loadedImage 우선 사용, 없으면 기존 image 사용
+                if let loadedImage = loadedImage {
+                    Image(uiImage: loadedImage)
+                        .resizable()
+                        .scaledToFill()
+                } else if let image = image {
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFill()
@@ -94,35 +107,29 @@ private struct MainImageView: View {
         .frame(height: 128)
         .cornerRadius(12)
         .clipped()
+        .task {
+            if let imagePath = imagePath, loadedImage == nil && image == nil {
+                loadedImage = await ImageLoader.loadAsync(
+                    from: imagePath,
+                    targetSize: CGSize(width: 260, height: 120)
+                )
+            }
+        }
     }
 }
 
 
 private struct ThumbnailImagesView: View {
     let images: [UIImage?]
+    let imagePaths: [String]
 
     var body: some View {
         VStack(spacing: 4) {
             ForEach(0..<2, id: \.self) { index in
-                Group {
-                    if index < images.count, let image = images[index] {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                    } else {
-                        ZStack {
-                            Color.gray30
-                            VStack(spacing: 4) {
-                                Image(systemName: "photo")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.gray60)
-                                Text("No Image")
-                                    .font(.caption2)
-                                    .foregroundColor(.gray60)
-                            }
-                        }
-                    }
-                }
+                ThumbnailImageItem(
+                    image: index < images.count ? images[index] : nil,
+                    imagePath: index < imagePaths.count ? imagePaths[index] : nil
+                )
                 .frame(width: 92, height: (128 - 4) / 2)
                 .clipped()
                 .cornerRadius(8)
