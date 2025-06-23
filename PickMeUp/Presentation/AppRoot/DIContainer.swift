@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-final class DIContainer: AuthViewProviding, OrderViewProviding,  ProfileViewProviding, StoreViewProviding, StoreDetailViewProviding {
+final class DIContainer: AuthViewProviding, OrderViewProviding, StoreViewProviding, StoreDetailViewProviding, ChattingViewProviding, ProfileViewProviding {
     let router = AppRouter()
 
     // MARK: - AuthViewProviding
@@ -39,38 +39,6 @@ final class DIContainer: AuthViewProviding, OrderViewProviding,  ProfileViewProv
         )
 
         return AnyView(OrderScreen(store: store))
-    }
-
-    // MARK: - ProfileViewProviding
-    func makeProfileScreen() -> AnyView {
-        let state = ProfileState(
-            user: MeProfileResponse.empty,
-            profile: MeProfileResponse.empty.toEntity()
-        )
-        let effect = ProfileEffect()
-        let reducer = ProfileReducer()
-
-        let store = ProfileStore(
-            state: state,
-            effect: effect,
-            reducer: reducer,
-            router: self.router
-        )
-
-        return AnyView(ProfileScreen(store: store))
-    }
-
-    func makeProfileEditScreen(user: ProfileEntity) -> AnyView {
-        let state = ProfileEditState(profile: user)
-        let effect = ProfileEditEffect()
-        let reducer = ProfileEditReducer()
-        let store = ProfileEditStore(
-            state: state,
-            reducer: reducer,
-            effect: effect,
-            router: self.router
-        )
-        return AnyView(ProfileEditScreen(store: store))
     }
 
     // MARK: - StoreViewProviding
@@ -111,6 +79,44 @@ final class DIContainer: AuthViewProviding, OrderViewProviding,  ProfileViewProv
             router: router
         ))
     }
+
+    // MARK: - ChattingViewProviding
+    func makeChattingScreen() -> AnyView {
+        return AnyView(ChattingScreen())
+    }
+
+    // MARK: - ProfileViewProviding
+    func makeProfileScreen() -> AnyView {
+        let state = ProfileState(
+            user: MeProfileResponse.empty,
+            profile: MeProfileResponse.empty.toEntity()
+        )
+        let effect = ProfileEffect()
+        let reducer = ProfileReducer()
+
+        let store = ProfileStore(
+            state: state,
+            effect: effect,
+            reducer: reducer,
+            router: self.router
+        )
+
+        return AnyView(ProfileScreen(store: store))
+    }
+
+    func makeProfileEditScreen(user: ProfileEntity) -> AnyView {
+        let state = ProfileEditState(profile: user)
+        let effect = ProfileEditEffect()
+        let reducer = ProfileEditReducer()
+        let store = ProfileEditStore(
+            state: state,
+            reducer: reducer,
+            effect: effect,
+            router: self.router
+        )
+        return AnyView(ProfileEditScreen(store: store))
+    }
+
 }
 
 extension DIContainer {
