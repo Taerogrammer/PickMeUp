@@ -12,14 +12,14 @@ enum ChatListAction {
         case onAppear
         case loadChatList
         case refreshChatList
-        case selectChatRoom(ChatModel)
+        case selectChatRoom(ChatRoomEntity)
         case dismissChatRoom
         case dismissError
         case startNewChat
     }
 
     enum Result {
-        case loadChatListSuccess([ChatModel])
+        case loadChatListSuccess([ChatRoomEntity])
         case loadChatListFailed(String)
     }
 }

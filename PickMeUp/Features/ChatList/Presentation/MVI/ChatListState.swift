@@ -8,10 +8,10 @@
 import Foundation
 
 struct ChatListState {
-    var chatRooms: [ChatModel] = []
+    var chatRooms: [ChatRoomEntity] = []
     var isLoading: Bool = false
     var errorMessage: String? = nil
-    var selectedChatRoom: ChatModel? = nil
+    var selectedChatRoom: ChatRoomEntity? = nil
     var currentUserID: String? = nil
 
     var isEmptyState: Bool {

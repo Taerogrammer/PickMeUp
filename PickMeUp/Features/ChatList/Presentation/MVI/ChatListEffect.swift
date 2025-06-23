@@ -28,7 +28,9 @@ struct ChatListEffect {
             if let success = response.success {
                 print("응답 데이터: \(success.data)")
                 print("데이터 개수: \(success.data.count)")
-                return .loadChatListSuccess(success.data)
+
+                let entities = success.data.map { $0.toEntity() }
+                return .loadChatListSuccess(entities)
             } else if let failure = response.failure {
                 return .loadChatListFailed(failure.message)
             } else {

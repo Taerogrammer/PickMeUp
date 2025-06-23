@@ -51,7 +51,7 @@ struct ChatListView: View {
                 Text(errorMessage)
             }
         }
-        .sheet(item: Binding<ChatModel?>(
+        .sheet(item: Binding<ChatRoomEntity?>(
             get: { store.state.selectedChatRoom },
             set: { _ in store.send(.dismissChatRoom) }
         )) { chatRoom in
@@ -137,7 +137,7 @@ struct ChatListView: View {
 
 // MARK: - ChatRoomRow
 struct ChatRoomRow: View {
-    let chatRoom: ChatModel
+    let chatRoom: ChatRoomEntity  // Entity로 변경
     let currentUserID: String
     let onTap: () -> Void
 
@@ -229,7 +229,7 @@ struct ChatRoomRow: View {
     }
 
     // MARK: - Computed Properties
-    private var opponent: ParticipantModel? {
+    private var opponent: ParticipantEntity? {
         chatRoom.participants.first { $0.userID != currentUserID }
     }
 
@@ -269,9 +269,8 @@ struct ChatRoomRow: View {
     private var formattedTime: String {
         guard let lastChat = chatRoom.lastChat else { return "" }
 
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        guard let date = formatter.date(from: lastChat.createdAt) else { return "" }
+        // Entity에서는 이미 Date 타입이므로 바로 사용
+        let date = lastChat.createdAt
 
         let displayFormatter = DateFormatter()
         displayFormatter.locale = Locale(identifier: "ko_KR")
@@ -299,9 +298,9 @@ struct ChatRoomRow: View {
     }
 }
 
-// MARK: - ChatDetailView (임시)
+// MARK: - 수정된 ChatDetailView
 struct ChatDetailView: View {
-    let chatRoom: ChatModel
+    let chatRoom: ChatRoomEntity  // Entity로 변경
     let currentUserID: String
 
     @Environment(\.dismiss) private var dismiss
@@ -321,7 +320,6 @@ struct ChatDetailView: View {
         }
     }
 }
-
 
 
 //#Preview {
