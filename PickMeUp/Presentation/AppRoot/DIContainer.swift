@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-final class DIContainer: AuthViewProviding, OrderViewProviding, StoreViewProviding, StoreDetailViewProviding, ChattingViewProviding, ProfileViewProviding {
+final class DIContainer: AuthViewProviding, OrderViewProviding, StoreViewProviding, StoreDetailViewProviding, ChatViewProviding, ProfileViewProviding {
     let router = AppRouter()
 
     // MARK: - AuthViewProviding
@@ -81,8 +81,8 @@ final class DIContainer: AuthViewProviding, OrderViewProviding, StoreViewProvidi
     }
 
     // MARK: - ChattingViewProviding
-    func makeChattingScreen() -> AnyView {
-        return AnyView(ChattingScreen())
+    func makeChatScreen() -> AnyView {
+        return AnyView(ChatScreen())
     }
 
     // MARK: - ProfileViewProviding

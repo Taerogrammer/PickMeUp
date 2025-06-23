@@ -7,6 +7,6 @@
 
 import SwiftUI
 
-protocol ChattingViewProviding: AnyObject {
-    func makeChattingScreen() -> AnyView
+protocol ChatViewProviding: AnyObject {
+    func makeChatScreen() -> AnyView
 }
