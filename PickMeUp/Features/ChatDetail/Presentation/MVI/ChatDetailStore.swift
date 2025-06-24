@@ -13,6 +13,7 @@ final class ChatDetailStore: ObservableObject {
 
     private let messageManager: ChatMessageManager
     private let socketManager: ChatSocketManager
+    private var cancellables = Set<AnyCancellable>()
 
     init(
         chatRoom: ChatRoomEntity,
@@ -23,6 +24,9 @@ final class ChatDetailStore: ObservableObject {
         self.state = ChatDetailState(chatRoom: chatRoom, currentUserID: currentUserID)
         self.messageManager = messageManager
         self.socketManager = socketManager
+
+        // 델리게이트 설정 - 실시간 메시지 수신을 위해 필수!
+        socketManager.delegate = self
 
         setupManagerObservation()
     }
@@ -108,6 +112,32 @@ final class ChatDetailStore: ObservableObject {
             }
             .store(in: &cancellables)
     }
+}
 
-    private var cancellables = Set<AnyCancellable>()
+// MARK: - ChatSocketDelegate 구현 (실시간 메시지의 핵심!)
+extension ChatDetailStore: ChatSocketDelegate {
+    func socketDidConnect() {
+        print("🔗 Store: Socket 연결됨")
+        // 연결 상태는 이미 @Published 프로퍼티로 관찰되고 있음
+    }
+
+    func socketDidDisconnect() {
+        print("🔗 Store: Socket 연결 해제됨")
+        // 연결 상태는 이미 @Published 프로퍼티로 관찰되고 있음
+    }
+
+    func socketDidReceiveError(_ error: String) {
+        print("🚨 Store: Socket 에러: \(error)")
+        Task { @MainActor in
+            handleResult(.socketError(error))
+        }
+    }
+
+    func socketDidReceiveMessage(_ message: ChatMessageEntity) {
+        print("💬 Store: 실시간 메시지 수신: \(message.content)")
+        // 실시간으로 받은 메시지를 State에 반영
+        Task { @MainActor in
+            send(.receiveRealtimeMessage(message))
+        }
+    }
 }

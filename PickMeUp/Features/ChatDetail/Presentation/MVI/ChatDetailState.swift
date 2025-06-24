@@ -46,11 +46,22 @@ struct ChatDetailState {
         return ""
     }
 
-    // Helper Methods
+    // Helper Methods - 중복 체크 로직 개선
     mutating func addMessage(_ message: ChatMessageEntity) {
-        if !messages.contains(where: { $0.id == message.id }) {
+        // 중복 체크: ID 또는 (content + timestamp + sender)로 중복 판단
+        let isDuplicate = messages.contains { existingMessage in
+            existingMessage.id == message.id ||
+            (existingMessage.content == message.content &&
+             existingMessage.sender.userID == message.sender.userID &&
+             abs(existingMessage.createdAt.timeIntervalSince(message.createdAt)) < 2.0) // 2초 이내
+        }
+
+        if !isDuplicate {
             messages.append(message)
             messages.sort { $0.createdAt < $1.createdAt }
+            print("✅ 메시지 추가됨: \(message.content)")
+        } else {
+            print("📝 중복 메시지 감지, 추가하지 않음: \(message.content)")
         }
     }
 

@@ -35,6 +35,8 @@ struct ChatDetailEffect {
             return await handleDisconnectSocket(socketManager: socketManager)
         case .sendMessage(let content):
             return await handleSendMessage(content: content, state: state, messageManager: messageManager)
+        case .receiveRealtimeMessage(let message):
+            return .realtimeMessageReceived(message)
         case .updateNewMessage, .dismissError, .addTempMessage, .removeTempMessage, .clearMessages:
             return nil
         }

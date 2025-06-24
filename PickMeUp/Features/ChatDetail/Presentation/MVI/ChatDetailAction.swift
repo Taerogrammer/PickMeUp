@@ -20,6 +20,7 @@ enum ChatDetailAction {
         case addTempMessage(ChatMessageEntity)
         case removeTempMessage(String)
         case clearMessages
+        case receiveRealtimeMessage(ChatMessageEntity)
     }
 
     enum Result {
@@ -31,5 +32,6 @@ enum ChatDetailAction {
         case socketDisconnected
         case socketError(String)
         case newMessageReceived(ChatMessageEntity)
+        case realtimeMessageReceived(ChatMessageEntity)
     }
 }

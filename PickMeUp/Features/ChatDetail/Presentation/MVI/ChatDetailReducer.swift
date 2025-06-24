@@ -37,6 +37,8 @@ struct ChatDetailReducer {
             state.removeMessage(withId: messageId)
         case .clearMessages:
             state.messages.removeAll()
+        case .receiveRealtimeMessage:
+            break
         }
     }
 
@@ -68,6 +70,9 @@ struct ChatDetailReducer {
             state.isSocketConnected = false
             state.errorMessage = error
         case .newMessageReceived(let message):
+            state.addMessage(message)
+        case .realtimeMessageReceived(let message): // 새로 추가
+            // 실시간으로 받은 메시지를 State에 반영
             state.addMessage(message)
         }
     }

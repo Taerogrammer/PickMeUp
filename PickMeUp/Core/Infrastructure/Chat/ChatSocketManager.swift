@@ -8,7 +8,15 @@
 import SocketIO
 import Foundation
 
+protocol ChatSocketDelegate: AnyObject {
+    func socketDidConnect()
+    func socketDidDisconnect()
+    func socketDidReceiveError(_ error: String)
+    func socketDidReceiveMessage(_ message: ChatMessageEntity)
+}
+
 final class ChatSocketManager: ObservableObject {
+    weak var delegate: ChatSocketDelegate?
     private var manager: SocketManager?
     private var socket: SocketIOClient?
 
@@ -61,75 +69,6 @@ final class ChatSocketManager: ObservableObject {
         print("🔌 Socket.IO 연결 시도: \(baseURL)/chats-\(roomID)")
     }
 
-    private func setupSocketEvents() {
-        // 연결 이벤트
-        socket?.on(clientEvent: .connect) { [weak self] data, ack in
-            print("✅ Socket.IO 연결 성공: \(data)")
-            DispatchQueue.main.async {
-                self?.isConnected = true
-                self?.connectionError = nil
-            }
-        }
-
-        // 연결 해제 이벤트
-        socket?.on(clientEvent: .disconnect) { [weak self] data, ack in
-            print("❌ Socket.IO 연결 해제: \(data)")
-            DispatchQueue.main.async {
-                self?.isConnected = false
-            }
-        }
-
-        // 오류 이벤트
-        socket?.on(clientEvent: .error) { [weak self] data, ack in
-            print("🚨 Socket.IO 오류: \(data)")
-            DispatchQueue.main.async {
-                self?.connectionError = "소켓 오류: \(data)"
-                self?.isConnected = false
-            }
-        }
-
-        // 채팅 메시지 수신 - 문서에 명시된 "chat" 이벤트
-        socket?.on("chat") { [weak self] data, ack in
-            print("💬 채팅 메시지 수신: \(data)")
-            self?.handleChatMessage(data)
-        }
-
-        // 연결 상태 이벤트
-        socket?.on(clientEvent: .statusChange) { data, ack in
-            print("📡 연결 상태 변경: \(data)")
-        }
-    }
-
-    private func handleChatMessage(_ data: [Any]) {
-        guard let messageData = data.first as? [String: Any] else {
-            print("🚨 잘못된 메시지 형식")
-            return
-        }
-
-        // 문서에 명시된 JSON 구조에 따라 파싱
-        /*
-        {
-          "chat_id": "683c5ae31ca33ade44437e73",
-          "room_id": "68287f754b8088df94e434c1",
-          "content": "반갑습니다 :)",
-          "createdAt": "2025-06-01T13:51:31.402Z",
-          "updatedAt": "2025-06-01T13:51:31.402Z",
-          "sender": { ... },
-          "files": [ ... ]
-        }
-        */
-
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: messageData)
-            // ChatMessageEntity로 디코딩
-            // let message = try JSONDecoder().decode(ChatMessageResponse.self, from: jsonData)
-            // TODO: 새 메시지를 ChatDetailStore에 전달
-            print("✅ 메시지 파싱 성공: \(messageData)")
-        } catch {
-            print("🚨 메시지 파싱 실패: \(error)")
-        }
-    }
-
     // 연결 해제
     func disconnect() {
         socket?.disconnect()
@@ -148,6 +87,73 @@ final class ChatSocketManager: ObservableObject {
     func sendMessage(_ message: String) {
         socket?.emit("chat", message) {
             print("📤 메시지 전송 완료")
+        }
+    }
+
+    private func handleChatMessage(_ data: [Any]) {
+        guard let messageData = data.first as? [String: Any] else {
+            print("🚨 잘못된 메시지 형식")
+            return
+        }
+
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: messageData)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+
+            let messageResponse = try decoder.decode(ChatSendResponse.self, from: jsonData)
+            let messageEntity = messageResponse.toEntity()
+
+            // 델리게이트를 통해 메시지 전달
+            DispatchQueue.main.async { [weak self] in
+                self?.delegate?.socketDidReceiveMessage(messageEntity)
+            }
+
+            print("✅ 실시간 메시지 수신: \(messageEntity.content)")
+        } catch {
+            print("🚨 메시지 파싱 실패: \(error)")
+        }
+    }
+
+    private func setupSocketEvents() {
+        // 연결 이벤트
+        socket?.on(clientEvent: .connect) { [weak self] data, ack in
+            print("✅ Socket.IO 연결 성공: \(data)")
+            DispatchQueue.main.async {
+                self?.isConnected = true
+                self?.connectionError = nil
+                self?.delegate?.socketDidConnect()
+            }
+        }
+
+        // 연결 해제 이벤트
+        socket?.on(clientEvent: .disconnect) { [weak self] data, ack in
+            print("❌ Socket.IO 연결 해제: \(data)")
+            DispatchQueue.main.async {
+                self?.isConnected = false
+                self?.delegate?.socketDidDisconnect()
+            }
+        }
+
+        // 오류 이벤트
+        socket?.on(clientEvent: .error) { [weak self] data, ack in
+            print("🚨 Socket.IO 오류: \(data)")
+            DispatchQueue.main.async {
+                self?.connectionError = "소켓 오류: \(data)"
+                self?.isConnected = false
+                self?.delegate?.socketDidReceiveError("소켓 오류: \(data)")
+            }
+        }
+
+        // 채팅 메시지 수신 - 문서에 명시된 "chat" 이벤트
+        socket?.on("chat") { [weak self] data, ack in
+            print("💬 채팅 메시지 수신: \(data)")
+            self?.handleChatMessage(data)
+        }
+
+        // 연결 상태 이벤트
+        socket?.on(clientEvent: .statusChange) { data, ack in
+            print("📡 연결 상태 변경: \(data)")
         }
     }
 }
