@@ -69,3 +69,27 @@ struct ChatDetailState {
         messages.removeAll { $0.id == id }
     }
 }
+
+extension ChatDetailState {
+    var chatViewItems: [ChatViewItem] {
+        var items: [ChatViewItem] = []
+        var currentDate: Date?
+
+        let sortedMessages = messages.sorted { $0.createdAt < $1.createdAt }
+
+        for message in sortedMessages {
+            let messageDate = Calendar.current.startOfDay(for: message.createdAt)
+
+            // 날짜가 바뀌었으면 날짜 구분선 추가
+            if currentDate != messageDate {
+                items.append(.dateSeparator(messageDate))
+                currentDate = messageDate
+            }
+
+            // 메시지 추가
+            items.append(.message(message))
+        }
+
+        return items
+    }
+}

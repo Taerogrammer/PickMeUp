@@ -16,7 +16,7 @@ struct ChatListView: View {
 
     var body: some View {
         ZStack {
-            Color(Color.gray15)
+            Color.gray15
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {

@@ -86,12 +86,7 @@ struct MessageRow: View {
     private var formattedTime: String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
-
-        if Calendar.current.isDateInToday(message.createdAt) {
-            formatter.dateFormat = "HH:mm"
-        } else {
-            formatter.dateFormat = "M/d HH:mm"
-        }
+        formatter.dateFormat = "HH:mm"
 
         return formatter.string(from: message.createdAt)
     }
