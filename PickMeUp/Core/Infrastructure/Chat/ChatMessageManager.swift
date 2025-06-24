@@ -7,7 +7,7 @@
 
 import Foundation
 
-class ChatMessageManager: ObservableObject {
+final class ChatMessageManager: ObservableObject {
     @Published var messages: [ChatMessageEntity] = []
     @Published var isLoading: Bool = false
     @Published var isLoadingHistory: Bool = false

@@ -8,45 +8,34 @@
 import SwiftUI
 
 struct ChatDetailView: View {
-    let chatRoom: ChatRoomEntity
-    let currentUserID: String
+    @ObservedObject private var store: ChatDetailStore
 
-    @StateObject private var socketManager = ChatSocketManager()
-    @StateObject private var messageManager = ChatMessageManager()
-    @State private var newMessage: String = ""
+    init(chatRoom: ChatRoomEntity, currentUserID: String) {
+        self.store = ChatDetailStore(chatRoom: chatRoom, currentUserID: currentUserID)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
-            // 연결 상태 표시
             connectionStatusView
-
-            // 채팅 메시지 목록
             messageListView
-
-            // 메시지 입력 영역
             messageInputView
         }
         .background(Color(hex: "F6EEE3").opacity(0.1))
-        .navigationTitle(opponentName)
+        .navigationTitle(store.state.opponentName)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(false)
         .onAppear {
-            loadChatData()
+            store.send(.onAppear)
         }
         .onDisappear {
-            socketManager.disconnect()
+            store.send(.onDisappear)
         }
-        .alert("오류", isPresented: .constant(messageManager.sendError != nil || messageManager.historyError != nil)) {
+        .alert("오류", isPresented: .constant(store.state.hasError)) {
             Button("확인") {
-                messageManager.sendError = nil
-                messageManager.historyError = nil
+                store.send(.dismissError)
             }
         } message: {
-            if let sendError = messageManager.sendError {
-                Text("전송 오류: \(sendError)")
-            } else if let historyError = messageManager.historyError {
-                Text("채팅 내역 로드 오류: \(historyError)")
-            }
+            Text(store.state.errorText)
         }
     }
 
@@ -54,22 +43,22 @@ struct ChatDetailView: View {
     private var connectionStatusView: some View {
         HStack(spacing: 8) {
             Circle()
-                .fill(socketManager.isConnected ? Color(hex: "D7A86E") : Color.gray)
+                .fill(store.state.isSocketConnected ? Color(hex: "D7A86E") : Color.gray)
                 .frame(width: 8, height: 8)
 
-            Text(socketManager.isConnected ? "온라인" : "오프라인")
+            Text(store.state.isSocketConnected ? "온라인" : "오프라인")
                 .font(.caption)
                 .foregroundColor(.secondary)
 
             Spacer()
 
-            if messageManager.isLoadingHistory {
+            if store.state.isLoadingHistory {
                 ProgressView()
                     .scaleEffect(0.8)
                 Text("로딩 중...")
                     .font(.caption)
                     .foregroundColor(.secondary)
-            } else if messageManager.isLoading {
+            } else if store.state.isLoading {
                 ProgressView()
                     .scaleEffect(0.8)
                 Text("전송 중...")
@@ -87,15 +76,15 @@ struct ChatDetailView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 12) {
-                    if messageManager.isLoadingHistory {
+                    if store.state.isLoadingHistory {
                         loadingMessagesView
-                    } else if messageManager.messages.isEmpty {
+                    } else if store.state.messages.isEmpty {
                         emptyMessagesView
                     } else {
-                        ForEach(messageManager.messages) { message in
+                        ForEach(store.state.messages) { message in
                             MessageRow(
                                 message: message,
-                                isFromCurrentUser: message.sender.userID == currentUserID
+                                isFromCurrentUser: message.sender.userID == store.state.currentUserID
                             )
                         }
                     }
@@ -103,15 +92,15 @@ struct ChatDetailView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
             }
-            .onChange(of: messageManager.messages.count) { _ in
-                if let lastMessage = messageManager.messages.last {
+            .onChange(of: store.state.messages.count) { _ in
+                if let lastMessage = store.state.messages.last {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         proxy.scrollTo(lastMessage.id, anchor: .bottom)
                     }
                 }
             }
             .onAppear {
-                if let lastMessage = messageManager.messages.last {
+                if let lastMessage = store.state.messages.last {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         proxy.scrollTo(lastMessage.id, anchor: .bottom)
                     }
@@ -164,21 +153,22 @@ struct ChatDetailView: View {
 
     private var messageInputView: some View {
         HStack(spacing: 12) {
-            // 메시지 입력 필드
-            TextField("메시지를 입력하세요...", text: $newMessage, axis: .vertical)
-                .font(.body)
-                .lineLimit(1...3)
-                .disabled(messageManager.isLoading)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color(hex: "F6EEE3").opacity(0.8))
-                )
+            TextField("메시지를 입력하세요...", text: .init(
+                get: { store.state.newMessage },
+                set: { store.send(.updateNewMessage($0)) }
+            ), axis: .vertical)
+            .font(.body)
+            .lineLimit(1...3)
+            .disabled(store.state.isLoading)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(hex: "F6EEE3").opacity(0.8))
+            )
 
-            // 전송 버튼
             Button(action: sendMessage) {
-                if messageManager.isLoading {
+                if store.state.isLoading {
                     ProgressView()
                         .frame(width: 20, height: 20)
                         .tint(.white)
@@ -191,11 +181,11 @@ struct ChatDetailView: View {
             .frame(width: 40, height: 40)
             .background(
                 Circle()
-                    .fill(canSendMessage ? Color(hex: "D7A86E") : Color.gray.opacity(0.5))
+                    .fill(store.state.canSendMessage ? Color(hex: "D7A86E") : Color.gray.opacity(0.5))
             )
-            .disabled(!canSendMessage || messageManager.isLoading)
-            .scaleEffect(canSendMessage ? 1.0 : 0.9)
-            .animation(.easeInOut(duration: 0.2), value: canSendMessage)
+            .disabled(!store.state.canSendMessage)
+            .scaleEffect(store.state.canSendMessage ? 1.0 : 0.9)
+            .animation(.easeInOut(duration: 0.2), value: store.state.canSendMessage)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -208,64 +198,33 @@ struct ChatDetailView: View {
         )
     }
 
-    // MARK: - Computed Properties
-    private var opponentName: String {
-        let opponent = chatRoom.participants.first { $0.userID != currentUserID }
-        return opponent?.nick ?? "알 수 없는 사용자"
-    }
-
-    private var canSendMessage: Bool {
-        !newMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
     // MARK: - Functions
-    private func loadChatData() {
-        Task {
-            await messageManager.loadChatHistory(roomID: chatRoom.roomID)
-            await MainActor.run {
-                socketManager.connect(roomID: chatRoom.roomID)
-            }
-        }
-    }
-
     private func sendMessage() {
-        let messageText = newMessage.trimmingCharacters(in: .whitespacesAndNewlines)
+        let messageText = store.state.newMessage.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !messageText.isEmpty else { return }
 
+        // 임시 메시지 생성
         let tempID = "temp_\(UUID().uuidString)"
         let tempMessage = ChatMessageEntity(
             id: tempID,
-            roomID: chatRoom.roomID,
+            roomID: store.state.chatRoom.roomID,
             content: messageText,
             createdAt: Date(),
             updatedAt: Date(),
             sender: SenderEntity(
-                userID: currentUserID,
+                userID: store.state.currentUserID,
                 nick: "나",
                 profileImage: nil
             ),
             files: []
         )
 
-        messageManager.addMessage(tempMessage)
-        newMessage = ""
+        // 임시 메시지 추가
+        store.send(.addTempMessage(tempMessage))
 
-        Task {
-            let success = await messageManager.sendMessage(
-                roomID: chatRoom.roomID,
-                content: messageText,
-                files: nil
-            )
+        // 실제 메시지 전송
+        store.send(.sendMessage(messageText))
 
-            if success {
-                await MainActor.run {
-                    messageManager.removeMessage(withId: tempID)
-                }
-            } else {
-                await MainActor.run {
-                    messageManager.removeMessage(withId: tempID)
-                }
-            }
-        }
+        // 전송 실패 시 임시 메시지 제거는 Effect에서 처리
     }
 }
