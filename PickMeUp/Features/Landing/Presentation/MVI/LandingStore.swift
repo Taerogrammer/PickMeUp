@@ -36,11 +36,11 @@ final class LandingStore: ObservableObject {
 
         // 성공 메시지 설정
         switch result {
-        case .loginSuccess(_, _, let message):
+        case .loginSuccess(_, _, _, let message):
             state.successMessage = message
-        case .appleLoginSuccess(_, _, let message):
+        case .appleLoginSuccess(_, _, _, let message):
             state.successMessage = message
-        case .kakaoLoginSuccess(_, _, let message):
+        case .kakaoLoginSuccess(_, _, _, let message):
             state.successMessage = message
         default:
             break

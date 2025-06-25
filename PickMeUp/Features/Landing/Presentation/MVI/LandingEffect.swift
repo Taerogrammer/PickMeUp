@@ -44,6 +44,7 @@ struct LandingEffect {
                 return .loginSuccess(
                     accessToken: success.accessToken,
                     refreshToken: success.refreshToken,
+                    userID: success.userId,
                     message: "로그인 성공!"
                 )
             } else if let failure = result.failure {
@@ -71,6 +72,7 @@ struct LandingEffect {
                 return .appleLoginSuccess(
                     accessToken: success.accessToken,
                     refreshToken: success.refreshToken,
+                    userID: success.userId,
                     message: "Apple 로그인 성공"
                 )
             } else if let failure = result.failure {

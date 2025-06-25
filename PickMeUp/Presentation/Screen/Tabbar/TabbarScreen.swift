@@ -36,6 +36,12 @@ struct TabbarScreen: View {
                 }
                 .tag(TabItem.friends)
 
+            container.makeChatScreen()
+                .tabItem {
+                    Image(systemName: TabItem.chat.iconName)
+                }
+                .tag(TabItem.chat)
+
             container.makeProfileScreen()
                 .tabItem {
                     Image(systemName: TabItem.profile.iconName)

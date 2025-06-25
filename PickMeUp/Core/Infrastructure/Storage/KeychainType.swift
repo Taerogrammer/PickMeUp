@@ -7,8 +7,9 @@
 
 import Foundation
 
-enum TokenType: String {
+enum KeychainType: String {
     case accessToken
     case refreshToken
     case deviceToken
+    case userID
 }

@@ -36,7 +36,7 @@ final class ImageCacheManager {
     func loadImage(
         from path: String,
         targetSize: CGSize = CGSize(width: 160, height: 120),
-        accessTokenKey: String = TokenType.accessToken.rawValue
+        accessTokenKey: String = KeychainType.accessToken.rawValue
     ) async -> UIImage? {
         let cacheKey = generateCacheKey(from: path)
 
@@ -109,7 +109,7 @@ private extension ImageCacheManager {
 
 // MARK: - Private Methods - 네트워크
 private extension ImageCacheManager {
-    func getETagFromServer(path: String, accessTokenKey: String = TokenType.accessToken.rawValue) async -> String? {
+    func getETagFromServer(path: String, accessTokenKey: String = KeychainType.accessToken.rawValue) async -> String? {
         guard let url = URL(string: "\(APIEnvironment.production.baseURL)/v1\(path)"),
               let accessToken = KeychainManager.shared.load(key: accessTokenKey) else {
             return nil
@@ -132,7 +132,7 @@ private extension ImageCacheManager {
         return nil
     }
 
-    func downloadImage(from path: String, targetSize: CGSize, etag: String?, accessTokenKey: String = TokenType.accessToken.rawValue) async -> CacheImage? {
+    func downloadImage(from path: String, targetSize: CGSize, etag: String?, accessTokenKey: String = KeychainType.accessToken.rawValue) async -> CacheImage? {
         guard let url = URL(string: "\(APIEnvironment.production.baseURL)/v1\(path)"),
               let accessToken = KeychainManager.shared.load(key: accessTokenKey) else {
             return nil

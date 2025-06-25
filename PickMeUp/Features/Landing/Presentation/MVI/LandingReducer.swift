@@ -35,12 +35,13 @@ struct LandingReducer {
 
     static func reduce(state: inout LandingState, result: LandingAction.Result, appLaunchState: AppLaunchState) {
         switch result {
-        case .loginSuccess(let accessToken, let refreshToken, _):
+        case .loginSuccess(let accessToken, let refreshToken, let userID, _):
             state.isLoginLoading = false
             state.loginErrorMessage = nil
 
-            KeychainManager.shared.save(key: TokenType.accessToken.rawValue, value: accessToken)
-            KeychainManager.shared.save(key: TokenType.refreshToken.rawValue, value: refreshToken)
+            KeychainManager.shared.save(key: KeychainType.accessToken.rawValue, value: accessToken)
+            KeychainManager.shared.save(key: KeychainType.refreshToken.rawValue, value: refreshToken)
+            KeychainManager.shared.save(key: KeychainType.userID.rawValue, value: userID)
 
             appLaunchState.isSessionValid = true
 
@@ -48,12 +49,13 @@ struct LandingReducer {
             state.isLoginLoading = false
             state.loginErrorMessage = error
 
-        case .appleLoginSuccess(let accessToken, let refreshToken, _):
+        case .appleLoginSuccess(let accessToken, let refreshToken, let userID, _):
             state.isAppleLoginLoading = false
             state.loginErrorMessage = nil
 
-            KeychainManager.shared.save(key: TokenType.accessToken.rawValue, value: accessToken)
-            KeychainManager.shared.save(key: TokenType.refreshToken.rawValue, value: refreshToken)
+            KeychainManager.shared.save(key: KeychainType.accessToken.rawValue, value: accessToken)
+            KeychainManager.shared.save(key: KeychainType.refreshToken.rawValue, value: refreshToken)
+            KeychainManager.shared.save(key: KeychainType.userID.rawValue, value: userID)
 
             appLaunchState.isSessionValid = true
 
@@ -61,12 +63,13 @@ struct LandingReducer {
             state.isAppleLoginLoading = false
             state.loginErrorMessage = error
 
-        case .kakaoLoginSuccess(let accessToken, let refreshToken, _):
+        case .kakaoLoginSuccess(let accessToken, let refreshToken, let userID, _):
             state.isKakaoLoginLoading = false
             state.loginErrorMessage = nil
 
-            KeychainManager.shared.save(key: TokenType.accessToken.rawValue, value: accessToken)
-            KeychainManager.shared.save(key: TokenType.refreshToken.rawValue, value: refreshToken)
+            KeychainManager.shared.save(key: KeychainType.accessToken.rawValue, value: accessToken)
+            KeychainManager.shared.save(key: KeychainType.refreshToken.rawValue, value: refreshToken)
+            KeychainManager.shared.save(key: KeychainType.userID.rawValue, value: userID)
 
             appLaunchState.isSessionValid = true
 
