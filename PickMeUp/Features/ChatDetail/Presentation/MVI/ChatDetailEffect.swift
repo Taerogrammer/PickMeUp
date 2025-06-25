@@ -52,7 +52,9 @@ struct ChatDetailEffect {
         await withTaskGroup(of: Void.self) { group in
             // 1. 채팅 히스토리 로드 (백그라운드)
             group.addTask {
-                await messageManager.loadChatHistory(roomID: state.chatRoom.roomID)
+                // 수정됨 - 로컬 먼저, 그 다음 서버
+                await messageManager.loadLocalChatHistory(roomID: state.chatRoom.roomID)
+                await messageManager.loadChatHistory(roomID: state.chatRoom.roomID) // 서버 동기화
             }
 
             // 2. 소켓 연결 (메인 스레드에서 처리)
@@ -72,8 +74,9 @@ struct ChatDetailEffect {
         messageManager: ChatMessageManager
     ) async -> ChatDetailAction.Result {
 
-        // 백그라운드에서 채팅 히스토리 로드
-        await messageManager.loadChatHistory(roomID: state.chatRoom.roomID)
+        // 수정됨 - 로컬 먼저, 그 다음 서버
+        await messageManager.loadLocalChatHistory(roomID: state.chatRoom.roomID)
+        await messageManager.loadChatHistory(roomID: state.chatRoom.roomID) // 서버 동기화
 
         // 메인 스레드에서 결과 확인 및 반환
         return await MainActor.run {

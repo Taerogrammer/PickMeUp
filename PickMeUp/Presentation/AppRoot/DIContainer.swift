@@ -10,6 +10,25 @@ import SwiftUI
 final class DIContainer: AuthViewProviding, OrderViewProviding, StoreViewProviding, StoreDetailViewProviding, ChatViewProviding, ProfileViewProviding {
     let router = AppRouter()
 
+    // CoreData 관련 추가
+    let coreDataStack: CoreDataStack
+    let chatRepository: ChatRepositoryProtocol
+
+    init() {
+        self.coreDataStack = CoreDataStack.shared
+        self.chatRepository = ChatRepository(coreDataStack: coreDataStack)
+    }
+
+    // ChatDetailStore 생성 시 Repository 주입
+    func makeChatDetailStore(chatRoom: ChatRoomEntity, currentUserID: String) -> ChatDetailStore {
+        return ChatDetailStore(
+            chatRoom: chatRoom,
+            currentUserID: currentUserID,
+            messageManager: ChatMessageManager(repository: chatRepository), // Repository 주입
+            socketManager: ChatSocketManager()
+        )
+    }
+
     // MARK: - AuthViewProviding
     func makeLandingView(appLaunchState: AppLaunchState) -> AnyView {
         let state = LandingState()

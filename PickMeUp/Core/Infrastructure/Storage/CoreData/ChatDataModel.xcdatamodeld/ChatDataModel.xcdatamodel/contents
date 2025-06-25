@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="24F74" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="ChatMessage" representedClassName="ChatMessage" syncable="YES" codeGenerationType="class">
+        <attribute name="content" attributeType="String"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO" spotlightIndexingEnabled="YES"/>
+        <attribute name="files" optional="YES" attributeType="Binary"/>
+        <attribute name="id" attributeType="String" spotlightIndexingEnabled="YES"/>
+        <attribute name="roomID" attributeType="String" spotlightIndexingEnabled="YES"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="room" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ChatRoom" inverseName="messages" inverseEntity="ChatRoom"/>
+        <relationship name="sender" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Sender" inverseName="sentMessages" inverseEntity="Sender"/>
+    </entity>
+    <entity name="ChatRoom" representedClassName="ChatRoom" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="roomID" attributeType="String" spotlightIndexingEnabled="YES"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="lastChat" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="LastChat" inverseName="room" inverseEntity="LastChat"/>
+        <relationship name="messages" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ChatMessage" inverseName="room" inverseEntity="ChatMessage"/>
+        <relationship name="participants" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Participant" inverseName="room" inverseEntity="Participant"/>
+    </entity>
+    <entity name="LastChat" representedClassName="LastChat" syncable="YES" codeGenerationType="class">
+        <attribute name="chatID" attributeType="String" spotlightIndexingEnabled="YES"/>
+        <attribute name="content" attributeType="String"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="files" optional="YES" attributeType="Binary"/>
+        <attribute name="roomID" attributeType="String"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="room" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ChatRoom" inverseName="lastChat" inverseEntity="ChatRoom"/>
+        <relationship name="sender" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Sender" inverseName="lastChatSent" inverseEntity="Sender"/>
+    </entity>
+    <entity name="Participant" representedClassName="Participant" syncable="YES" codeGenerationType="class">
+        <attribute name="nick" attributeType="String"/>
+        <attribute name="profileImage" optional="YES" attributeType="String"/>
+        <attribute name="userID" attributeType="String"/>
+        <relationship name="room" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ChatRoom" inverseName="participants" inverseEntity="ChatRoom"/>
+    </entity>
+    <entity name="Sender" representedClassName="Sender" syncable="YES" codeGenerationType="class">
+        <attribute name="nick" attributeType="String"/>
+        <attribute name="profileImage" optional="YES" attributeType="String"/>
+        <attribute name="userID" attributeType="String" spotlightIndexingEnabled="YES"/>
+        <relationship name="lastChatSent" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="LastChat" inverseName="sender" inverseEntity="LastChat"/>
+        <relationship name="sentMessages" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ChatMessage" inverseName="sender" inverseEntity="ChatMessage"/>
+    </entity>
+</model>
