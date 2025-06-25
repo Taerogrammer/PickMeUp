@@ -17,12 +17,15 @@ final class ChatMessageManager: ObservableObject {
     // Repository 추가
     private let repository: ChatRepositoryProtocol
 
+    // 이미 저장된 메시지 ID 추적
+    private var savedMessageIDs: Set<String> = []
+
     // Repository 주입 생성자 추가
     init(repository: ChatRepositoryProtocol = ChatRepository()) {
         self.repository = repository
     }
 
-    // 🆕 로컬 데이터부터 로드하는 새로운 메서드
+    // MARK: - 로컬 데이터 로드
     func loadLocalChatHistory(roomID: String) async {
         await MainActor.run {
             isLoadingHistory = true
@@ -37,9 +40,13 @@ final class ChatMessageManager: ObservableObject {
             switch result {
             case .success(let localMessages):
                 messages = localMessages.sorted { $0.createdAt < $1.createdAt }
-                print("✅ [Local History] 로컬 데이터 로드 성공: \(localMessages.count)개 메시지")
 
-                // 로컬 데이터가 있으면 로딩 상태 해제
+                // 로컬에서 로드된 메시지들의 ID를 추적 목록에 추가
+                savedMessageIDs = Set(localMessages.map { $0.id })
+
+                print("✅ [Local History] 로컬 데이터 로드 성공: \(localMessages.count)개 메시지")
+                print("📝 [Local History] 추적 중인 메시지 ID: \(savedMessageIDs.count)개")
+
                 if !localMessages.isEmpty {
                     isLoadingHistory = false
                 }
@@ -51,10 +58,11 @@ final class ChatMessageManager: ObservableObject {
         }
     }
 
-    // 기존 서버 데이터 로드 메서드 (수정됨 - 로컬 저장 추가)
+    // MARK: - 서버 데이터 동기화
     func loadChatHistory(roomID: String, next: String = "") async {
-        // 로컬 데이터가 없을 때만 로딩 상태 설정
-        if messages.isEmpty {
+        let hasLocalData = !messages.isEmpty
+
+        if !hasLocalData {
             await MainActor.run {
                 isLoadingHistory = true
                 historyError = nil
@@ -62,9 +70,8 @@ final class ChatMessageManager: ObservableObject {
         }
 
         do {
-            print("🔍 [Server History] 서버 요청 시작 - roomID: \(roomID), next: \(next)")
+            print("🔍 [Server History] 서버 동기화 시작 - roomID: \(roomID)")
 
-            // 🔧 NetworkManager 사용하도록 변경
             let request = GetChattingRequest(roomID: roomID, next: next)
             let response = try await NetworkManager.shared.fetch(
                 ChatRouter.getChatting(request: request),
@@ -72,7 +79,7 @@ final class ChatMessageManager: ObservableObject {
                 failureType: CommonMessageResponse.self
             )
 
-            // 🔍 응답 상세 디버깅
+            // 응답 상세 디버깅
             print("🔍 [Server History] 응답 상태:")
             print("  - statusCode: \(response.statusCode)")
             print("  - success 존재: \(response.success != nil)")
@@ -80,71 +87,101 @@ final class ChatMessageManager: ObservableObject {
             print("  - isFromCache: \(response.isFromCache)")
 
             if let success = response.success {
-                print("✅ [Server History] 성공 응답 받음")
-                print("  - 메시지 개수: \(success.data.count)")
+                print("✅ [Server History] 서버 응답: \(success.data.count)개 메시지")
 
                 let serverMessages = success.data.map { $0.toEntity() }
 
-                // 🆕 서버 메시지들을 로컬DB에 저장
-                await saveMessagesToLocal(serverMessages, in: roomID)
+                // 새로운 메시지만 필터링 (메모리 기준)
+                let newMessages = filterNewMessages(serverMessages)
 
-                // 🆕 로컬DB에서 다시 조회하여 최신 데이터로 UI 업데이트
-                await loadLocalChatHistory(roomID: roomID)
+                if newMessages.isEmpty {
+                    print("📝 [Server History] 새 메시지 없음")
+                } else {
+                    print("🆕 [Server History] 새 메시지 \(newMessages.count)개 발견")
+
+                    // 새 메시지만 저장
+                    await saveNewMessagesToLocal(newMessages, in: roomID)
+
+                    // UI 업데이트를 위해 메모리에도 추가
+                    await MainActor.run {
+                        for message in newMessages {
+                            addMessage(message)
+                        }
+                    }
+                }
 
                 await MainActor.run {
                     isLoadingHistory = false
                 }
 
-                print("✅ [Server History] 서버 데이터 동기화 완료: \(serverMessages.count)개 메시지")
+                print("✅ [Server History] 동기화 완료")
 
             } else if let failure = response.failure {
-                print("❌ [Server History] 실패 응답 받음")
-                print("  - 에러 메시지: \(failure.message)")
+                print("❌ [Server History] 서버 실패: \(failure.message)")
                 await MainActor.run {
                     isLoadingHistory = false
-                    historyError = failure.message
+                    if !hasLocalData {
+                        historyError = failure.message
+                    }
                 }
             } else {
                 print("🚨 [Server History] Success와 Failure 모두 nil!")
                 print("  - 이는 JSON 파싱 실패를 의미합니다.")
                 print("  - StatusCode: \(response.statusCode)")
 
-                // 🔍 원시 응답 확인을 위한 추가 요청
+                // 원시 응답 확인을 위한 추가 요청
                 await debugRawResponse(roomID: roomID, next: next)
 
                 await MainActor.run {
                     isLoadingHistory = false
-                    historyError = "응답 파싱 실패 (StatusCode: \(response.statusCode))"
+                    if !hasLocalData {
+                        historyError = "응답 파싱 실패 (StatusCode: \(response.statusCode))"
+                    }
                 }
             }
 
         } catch {
+            print("🚨 [Server History] 네트워크 에러: \(error)")
             await MainActor.run {
                 isLoadingHistory = false
-                historyError = "네트워크 오류: \(error.localizedDescription)"
+                if !hasLocalData {
+                    historyError = "오프라인 상태입니다. 네트워크를 확인해주세요."
+                } else {
+                    print("📱 [Offline] 로컬 데이터 \(messages.count)개로 오프라인 모드 동작")
+                }
             }
-            print("🚨 [Server History] 네트워크 에러: \(error)")
         }
     }
 
-    // 🆕 서버 메시지들을 로컬DB에 저장하는 메서드
-    private func saveMessagesToLocal(_ messages: [ChatMessageEntity], in roomID: String) async {
-        print("💾 [Local Save] \(messages.count)개 메시지 로컬 저장 시작")
+    // MARK: - Helper Methods
 
-        for message in messages {
+    // 새로운 메시지만 필터링 (메모리 기준)
+    private func filterNewMessages(_ serverMessages: [ChatMessageEntity]) -> [ChatMessageEntity] {
+        let existingIDs = Set(messages.map { $0.id })
+        return serverMessages.filter { !existingIDs.contains($0.id) }
+    }
+
+    // 새 메시지만 로컬에 저장
+    private func saveNewMessagesToLocal(_ newMessages: [ChatMessageEntity], in roomID: String) async {
+        guard !newMessages.isEmpty else { return }
+
+        print("💾 [Local Save] \(newMessages.count)개 새 메시지 저장 시작")
+
+        for message in newMessages {
             let result = await repository.saveMessage(message, in: roomID)
             switch result {
             case .success:
-                print("  ✅ 로컬 저장 성공: \(message.content)")
+                savedMessageIDs.insert(message.id)
+                print("  ✅ 새 메시지 저장: \(message.content)")
             case .failure(let error):
-                print("  ❌ 로컬 저장 실패: \(message.content) - \(error)")
+                print("  ❌ 저장 실패: \(message.content) - \(error)")
             }
         }
 
-        print("💾 [Local Save] 로컬 저장 완료")
+        print("💾 [Local Save] 새 메시지 저장 완료")
     }
 
-    // 🔍 원시 응답 디버깅 함수
+    // 원시 응답 디버깅 함수
     private func debugRawResponse(roomID: String, next: String) async {
         do {
             let url = URL(string: "http://pickup.sesac.kr:31668/v1/chats/\(roomID)")!
@@ -182,7 +219,7 @@ final class ChatMessageManager: ObservableObject {
         }
     }
 
-    // 메시지 전송 (수정됨 - 로컬 저장 추가)
+    // MARK: - 메시지 전송
     func sendMessage(roomID: String, content: String, files: [String]? = nil) async -> Bool {
         await MainActor.run {
             isLoading = true
@@ -208,15 +245,20 @@ final class ChatMessageManager: ObservableObject {
                 if let success = response.success {
                     let messageEntity = success.toEntity()
 
-                    // 🆕 서버 전송 성공 시 로컬DB에도 저장
-                    Task {
-                        let result = await repository.saveMessage(messageEntity, in: roomID)
-                        switch result {
-                        case .success:
-                            print("✅ [Send Message] 전송된 메시지 로컬 저장 성공")
-                        case .failure(let error):
-                            print("❌ [Send Message] 전송된 메시지 로컬 저장 실패: \(error)")
+                    // 이미 저장되지 않은 메시지만 로컬 저장
+                    if !savedMessageIDs.contains(messageEntity.id) {
+                        Task {
+                            let result = await repository.saveMessage(messageEntity, in: roomID)
+                            switch result {
+                            case .success:
+                                savedMessageIDs.insert(messageEntity.id)
+                                print("✅ [Send Message] 전송된 메시지 로컬 저장 성공")
+                            case .failure(let error):
+                                print("❌ [Send Message] 전송된 메시지 로컬 저장 실패: \(error)")
+                            }
                         }
+                    } else {
+                        print("📝 [Send Message] 이미 저장된 메시지, 로컬 저장 스킵")
                     }
 
                     // 메모리에도 추가
@@ -242,22 +284,31 @@ final class ChatMessageManager: ObservableObject {
         }
     }
 
-    // 🆕 실시간 메시지 수신 시 로컬 저장도 함께 하는 메서드
+    // MARK: - 실시간 메시지 처리
+
+    // 실시간 메시지 수신 시 로컬 저장도 함께 하는 메서드
     func addMessageAndSaveToLocal(_ message: ChatMessageEntity, roomID: String) {
         // 메모리에 추가
         addMessage(message)
 
-        // 로컬DB에 저장
-        Task {
-            let result = await repository.saveMessage(message, in: roomID)
-            switch result {
-            case .success:
-                print("✅ [Realtime Message] 실시간 메시지 로컬 저장 성공")
-            case .failure(let error):
-                print("❌ [Realtime Message] 실시간 메시지 로컬 저장 실패: \(error)")
+        // 이미 저장되지 않은 메시지만 로컬 저장
+        if !savedMessageIDs.contains(message.id) {
+            Task {
+                let result = await repository.saveMessage(message, in: roomID)
+                switch result {
+                case .success:
+                    savedMessageIDs.insert(message.id)
+                    print("✅ [Realtime Message] 실시간 메시지 로컬 저장 성공")
+                case .failure(let error):
+                    print("❌ [Realtime Message] 실시간 메시지 로컬 저장 실패: \(error)")
+                }
             }
+        } else {
+            print("📝 [Realtime Message] 이미 저장된 메시지, 로컬 저장 스킵")
         }
     }
+
+    // MARK: - 메시지 관리
 
     func addMessage(_ message: ChatMessageEntity) {
         if !messages.contains(where: { $0.id == message.id }) {
@@ -271,8 +322,9 @@ final class ChatMessageManager: ObservableObject {
 
     func removeMessage(withId id: String) {
         messages.removeAll { $0.id == id }
+        savedMessageIDs.remove(id) // 추적 목록에서도 제거
 
-        // 🆕 로컬DB에서도 삭제
+        // 로컬DB에서도 삭제
         Task {
             let result = await repository.deleteMessage(id: id)
             switch result {
@@ -286,10 +338,11 @@ final class ChatMessageManager: ObservableObject {
 
     func clearMessages() {
         messages.removeAll()
-        print("🗑️ [Memory] 메모리 메시지 전체 삭제")
+        savedMessageIDs.removeAll()
+        print("🗑️ [Memory] 메모리 메시지 및 추적 목록 전체 삭제")
     }
 
-    // 🆕 로컬DB 전체 삭제 (개발/테스트용)
+    // 로컬DB 전체 삭제 (개발/테스트용)
     func clearAllLocalData() async {
         let result = await repository.clearAllData()
         switch result {
