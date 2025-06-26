@@ -8,22 +8,23 @@
 import Foundation
 
 struct LocationSelectionState {
-    var currentLocation: String = "씨드큐브 창동"
+    var currentLocation: String
     var isShowingLocationSheet: Bool = false
     var isLoadingCurrentLocation: Bool = false
     var searchResults: [String] = []
-    var savedAddresses: [String] = ["인천 부평구 마장로264번길 33 103 동 703호"]
-    var defaultAddress: String = "씨드큐브 창동"
+    var savedAddresses: [String]
+    var defaultAddress: String
     var errorMessage: String?
     var isLoading: Bool = false
 
-    init(
-        currentLocation: String = "씨드큐브 창동",
-        savedAddresses: [String] = ["인천 부평구 마장로264번길 33 103 동 703호"],
-        defaultAddress: String = "씨드큐브 창동"
-    ) {
-        self.currentLocation = currentLocation
-        self.savedAddresses = savedAddresses
-        self.defaultAddress = defaultAddress
+    init() {
+        // 더미 데이터 사용
+        let dummyLocations = LocationDummyData.defaultLocations
+        let homeLocation = dummyLocations.first(where: { $0.type == .home })
+        let defaultLocation = homeLocation?.address ?? dummyLocations.first?.address ?? "인천광역시 부평구 마장로264번길 33"
+
+        self.currentLocation = defaultLocation
+        self.savedAddresses = dummyLocations.filter { $0.type != .system }.map { $0.address }
+        self.defaultAddress = defaultLocation
     }
 }

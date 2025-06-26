@@ -39,6 +39,10 @@ struct SavedLocation: Identifiable, Equatable {
         }
     }
 
+    var icon: String {
+        return type.icon
+    }
+
     static func == (lhs: SavedLocation, rhs: SavedLocation) -> Bool {
         return lhs.id == rhs.id
     }
