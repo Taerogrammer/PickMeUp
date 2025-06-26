@@ -105,7 +105,6 @@ struct CustomSearchBar: View {
     }
 }
 
-// MARK: - Location Management Sheet
 struct LocationManagementView: View {
     let state: LocationSelectionState
     let onIntent: (LocationSelectionAction.Intent) -> Void
@@ -120,14 +119,14 @@ struct LocationManagementView: View {
                 }) {
                     Image(systemName: "xmark")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(.blackSprout)
                 }
 
                 Spacer()
 
                 Text("주소 관리")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.black)
+                    .foregroundColor(.blackSprout)
 
                 Spacer()
 
@@ -140,16 +139,17 @@ struct LocationManagementView: View {
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
+            .background(Color.brightSprout)
 
             // 검색창
             HStack(spacing: 12) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 16))
-                    .foregroundColor(.gray)
+                    .foregroundColor(.deepSprout)
 
                 TextField("도로명, 건물명 또는 지번으로 검색", text: $searchText)
                     .font(.system(size: 16))
-                    .foregroundColor(.black)
+                    .foregroundColor(.blackSprout)
                     .onSubmit {
                         if !searchText.isEmpty {
                             onIntent(.searchAddress(searchText))
@@ -157,154 +157,204 @@ struct LocationManagementView: View {
                     }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(Color(.systemGray6))
-            .cornerRadius(8)
+            .padding(.vertical, 14)
+            .background(Color.white)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.deepSprout.opacity(0.3), lineWidth: 1.5)
+            )
+            .cornerRadius(12)
             .padding(.horizontal, 20)
+            .padding(.top, 20)
             .padding(.bottom, 24)
+            .background(Color.brightSprout)
 
-            // 검색 결과 표시
-            if state.isLoading {
-                HStack {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                    Text("검색 중...")
-                        .font(.system(size: 14))
-                        .foregroundColor(.gray)
-                }
-                .padding()
-            } else if !state.searchResults.isEmpty {
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(state.searchResults, id: \.self) { result in
-                            Button(action: {
-                                onIntent(.selectLocation(result))
-                            }) {
-                                HStack {
-                                    Text(result)
-                                        .font(.system(size: 16))
-                                        .foregroundColor(.black)
-                                    Spacer()
-                                }
-                                .padding()
-                            }
-                            .buttonStyle(PlainButtonStyle())
-
-                            if result != state.searchResults.last {
-                                Divider()
-                            }
-                        }
-                    }
-                }
-                .frame(maxHeight: 200)
-                .background(Color.white)
-                .cornerRadius(8)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
-            }
-
-            // 현재 위치로 주소 찾기 버튼
-            Button(action: {
-                onIntent(.requestCurrentLocation)
-            }) {
-                HStack(spacing: 12) {
-                    if state.isLoadingCurrentLocation {
+            // 메인 컨텐츠 영역
+            VStack(spacing: 0) {
+                // 검색 결과 표시
+                if state.isLoading {
+                    HStack {
                         ProgressView()
                             .scaleEffect(0.8)
-                            .frame(width: 20, height: 20)
-                    } else {
-                        Image(systemName: "plus.circle")
-                            .font(.system(size: 20))
-                            .foregroundColor(.black)
+                            .tint(.deepSprout)
+                        Text("검색 중...")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray45)
                     }
+                    .padding(.vertical, 32)
+                } else if !state.searchResults.isEmpty {
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            ForEach(state.searchResults, id: \.self) { result in
+                                Button(action: {
+                                    onIntent(.selectLocation(result))
+                                }) {
+                                    HStack {
+                                        Circle()
+                                            .fill(Color.deepSprout.opacity(0.2))
+                                            .frame(width: 8, height: 8)
 
-                    Text(state.isLoadingCurrentLocation ? "현재 위치 찾는 중..." : "현재 위치로 주소 찾기")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.black)
+                                        Text(result)
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.blackSprout)
+                                            .multilineTextAlignment(.leading)
 
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                .background(Color.white)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color(.systemGray4), lineWidth: 1)
-                )
-            }
-            .buttonStyle(PlainButtonStyle())
-            .disabled(state.isLoadingCurrentLocation)
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+                                        Spacer()
 
-            // 집 섹션
-            if let homeAddress = state.savedAddresses.first {
-                VStack(alignment: .leading, spacing: 16) {
-                    Button(action: {
-                        onIntent(.selectLocation(homeAddress))
-                    }) {
-                        HStack(spacing: 12) {
-                            Image(systemName: "house.fill")
-                                .font(.system(size: 20))
-                                .foregroundColor(.blue)
+                                        Image(systemName: "arrow.up.right")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.gray45)
+                                    }
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 16)
+                                }
+                                .buttonStyle(PlainButtonStyle())
 
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("집")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(.black)
-
-                                Text(homeAddress)
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.gray)
-                            }
-
-                            Spacer()
-
-                            Button(action: {
-                                onIntent(.editAddress(homeAddress))
-                            }) {
-                                Image(systemName: "pencil")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.gray)
+                                if result != state.searchResults.last {
+                                    Divider()
+                                        .padding(.horizontal, 20)
+                                }
                             }
                         }
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .frame(maxHeight: 200)
+                    .background(Color.white)
+                    .cornerRadius(12)
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-                    .background(Color(.systemBlue).opacity(0.1))
+                    .padding(.bottom, 20)
                 }
-            }
 
-            // 회사 추가 버튼
-            Button(action: {
-                onIntent(.addNewAddress)
-            }) {
-                HStack(spacing: 12) {
-                    Image(systemName: "building.2")
-                        .font(.system(size: 20))
-                        .foregroundColor(.gray)
+                // 현재 위치로 주소 찾기 버튼
+                Button(action: {
+                    onIntent(.requestCurrentLocation)
+                }) {
+                    HStack(spacing: 12) {
+                        if state.isLoadingCurrentLocation {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                                .frame(width: 20, height: 20)
+                                .tint(.deepSprout)
+                        } else {
+                            Image(systemName: "location.fill")
+                                .font(.system(size: 18))
+                                .foregroundColor(.deepSprout)
+                        }
 
-                    Text("회사 추가")
-                        .font(.system(size: 16))
-                        .foregroundColor(.black)
+                        Text(state.isLoadingCurrentLocation ? "현재 위치 찾는 중..." : "현재 위치로 주소 찾기")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.blackSprout)
 
-                    Spacer()
+                        Spacer()
+
+                        if !state.isLoadingCurrentLocation {
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.gray45)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 18)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.brightSprout.opacity(0.6))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.deepSprout.opacity(0.3), lineWidth: 1)
+                            )
+                    )
                 }
+                .buttonStyle(PlainButtonStyle())
+                .disabled(state.isLoadingCurrentLocation)
                 .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-            }
-            .buttonStyle(PlainButtonStyle())
+                .padding(.top, 32)
+                .padding(.bottom, 32)
 
-            // 에러 메시지 표시
-            if let errorMessage = state.errorMessage {
-                Text(errorMessage)
-                    .font(.system(size: 14))
-                    .foregroundColor(.red)
-                    .padding()
-            }
+                // 집 섹션
+                if let homeAddress = state.savedAddresses.first {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Button(action: {
+                            onIntent(.selectLocation(homeAddress))
+                        }) {
+                            HStack(spacing: 16) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.deepSprout.opacity(0.15))
+                                        .frame(width: 44, height: 44)
 
-            Spacer()
+                                    Image(systemName: "house.fill")
+                                        .font(.system(size: 18))
+                                        .foregroundColor(.deepSprout)
+                                }
+
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("집")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.blackSprout)
+
+                                    Text(homeAddress)
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.gray45)
+                                        .lineLimit(2)
+                                }
+
+                                Spacer()
+
+                                Button(action: {
+                                    onIntent(.editAddress(homeAddress))
+                                }) {
+                                    Image(systemName: "pencil")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.gray45)
+                                        .padding(8)
+                                        .background(Circle().fill(Color.gray15))
+                                }
+                            }
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.brightSprout.opacity(0.4))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.deepSprout.opacity(0.2), lineWidth: 1)
+                                )
+                        )
+                        .padding(.horizontal, 20)
+                    }
+                }
+
+
+
+                // 에러 메시지 표시
+                if let errorMessage = state.errorMessage {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(.brightForsythia)
+
+                        Text(errorMessage)
+                            .font(.system(size: 14))
+                            .foregroundColor(.blackSprout)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.brightForsythia.opacity(0.1))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.brightForsythia.opacity(0.3), lineWidth: 1)
+                            )
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
+                }
+
+                Spacer()
+            }
+            .background(Color.white)
         }
         .background(Color.white)
     }
