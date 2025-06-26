@@ -16,7 +16,7 @@ struct StoreScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            StoreSearchHeaderView()
+            LocationSelectionView()
             StoreListView(store: store)
         }
         .background(Color.gray30)
