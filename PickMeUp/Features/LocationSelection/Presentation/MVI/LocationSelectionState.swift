@@ -24,7 +24,7 @@ struct LocationSelectionState {
         let defaultLocation = homeLocation?.address ?? dummyLocations.first?.address ?? "인천광역시 부평구 마장로264번길 33"
 
         self.currentLocation = defaultLocation
-        self.savedAddresses = dummyLocations.filter { $0.type != .system }.map { $0.address }
+        self.savedAddresses = dummyLocations.map { $0.address }
         self.defaultAddress = defaultLocation
     }
 }

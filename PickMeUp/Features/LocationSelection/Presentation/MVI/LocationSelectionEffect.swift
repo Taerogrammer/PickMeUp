@@ -60,7 +60,7 @@ struct LocationSelectionEffect {
         // 시뮬레이션: 2초 후 성공
         try? await Task.sleep(nanoseconds: 2_000_000_000)
 
-        let dummyCurrentLocation = LocationDummyData.defaultLocations.first(where: { $0.type == .system })?.address ?? "서울특별시 도봉구 방학로 310"
+        let dummyCurrentLocation = LocationDummyData.defaultLocations.first(where: { $0.type == .home })?.address ?? "인천광역시 부평구 마장로264번길 33"
 
         await MainActor.run {
             store.send(.currentLocationRequestSucceeded(dummyCurrentLocation))

@@ -300,7 +300,7 @@ struct LocationManagementView: View {
 
     private var savedAddressesSection: some View {
         VStack(spacing: 12) {
-            ForEach(LocationDummyData.defaultLocations.filter { $0.type != .system }, id: \.id) { location in
+            ForEach(LocationDummyData.defaultLocations, id: \.id) { location in
                 savedAddressRow(location)
             }
         }

@@ -17,10 +17,17 @@ struct Location: Identifiable, Equatable {
 
     // 표시용 이름
     var displayName: String {
-        if let name = name, !name.isEmpty {
-            return name
-        } else {
-            return shortAddress
+        switch type {
+        case .home:
+            return "집"
+        case .work:
+            return "회사"
+        case .custom:
+            if let name = name, !name.isEmpty {
+                return name
+            } else {
+                return shortAddress
+            }
         }
     }
 
@@ -54,7 +61,7 @@ struct LocationDummyData {
             address: "서울특별시 도봉구 방학로 310",
             latitude: 37.6658609,
             longitude: 127.0317674,
-            type: .system
+            type: .custom
         ),
         Location(
             id: "home-001",
