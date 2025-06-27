@@ -49,7 +49,7 @@ struct LocationSelectionView: View {
 
 // MARK: - Location Row with Tap Action
 private struct LocationRow: View {
-    let currentLocation: String
+    let currentLocation: Location
     let onLocationTap: () -> Void
 
     var body: some View {
@@ -59,7 +59,7 @@ private struct LocationRow: View {
                     .scaledToFit()
                     .frame(width: 24, height: 24)
 
-                Text(currentLocation)
+                Text(currentLocation.displayName)  // displayName 사용
                     .font(.pretendardBody1)
                     .foregroundColor(.gray90)
 
@@ -226,7 +226,10 @@ struct LocationManagementView: View {
 
     private func searchResultRow(_ result: String) -> some View {
         Button(action: {
-            onIntent(.selectLocation(result))
+            // String 주소를 Location 객체로 변환해서 전달
+            if let location = LocationDummyData.searchResultLocations.first(where: { $0.address == result }) {
+                onIntent(.selectLocation(location))
+            }
         }) {
             HStack {
                 Circle()
@@ -308,12 +311,11 @@ struct LocationManagementView: View {
         .padding(.bottom, 20)
     }
 
-
     private func savedAddressRow(_ location: Location) -> some View {
-        let isSelected = state.currentLocation == location.address
+        let isSelected = state.currentLocation == location  // Location 객체끼리 비교
 
         return Button(action: {
-            onIntent(.selectLocation(location.address))
+            onIntent(.selectLocation(location))  // Location 객체 전달
         }) {
             HStack(spacing: 16) {
                 ZStack {
@@ -361,7 +363,6 @@ struct LocationManagementView: View {
         .padding(.vertical, 16)
         .background(savedAddressRowBackground(isSelected: isSelected))
     }
-
 
     private func savedAddressRowBackground(isSelected: Bool) -> some View {
         if isSelected {

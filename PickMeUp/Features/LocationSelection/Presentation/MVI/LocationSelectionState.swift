@@ -8,7 +8,7 @@
 import Foundation
 
 struct LocationSelectionState {
-    var currentLocation: String
+    var currentLocation: Location
     var isShowingLocationSheet: Bool = false
     var isLoadingCurrentLocation: Bool = false
     var searchResults: [String] = []
@@ -18,13 +18,11 @@ struct LocationSelectionState {
     var isLoading: Bool = false
 
     init() {
-        // 더미 데이터 사용
         let dummyLocations = LocationDummyData.defaultLocations
-        let homeLocation = dummyLocations.first(where: { $0.type == .home })
-        let defaultLocation = homeLocation?.address ?? dummyLocations.first?.address ?? "인천광역시 부평구 마장로264번길 33"
+        let homeLocation = dummyLocations.first(where: { $0.type == .home }) ?? dummyLocations.first!
 
-        self.currentLocation = defaultLocation
+        self.currentLocation = homeLocation
         self.savedAddresses = dummyLocations.map { $0.address }
-        self.defaultAddress = defaultLocation
+        self.defaultAddress = homeLocation.address
     }
 }

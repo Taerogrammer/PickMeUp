@@ -49,7 +49,7 @@ struct LocationSelectionReducer {
             state.isLoading = false
 
         case .locationSelected(let location):
-            state.currentLocation = location
+            state.currentLocation = location  // 이제 Location 타입
             state.isShowingLocationSheet = false
             state.isLoadingCurrentLocation = false
             state.isLoading = false
@@ -60,7 +60,7 @@ struct LocationSelectionReducer {
             state.errorMessage = nil
 
         case .currentLocationRequestSucceeded(let location):
-            state.currentLocation = location
+            state.currentLocation = location  // 이제 Location 타입
             state.isLoadingCurrentLocation = false
             state.isShowingLocationSheet = false
             state.errorMessage = nil
@@ -93,7 +93,9 @@ struct LocationSelectionReducer {
 
         case .defaultAddressSet(let address):
             state.defaultAddress = address
-            state.currentLocation = address
+            if let location = LocationDummyData.defaultLocations.first(where: { $0.address == address }) {
+                state.currentLocation = location
+            }
 
         case .loadingStateChanged(let isLoading):
             state.isLoading = isLoading

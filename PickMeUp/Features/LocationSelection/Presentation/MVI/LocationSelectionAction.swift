@@ -10,7 +10,7 @@ import Foundation
 enum LocationSelectionAction {
     enum Intent {
         case showLocationSelection
-        case selectLocation(String)
+        case selectLocation(Location)
         case dismissLocationSelection
         case requestCurrentLocation
         case searchAddress(String)
@@ -23,9 +23,9 @@ enum LocationSelectionAction {
     enum Result {
         case locationSheetShown
         case locationSheetDismissed
-        case locationSelected(String)
+        case locationSelected(Location)  // String → Location
         case currentLocationRequestStarted
-        case currentLocationRequestSucceeded(String)
+        case currentLocationRequestSucceeded(Location)  // String → Location
         case currentLocationRequestFailed(String)
         case addressSearchStarted
         case addressSearchSucceeded([String])
