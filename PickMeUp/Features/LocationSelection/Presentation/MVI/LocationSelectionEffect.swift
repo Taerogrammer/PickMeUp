@@ -60,7 +60,6 @@ struct LocationSelectionEffect {
         // 시뮬레이션: 2초 후 성공
         try? await Task.sleep(nanoseconds: 2_000_000_000)
 
-        // 더미 데이터 사용
         let dummyCurrentLocation = LocationDummyData.defaultLocations.first(where: { $0.type == .system })?.address ?? "서울특별시 도봉구 방학로 310"
 
         await MainActor.run {
@@ -76,12 +75,12 @@ struct LocationSelectionEffect {
         // 시뮬레이션: 1초 후 성공
         try? await Task.sleep(nanoseconds: 1_000_000_000)
 
-        // 더미 데이터 사용
-        let filteredResults = LocationDummyData.searchResults
-            .filter { $0.displayAddress.contains(query) || query.isEmpty }
-            .map { $0.displayAddress }
+        // 더미 데이터 사용 - 통합된 Location 모델 사용
+        let filteredResults = LocationDummyData.searchResultLocations
+            .filter { $0.address.contains(query) || query.isEmpty }
+            .map { $0.address }
 
-        let mockResults = filteredResults.isEmpty ? LocationDummyData.searchResults.map { $0.displayAddress } : filteredResults
+        let mockResults = filteredResults.isEmpty ? LocationDummyData.searchResultLocations.map { $0.address } : filteredResults
 
         await MainActor.run {
             store.send(.addressSearchSucceeded(mockResults))

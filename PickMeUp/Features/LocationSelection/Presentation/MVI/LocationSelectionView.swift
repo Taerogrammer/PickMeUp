@@ -309,7 +309,7 @@ struct LocationManagementView: View {
     }
 
 
-    private func savedAddressRow(_ location: SavedLocation) -> some View {
+    private func savedAddressRow(_ location: Location) -> some View {
         let isSelected = state.currentLocation == location.address
 
         return Button(action: {
