@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		16B254E22E0AAE5B008A9120 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 16B254E12E0AAE5B008A9120 /* SocketIO */; };
 		16B6F6732DF5DA3E00F265C9 /* iamport-ios in Frameworks */ = {isa = PBXBuildFile; productRef = 16B6F6722DF5DA3E00F265C9 /* iamport-ios */; };
+		16C4F71C2E0E356F00EE187F /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 16C4F71B2E0E356F00EE187F /* NMapsMap */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -97,6 +98,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				16B6F6732DF5DA3E00F265C9 /* iamport-ios in Frameworks */,
+				16C4F71C2E0E356F00EE187F /* NMapsMap in Frameworks */,
 				16B254E22E0AAE5B008A9120 /* SocketIO in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -171,6 +173,7 @@
 			packageProductDependencies = (
 				16B6F6722DF5DA3E00F265C9 /* iamport-ios */,
 				16B254E12E0AAE5B008A9120 /* SocketIO */,
+				16C4F71B2E0E356F00EE187F /* NMapsMap */,
 			);
 			productName = PickMeUp;
 			productReference = 164E9A452DCE545200C348AB /* PickMeUp.app */;
@@ -257,6 +260,7 @@
 			packageReferences = (
 				16B6F6712DF5DA3E00F265C9 /* XCRemoteSwiftPackageReference "iamport-ios" */,
 				16B254E02E0AAE5B008A9120 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */,
+				16C4F71A2E0E356F00EE187F /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 164E9A462DCE545200C348AB /* Products */;
@@ -654,6 +658,14 @@
 				minimumVersion = 1.4.7;
 			};
 		};
+		16C4F71A2E0E356F00EE187F /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/navermaps/SPM-NMapsMap";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.22.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -666,6 +678,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 16B6F6712DF5DA3E00F265C9 /* XCRemoteSwiftPackageReference "iamport-ios" */;
 			productName = "iamport-ios";
+		};
+		16C4F71B2E0E356F00EE187F /* NMapsMap */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 16C4F71A2E0E356F00EE187F /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */;
+			productName = NMapsMap;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
