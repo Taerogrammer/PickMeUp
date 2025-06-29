@@ -7,10 +7,12 @@
 
 import SwiftUI
 
-struct ThumbnailImageItem: View {
+private struct ThumbnailImageItem: View, Equatable {
     let image: UIImage?
     let imagePath: String?
+
     @State private var loadedImage: UIImage?
+    @State private var isLoading = false
 
     var body: some View {
         Group {
@@ -25,24 +27,40 @@ struct ThumbnailImageItem: View {
             } else {
                 ZStack {
                     Color.gray30
-                    VStack(spacing: 4) {
-                        Image(systemName: "photo")
-                            .font(.system(size: 16))
-                            .foregroundColor(.gray60)
-                        Text("No Image")
-                            .font(.caption2)
-                            .foregroundColor(.gray60)
+                    if isLoading {
+                        ProgressView()
+                            .scaleEffect(0.6)
+                    } else {
+                        VStack(spacing: 4) {
+                            Image(systemName: "photo")
+                                .font(.system(size: 16))
+                                .foregroundColor(.gray60)
+                            Text("No Image")
+                                .font(.caption2)
+                                .foregroundColor(.gray60)
+                        }
                     }
                 }
             }
         }
         .task {
-            if let imagePath = imagePath, loadedImage == nil && image == nil {
-                loadedImage = await ImageLoader.loadAsync(
-                    from: imagePath,
-                    targetSize: CGSize(width: 92, height: 62)
-                )
-            }
+            // ✅ 중복 로딩 방지
+            guard let imagePath = imagePath,
+                  loadedImage == nil,
+                  image == nil,
+                  !isLoading else { return }
+
+            isLoading = true
+            loadedImage = await ImageLoader.loadAsync(
+                from: imagePath,
+                targetSize: CGSize(width: 92, height: 62)
+            )
+            isLoading = false
         }
+    }
+
+    static func == (lhs: ThumbnailImageItem, rhs: ThumbnailImageItem) -> Bool {
+        return lhs.imagePath == rhs.imagePath &&
+               (lhs.image != nil) == (rhs.image != nil)  // ← 괄호로 명확하게 구분
     }
 }

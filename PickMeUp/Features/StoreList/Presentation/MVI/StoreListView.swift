@@ -50,6 +50,7 @@ struct StoreListView: View {
                                 store: store,
                                 storeData: storeData
                             )
+                            .equatable()
                             .onAppear {
                                 if !visibleStoreIDs.contains(storeData.storeID) {
                                     visibleStoreIDs.insert(storeData.storeID)
