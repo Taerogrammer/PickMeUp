@@ -31,6 +31,7 @@ struct NaverMapLocationView: UIViewRepresentable {
     let currentLocation: CLLocationCoordinate2D?
     let onLocationSelected: (CLLocationCoordinate2D, String) -> Void
     let onDismiss: () -> Void
+    let onCurrentLocationRequested: (() -> Void)? // ✅ 현재 위치 요청 콜백 추가
 
     func makeUIView(context: Context) -> UIView {
         let coordinator = context.coordinator
@@ -46,7 +47,8 @@ struct NaverMapLocationView: UIViewRepresentable {
             initialLocation: initialLocation,
             currentLocation: currentLocation,
             onLocationSelected: onLocationSelected,
-            onDismiss: onDismiss
+            onDismiss: onDismiss,
+            onCurrentLocationRequested: onCurrentLocationRequested // ✅ 콜백 전달
         )
     }
 }
@@ -57,34 +59,36 @@ final class MapCoordinator: NSObject {
     private var currentLocation: CLLocationCoordinate2D?
     private let onLocationSelected: (CLLocationCoordinate2D, String) -> Void
     private let onDismiss: () -> Void
+    private let onCurrentLocationRequested: (() -> Void)? // ✅ 콜백 추가
 
     // Map components
     private var mapView: NMFMapView?
     private var currentLocationMarker: NMFMarker?
     private var centerPinMarker: NMFMarker?
     private var selectedCoordinate: CLLocationCoordinate2D?
-
-    // ✅ GeoCoding을 위한 주소 저장
     private var selectedAddress: String = ""
-
-    // ✅ 디바운싱을 위한 타이머
     private var geocodingTimer: Timer?
+
+    // UI components
+    private var addressLabel: UILabel?
+    private var loadingIndicator: UIActivityIndicatorView?
 
     init(
         initialLocation: CLLocationCoordinate2D?,
         currentLocation: CLLocationCoordinate2D?,
         onLocationSelected: @escaping (CLLocationCoordinate2D, String) -> Void,
-        onDismiss: @escaping () -> Void
+        onDismiss: @escaping () -> Void,
+        onCurrentLocationRequested: (() -> Void)? = nil // ✅ 콜백 파라미터 추가
     ) {
         self.initialLocation = initialLocation
         self.currentLocation = currentLocation
         self.onLocationSelected = onLocationSelected
         self.onDismiss = onDismiss
+        self.onCurrentLocationRequested = onCurrentLocationRequested
         super.init()
     }
 
     func createMapContainer() -> UIView {
-        // 네이버 지도 SDK 초기화 상태 확인
         guard NaverMapConfiguration.shared.isReady else {
             print("❌ NaverMap not initialized properly")
             return createErrorView()
@@ -92,9 +96,14 @@ final class MapCoordinator: NSObject {
 
         let containerView = UIView()
         let mapView = createMapView()
-        let confirmButton = createConfirmButton()
+        let addressCard = createAddressCard()
+        // ✅ currentLocationButton 제거 - Screen에서 처리
 
-        setupLayout(in: containerView, mapView: mapView, confirmButton: confirmButton)
+        containerView.addSubview(mapView)
+        containerView.addSubview(addressCard)
+        // ✅ currentLocationButton 서브뷰 추가 제거
+
+        setupConstraints(containerView: containerView, mapView: mapView, addressCard: addressCard)
         setupMapComponents(mapView)
 
         self.mapView = mapView
@@ -107,7 +116,6 @@ final class MapCoordinator: NSObject {
         self.currentLocation = newLocation
         updateCurrentLocationMarker(newLocation)
 
-        // 현재 위치가 업데이트되면 지도 중심을 현재 위치로 이동 (선택적)
         if let location = newLocation {
             moveMapToLocation(location, animated: true)
         }
@@ -117,7 +125,6 @@ final class MapCoordinator: NSObject {
         let mapView = NMFMapView()
         mapView.translatesAutoresizingMaskIntoConstraints = false
 
-        // 초기 위치 설정 (현재 위치 → 초기 위치 → 기본 위치 순)
         let coordinate = currentLocation ?? initialLocation ?? MapConstants.seoulCoordinate
         let cameraPosition = NMFCameraPosition(
             NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude),
@@ -129,16 +136,9 @@ final class MapCoordinator: NSObject {
     }
 
     private func setupMapComponents(_ mapView: NMFMapView) {
-        // 카메라 델리게이트 설정
         mapView.addCameraDelegate(delegate: self)
-
-        // 중앙 핀 마커 설정
         setupCenterPinMarker(mapView)
-
-        // 현재 위치 마커 설정
         setupCurrentLocationMarker(mapView)
-
-        // 초기 선택 좌표 설정 및 주소 조회
         updateSelectedCoordinate(mapView.cameraPosition.target)
     }
 
@@ -156,7 +156,7 @@ final class MapCoordinator: NSObject {
         let marker = NMFMarker()
         marker.position = NMGLatLng(lat: currentLocation.latitude, lng: currentLocation.longitude)
         marker.iconImage = createCurrentLocationIcon()
-        marker.anchor = CGPoint(x: 0.5, y: 0.5) // 중앙 정렬
+        marker.anchor = CGPoint(x: 0.5, y: 0.5)
         marker.mapView = mapView
         self.currentLocationMarker = marker
     }
@@ -177,18 +177,15 @@ final class MapCoordinator: NSObject {
     }
 
     private func createCurrentLocationIcon() -> NMFOverlayImage {
-        // 현재 위치를 나타내는 아이콘 생성 (파란색 원)
         let size = CGSize(width: 20, height: 20)
         let renderer = UIGraphicsImageRenderer(size: size)
 
         let image = renderer.image { context in
             let rect = CGRect(origin: .zero, size: size)
 
-            // 외곽 흰색 원
             context.cgContext.setFillColor(UIColor.white.cgColor)
             context.cgContext.fillEllipse(in: rect)
 
-            // 내부 파란색 원
             let innerRect = rect.insetBy(dx: 3, dy: 3)
             context.cgContext.setFillColor(UIColor.systemBlue.cgColor)
             context.cgContext.fillEllipse(in: innerRect)
@@ -214,24 +211,18 @@ final class MapCoordinator: NSObject {
         mapView.moveCamera(cameraUpdate)
     }
 
-    // ✅ 중앙핀 위치 업데이트 + 디바운싱된 GeoCoding
     private func updateSelectedCoordinate(_ position: NMGLatLng) {
         selectedCoordinate = CLLocationCoordinate2D(latitude: position.lat, longitude: position.lng)
         centerPinMarker?.position = position
 
-        // 기존 타이머 취소
         geocodingTimer?.invalidate()
+        showAddressLoading()
 
-        // 1초 후에 GeoCoding 실행 (디바운싱)
         geocodingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
-            guard let self = self else { return }
-            self.reverseGeocode(coordinate: CLLocationCoordinate2D(latitude: position.lat, longitude: position.lng))
+            self?.reverseGeocode(coordinate: CLLocationCoordinate2D(latitude: position.lat, longitude: position.lng))
         }
-
-        print("📍 Position updated: \(position.lat), \(position.lng)")
     }
 
-    // ✅ 역지오코딩 메서드
     private func reverseGeocode(coordinate: CLLocationCoordinate2D) {
         let geocoder = CLGeocoder()
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
@@ -241,16 +232,16 @@ final class MapCoordinator: NSObject {
                 if let error = error {
                     print("❌ Geocoding error: \(error.localizedDescription)")
                     self?.selectedAddress = "주소를 가져올 수 없습니다"
+                    self?.updateAddressUI()
                     return
                 }
 
                 guard let placemark = placemarks?.first else {
-                    print("❌ No placemark found")
                     self?.selectedAddress = "주소를 찾을 수 없습니다"
+                    self?.updateAddressUI()
                     return
                 }
 
-                // 한국 주소 형식으로 조합
                 var addressComponents: [String] = []
 
                 if let country = placemark.country {
@@ -268,54 +259,158 @@ final class MapCoordinator: NSObject {
                 if let thoroughfare = placemark.thoroughfare {
                     addressComponents.append(thoroughfare)
                 }
-                if let subThoroughfare = placemark.subThoroughfare {
-                    addressComponents.append(subThoroughfare)
-                }
 
                 let fullAddress = addressComponents.joined(separator: " ")
                 self?.selectedAddress = fullAddress.isEmpty ? "알 수 없는 위치" : fullAddress
-
-                print("✅ Address updated: \(self?.selectedAddress ?? "")")
+                self?.updateAddressUI()
             }
         }
     }
 
-    private func createConfirmButton() -> UIButton {
+    private func createAddressCard() -> UIView {
+        let cardView = UIView()
+        cardView.backgroundColor = UIColor.systemBackground
+        cardView.layer.cornerRadius = 20
+        cardView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        cardView.layer.shadowColor = UIColor.black.cgColor
+        cardView.layer.shadowOffset = CGSize(width: 0, height: -2)
+        cardView.layer.shadowRadius = 10
+        cardView.layer.shadowOpacity = 0.1
+        cardView.translatesAutoresizingMaskIntoConstraints = false
+
+        let handleBar = UIView()
+        handleBar.backgroundColor = UIColor.systemGray4
+        handleBar.layer.cornerRadius = 2
+        handleBar.translatesAutoresizingMaskIntoConstraints = false
+
+        let iconImageView = UIImageView()
+        iconImageView.image = UIImage(systemName: "location.fill")
+        iconImageView.tintColor = UIColor(red: 0.8, green: 0.6, blue: 0.4, alpha: 1.0)
+        iconImageView.contentMode = .scaleAspectFit
+        iconImageView.translatesAutoresizingMaskIntoConstraints = false
+
+        let titleLabel = UILabel()
+        titleLabel.text = "배달 위치"
+        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        titleLabel.textColor = UIColor.label
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        let addressLabel = UILabel()
+        addressLabel.text = "지도를 움직여서 배달 위치를 선택해주세요"
+        addressLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        addressLabel.textColor = UIColor.secondaryLabel
+        addressLabel.numberOfLines = 0
+        addressLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        let loadingIndicator = UIActivityIndicatorView(style: .medium)
+        loadingIndicator.color = UIColor(red: 0.8, green: 0.6, blue: 0.4, alpha: 1.0)
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
+
+        let detailButton = UIButton(type: .system)
+        detailButton.setTitle("상세 주소 입력", for: .normal)
+        detailButton.setTitleColor(UIColor(red: 0.8, green: 0.6, blue: 0.4, alpha: 1.0), for: .normal)
+        detailButton.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        detailButton.contentHorizontalAlignment = .leading
+        detailButton.translatesAutoresizingMaskIntoConstraints = false
+
+        let confirmButton = UIButton(type: .system)
+        confirmButton.setTitle("이 위치로 설정", for: .normal)
+        confirmButton.backgroundColor = UIColor(red: 0.2, green: 0.5, blue: 1.0, alpha: 1.0)
+        confirmButton.setTitleColor(.white, for: .normal)
+        confirmButton.layer.cornerRadius = 12
+        confirmButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        confirmButton.translatesAutoresizingMaskIntoConstraints = false
+        confirmButton.addTarget(self, action: #selector(confirmButtonTapped), for: .touchUpInside)
+
+        cardView.addSubview(handleBar)
+        cardView.addSubview(iconImageView)
+        cardView.addSubview(titleLabel)
+        cardView.addSubview(addressLabel)
+        cardView.addSubview(loadingIndicator)
+        cardView.addSubview(detailButton)
+        cardView.addSubview(confirmButton)
+
+        NSLayoutConstraint.activate([
+            handleBar.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 8),
+            handleBar.centerXAnchor.constraint(equalTo: cardView.centerXAnchor),
+            handleBar.widthAnchor.constraint(equalToConstant: 40),
+            handleBar.heightAnchor.constraint(equalToConstant: 4),
+
+            iconImageView.topAnchor.constraint(equalTo: handleBar.bottomAnchor, constant: 20),
+            iconImageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 20),
+            iconImageView.widthAnchor.constraint(equalToConstant: 24),
+            iconImageView.heightAnchor.constraint(equalToConstant: 24),
+
+            titleLabel.centerYAnchor.constraint(equalTo: iconImageView.centerYAnchor),
+            titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 12),
+
+            loadingIndicator.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
+            loadingIndicator.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -20),
+
+            addressLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
+            addressLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 12),
+            addressLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -20),
+
+            detailButton.topAnchor.constraint(equalTo: addressLabel.bottomAnchor, constant: 8),
+            detailButton.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 12),
+
+            confirmButton.topAnchor.constraint(equalTo: detailButton.bottomAnchor, constant: 16),
+            confirmButton.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 20),
+            confirmButton.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -20),
+            confirmButton.heightAnchor.constraint(equalToConstant: 50),
+            confirmButton.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -20)
+        ])
+
+        self.addressLabel = addressLabel
+        self.loadingIndicator = loadingIndicator
+
+        return cardView
+    }
+
+    private func createCurrentLocationButton() -> UIButton {
         let button = UIButton(type: .system)
-        button.setTitle("이 위치로 설정", for: .normal)
-        button.backgroundColor = UIColor.systemBlue
-        button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 12
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        button.setImage(UIImage(systemName: "location.fill"), for: .normal)
+        button.tintColor = .white
+        button.backgroundColor = UIColor(red: 0.8, green: 0.6, blue: 0.4, alpha: 1.0)
+        button.layer.cornerRadius = 25
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOffset = CGSize(width: 0, height: 2)
+        button.layer.shadowRadius = 8
+        button.layer.shadowOpacity = 0.2
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(confirmButtonTapped), for: .touchUpInside)
+
         return button
+    }
+
+    private func updateAddressUI() {
+        loadingIndicator?.stopAnimating()
+        addressLabel?.text = selectedAddress
+    }
+
+    private func showAddressLoading() {
+        loadingIndicator?.startAnimating()
+        addressLabel?.text = "주소를 찾고 있어요..."
     }
 
     @objc private func confirmButtonTapped() {
         guard let coordinate = selectedCoordinate else { return }
-
-        // 타이머 정리
         geocodingTimer?.invalidate()
-
-        // ✅ 실제 GeoCoding된 주소 사용
         onLocationSelected(coordinate, selectedAddress)
     }
 
-    private func setupLayout(in containerView: UIView, mapView: NMFMapView, confirmButton: UIButton) {
-        containerView.addSubview(mapView)
-        containerView.addSubview(confirmButton)
-
+    private func setupConstraints(containerView: UIView, mapView: NMFMapView, addressCard: UIView) {
         NSLayoutConstraint.activate([
             mapView.topAnchor.constraint(equalTo: containerView.topAnchor),
             mapView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             mapView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            mapView.bottomAnchor.constraint(equalTo: confirmButton.topAnchor, constant: -MapConstants.mapButtonSpacing),
+            mapView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
 
-            confirmButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: MapConstants.horizontalPadding),
-            confirmButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -MapConstants.horizontalPadding),
-            confirmButton.bottomAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.bottomAnchor, constant: -MapConstants.bottomPadding),
-            confirmButton.heightAnchor.constraint(equalToConstant: MapConstants.buttonHeight)
+            // ✅ currentLocationButton 관련 제약 조건 제거
+
+            addressCard.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            addressCard.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            addressCard.bottomAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
 

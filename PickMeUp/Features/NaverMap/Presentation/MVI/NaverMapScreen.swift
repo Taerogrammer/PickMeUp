@@ -21,7 +21,7 @@ struct NaverMapScreen: View {
         ZStack {
             mapView
             topNavigationBar
-            bottomControls
+            currentLocationButton // ✅ 갈색 현재 위치 버튼 추가됨
             currentLocationInfo
         }
         .navigationBarBackButtonHidden(true)
@@ -35,7 +35,10 @@ struct NaverMapScreen: View {
             initialLocation: locationManager.currentLocation?.coordinate,
             currentLocation: locationManager.currentLocation?.coordinate,
             onLocationSelected: handleLocationSelection,
-            onDismiss: { dismiss() }
+            onDismiss: { dismiss() },
+            onCurrentLocationRequested: {
+                locationManager.requestLocationPermission()
+            }
         )
         .ignoresSafeArea()
     }
@@ -77,58 +80,34 @@ struct NaverMapScreen: View {
             .cornerRadius(8)
     }
 
-    private var bottomControls: some View {
+    // ✅ 현재 위치 버튼 - 새로 추가된 코드
+    private var currentLocationButton: some View {
         VStack {
             Spacer()
             HStack {
                 Spacer()
-                VStack(spacing: 12) {
-                    // 현재 위치 획득 버튼
-                    currentLocationButton
-
-                    // 내 위치로 지도 중심 이동 버튼
-                    if locationManager.currentLocation != nil {
-                        moveToCurrentLocationButton
-                    }
+                Button(action: {
+                    print("🔘 현재 위치 버튼 클릭됨!")
+                    locationManager.requestLocationPermission()
+                }) {
+                    Image(systemName: locationManager.isLoading ? "arrow.clockwise" : "location.fill")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 56, height: 56) // 조금 더 크게
+                        .background(Color(red: 0.8, green: 0.6, blue: 0.4)) // 갈색 톤
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                        .rotationEffect(.degrees(locationManager.isLoading ? 360 : 0))
+                        .animation(
+                            locationManager.isLoading ?
+                                .linear(duration: 1).repeatForever(autoreverses: false) :
+                                .default,
+                            value: locationManager.isLoading
+                        )
                 }
                 .padding(.trailing, 20)
-                .padding(.bottom, 140)
+                .padding(.bottom, 160) // 주소 카드와 겹치지 않게 조정
             }
-        }
-    }
-
-    private var currentLocationButton: some View {
-        Button(action: {
-            locationManager.requestLocationPermission()
-        }) {
-            Image(systemName: locationManager.isLoading ? "arrow.clockwise" : "location.fill")
-                .font(.system(size: 18))
-                .foregroundColor(.white)
-                .frame(width: 50, height: 50)
-                .background(Color.deepSprout)
-                .clipShape(Circle())
-                .shadow(radius: 4)
-                .rotationEffect(.degrees(locationManager.isLoading ? 360 : 0))
-                .animation(
-                    locationManager.isLoading ?
-                        .linear(duration: 1).repeatForever(autoreverses: false) :
-                        .default,
-                    value: locationManager.isLoading
-                )
-        }
-    }
-
-    private var moveToCurrentLocationButton: some View {
-        Button(action: {
-            locationManager.requestLocationPermission()
-        }) {
-            Image(systemName: "scope")
-                .font(.system(size: 16))
-                .foregroundColor(.white)
-                .frame(width: 44, height: 44)
-                .background(Color.blue.opacity(0.8))
-                .clipShape(Circle())
-                .shadow(radius: 4)
         }
     }
 
@@ -193,7 +172,6 @@ struct NaverMapScreen: View {
         .cornerRadius(6)
         .shadow(radius: 1)
     }
-
 
     private func setupLocationManager() {
         locationManager.locationUpdateHandler = { location in
