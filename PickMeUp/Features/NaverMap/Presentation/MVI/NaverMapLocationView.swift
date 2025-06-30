@@ -139,7 +139,6 @@ final class MapCoordinator: NSObject {
     private func setupCenterPinMarker(_ mapView: NMFMapView) {
         let marker = NMFMarker()
         marker.position = mapView.cameraPosition.target
-        marker.iconImage = NMFOverlayImage(name: "ic_map_pin")
         marker.anchor = CGPoint(x: 0.5, y: 1.0)
         marker.mapView = mapView
         self.centerPinMarker = marker
