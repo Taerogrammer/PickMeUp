@@ -17,6 +17,12 @@ struct NaverMapLocationView: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView {
         let containerView = UIView()
 
+        // 네이버 지도 SDK 초기화 상태 확인
+        guard let clientId = NMFAuthManager.shared().ncpKeyId, !clientId.isEmpty else {
+            print("❌ NaverMap not initialized. Please check your App initialization.")
+            return createErrorView()
+        }
+
         // 네이버 맵 설정
         let mapView = NMFMapView()
         mapView.translatesAutoresizingMaskIntoConstraints = false
@@ -33,7 +39,6 @@ struct NaverMapLocationView: UIViewRepresentable {
         let centerMarker = NMFMarker()
         centerMarker.position = mapView.cameraPosition.target
         centerMarker.mapView = mapView
-        centerMarker.iconImage = NMFOverlayImage(name: "location_pin") ?? NMFOverlayImage.init()
 
         // 하단 확인 버튼
         let confirmButton = UIButton(type: .system)
@@ -47,6 +52,15 @@ struct NaverMapLocationView: UIViewRepresentable {
         // 버튼 액션을 위한 target 설정
         let target = MapButtonTarget(mapView: mapView, onLocationSelected: onLocationSelected)
         confirmButton.addTarget(target, action: #selector(MapButtonTarget.confirmLocation), for: .touchUpInside)
+
+        // target과 delegate를 containerView에 저장하여 메모리에서 해제되지 않도록 함
+        let cameraDelegate = MapCameraDelegate { cameraPosition in
+            centerMarker.position = cameraPosition.target
+        }
+        mapView.addCameraDelegate(delegate: cameraDelegate)
+
+        objc_setAssociatedObject(containerView, "buttonTarget", target, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        objc_setAssociatedObject(containerView, "cameraDelegate", cameraDelegate, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
 
         // 레이아웃 설정
         containerView.addSubview(mapView)
@@ -66,17 +80,35 @@ struct NaverMapLocationView: UIViewRepresentable {
             confirmButton.heightAnchor.constraint(equalToConstant: 50)
         ])
 
-        // 지도 이동시 마커 위치 업데이트
-        mapView.addCameraDelegate(delegate: MapCameraDelegate { cameraPosition in
-            centerMarker.position = cameraPosition.target
-        })
-
         return containerView
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {}
-}
 
+    // 오류 발생 시 표시할 뷰
+    private func createErrorView() -> UIView {
+        let errorView = UIView()
+        errorView.backgroundColor = UIColor.systemBackground
+
+        let label = UILabel()
+        label.text = "지도를 불러올 수 없습니다.\n네이버 지도 설정을 확인해주세요."
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        label.textColor = UIColor.label
+        label.translatesAutoresizingMaskIntoConstraints = false
+
+        errorView.addSubview(label)
+
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: errorView.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: errorView.centerYAnchor),
+            label.leadingAnchor.constraint(greaterThanOrEqualTo: errorView.leadingAnchor, constant: 20),
+            label.trailingAnchor.constraint(lessThanOrEqualTo: errorView.trailingAnchor, constant: -20)
+        ])
+
+        return errorView
+    }
+}
 
 class MapButtonTarget: NSObject {
     let mapView: NMFMapView
