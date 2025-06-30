@@ -18,11 +18,12 @@ struct NaverMapScreen: View {
     @State private var selectedAddress: String = ""
 
     var body: some View {
-        ZStack {
-            mapView
-            topNavigationBar
-            currentLocationButton // ✅ 갈색 현재 위치 버튼 추가됨
-            currentLocationInfo
+        VStack(spacing: 0) {
+            ZStack {
+                mapView
+                topNavigationBar
+                currentLocationButton // ✅ 갈색 현재 위치 버튼
+            }
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
@@ -80,7 +81,6 @@ struct NaverMapScreen: View {
             .cornerRadius(8)
     }
 
-    // ✅ 현재 위치 버튼 - 새로 추가된 코드
     private var currentLocationButton: some View {
         VStack {
             Spacer()
@@ -109,68 +109,6 @@ struct NaverMapScreen: View {
                 .padding(.bottom, 160) // 주소 카드와 겹치지 않게 조정
             }
         }
-    }
-
-    @ViewBuilder
-    private var currentLocationInfo: some View {
-        if let location = locationManager.currentLocation {
-            VStack {
-                HStack {
-                    locationInfoCard(for: location)
-                    Spacer()
-                    if let selectedCoord = selectedCoordinate {
-                        addressLocationCard(for: selectedCoord)
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 120)
-                Spacer()
-            }
-        }
-    }
-
-    private func locationInfoCard(for location: CLLocation) -> some View {
-        VStack(spacing: 4) {
-            HStack {
-                Circle()
-                    .fill(Color.blue)
-                    .frame(width: 8, height: 8)
-                Text("현재 위치")
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-            }
-
-            Text("\(location.coordinate.latitude, specifier: "%.4f"), \(location.coordinate.longitude, specifier: "%.4f")")
-                .font(.caption2)
-                .foregroundColor(.blackSprout)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
-        .background(Color.white.opacity(0.9))
-        .cornerRadius(6)
-        .shadow(radius: 1)
-    }
-
-    private func addressLocationCard(for coordinate: CLLocationCoordinate2D) -> some View {
-        VStack(spacing: 4) {
-            HStack {
-                Image(systemName: "mappin")
-                    .foregroundColor(.blue)
-                    .font(.system(size: 8))
-                Text("배달위치")
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-            }
-
-            Text("\(coordinate.latitude, specifier: "%.4f"), \(coordinate.longitude, specifier: "%.4f")")
-                .font(.caption2)
-                .foregroundColor(.blackSprout)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
-        .background(Color.white.opacity(0.9))
-        .cornerRadius(6)
-        .shadow(radius: 1)
     }
 
     private func setupLocationManager() {
