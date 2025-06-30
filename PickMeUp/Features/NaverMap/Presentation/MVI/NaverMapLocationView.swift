@@ -15,15 +15,38 @@ struct NaverMapLocationView: UIViewRepresentable {
     let onDismiss: () -> Void
 
     func makeUIView(context: Context) -> UIView {
-        let containerView = UIView()
-
         // 네이버 지도 SDK 초기화 상태 확인
-        guard let clientId = NMFAuthManager.shared().ncpKeyId, !clientId.isEmpty else {
-            print("❌ NaverMap not initialized. Please check your App initialization.")
+        guard NaverMapConfiguration.shared.isReady else {
+            print("❌ NaverMap not initialized properly")
             return createErrorView()
         }
 
-        // 네이버 맵 설정
+        return createMapView()
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {}
+
+    private func createMapView() -> UIView {
+        let containerView = UIView()
+
+        // 지도 뷰 생성
+        let mapView = createNMFMapView()
+        let confirmButton = createConfirmButton(for: mapView)
+        let centerMarker = createCenterMarker(for: mapView)
+
+        // 지도 카메라 델리게이트 설정
+        setupCameraDelegate(for: mapView, marker: centerMarker)
+
+        // 메모리 관리를 위한 객체 저장
+        storeObjectsInContainer(containerView, mapView: mapView)
+
+        // 레이아웃 설정
+        setupLayout(in: containerView, mapView: mapView, confirmButton: confirmButton)
+
+        return containerView
+    }
+
+    private func createNMFMapView() -> NMFMapView {
         let mapView = NMFMapView()
         mapView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -35,34 +58,52 @@ struct NaverMapLocationView: UIViewRepresentable {
         )
         mapView.moveCamera(NMFCameraUpdate(position: cameraPosition))
 
-        // 지도 중앙에 마커 표시
-        let centerMarker = NMFMarker()
-        centerMarker.position = mapView.cameraPosition.target
-        centerMarker.mapView = mapView
+        return mapView
+    }
 
-        // 하단 확인 버튼
-        let confirmButton = UIButton(type: .system)
-        confirmButton.setTitle("이 위치로 설정", for: .normal)
-        confirmButton.backgroundColor = UIColor.systemBlue
-        confirmButton.setTitleColor(.white, for: .normal)
-        confirmButton.layer.cornerRadius = 12
-        confirmButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        confirmButton.translatesAutoresizingMaskIntoConstraints = false
+    private func createCenterMarker(for mapView: NMFMapView) -> NMFMarker {
+        let marker = NMFMarker()
+        marker.position = mapView.cameraPosition.target
+        marker.mapView = mapView
+        return marker
+    }
 
-        // 버튼 액션을 위한 target 설정
+    private func createConfirmButton(for mapView: NMFMapView) -> UIButton {
+        let button = UIButton(type: .system)
+        button.setTitle("이 위치로 설정", for: .normal)
+        button.backgroundColor = UIColor.systemBlue
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 12
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        button.translatesAutoresizingMaskIntoConstraints = false
+
+        // 버튼 액션 설정
         let target = MapButtonTarget(mapView: mapView, onLocationSelected: onLocationSelected)
-        confirmButton.addTarget(target, action: #selector(MapButtonTarget.confirmLocation), for: .touchUpInside)
+        button.addTarget(target, action: #selector(MapButtonTarget.confirmLocation), for: .touchUpInside)
 
-        // target과 delegate를 containerView에 저장하여 메모리에서 해제되지 않도록 함
+        return button
+    }
+
+    private func setupCameraDelegate(for mapView: NMFMapView, marker: NMFMarker) {
         let cameraDelegate = MapCameraDelegate { cameraPosition in
-            centerMarker.position = cameraPosition.target
+            marker.position = cameraPosition.target
         }
         mapView.addCameraDelegate(delegate: cameraDelegate)
+    }
 
-        objc_setAssociatedObject(containerView, "buttonTarget", target, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    private func storeObjectsInContainer(_ containerView: UIView, mapView: NMFMapView) {
+        // 버튼 타겟과 카메라 델리게이트를 컨테이너에 저장하여 메모리 해제 방지
+        if let button = containerView.subviews.compactMap({ $0 as? UIButton }).first,
+           let target = button.allTargets.first as? MapButtonTarget {
+            objc_setAssociatedObject(containerView, "buttonTarget", target, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+
+        // 카메라 델리게이트는 별도로 저장 (weak reference 방지)
+        let cameraDelegate = MapCameraDelegate { _ in }
         objc_setAssociatedObject(containerView, "cameraDelegate", cameraDelegate, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    }
 
-        // 레이아웃 설정
+    private func setupLayout(in containerView: UIView, mapView: NMFMapView, confirmButton: UIButton) {
         containerView.addSubview(mapView)
         containerView.addSubview(confirmButton)
 
@@ -79,13 +120,8 @@ struct NaverMapLocationView: UIViewRepresentable {
             confirmButton.bottomAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.bottomAnchor, constant: -20),
             confirmButton.heightAnchor.constraint(equalToConstant: 50)
         ])
-
-        return containerView
     }
 
-    func updateUIView(_ uiView: UIView, context: Context) {}
-
-    // 오류 발생 시 표시할 뷰
     private func createErrorView() -> UIView {
         let errorView = UIView()
         errorView.backgroundColor = UIColor.systemBackground
@@ -110,13 +146,15 @@ struct NaverMapLocationView: UIViewRepresentable {
     }
 }
 
-class MapButtonTarget: NSObject {
-    let mapView: NMFMapView
-    let onLocationSelected: (CLLocationCoordinate2D, String) -> Void
+// MARK: - Map Button Target
+final class MapButtonTarget: NSObject {
+    private let mapView: NMFMapView
+    private let onLocationSelected: (CLLocationCoordinate2D, String) -> Void
 
     init(mapView: NMFMapView, onLocationSelected: @escaping (CLLocationCoordinate2D, String) -> Void) {
         self.mapView = mapView
         self.onLocationSelected = onLocationSelected
+        super.init()
     }
 
     @objc func confirmLocation() {
@@ -125,17 +163,19 @@ class MapButtonTarget: NSObject {
             longitude: mapView.cameraPosition.target.lng
         )
 
-        // 역지오코딩으로 주소 가져오기 (여기서는 더미)
+        // TODO: 실제 역지오코딩 구현
         let address = "선택된 위치의 주소"
         onLocationSelected(coordinate, address)
     }
 }
 
-class MapCameraDelegate: NSObject, NMFMapViewCameraDelegate {
-    let onCameraChange: (NMFCameraPosition) -> Void
+// MARK: - Map Camera Delegate
+final class MapCameraDelegate: NSObject, NMFMapViewCameraDelegate {
+    private let onCameraChange: (NMFCameraPosition) -> Void
 
     init(onCameraChange: @escaping (NMFCameraPosition) -> Void) {
         self.onCameraChange = onCameraChange
+        super.init()
     }
 
     func mapView(_ mapView: NMFMapView, cameraDidChangeByReason reason: Int, animated: Bool) {
