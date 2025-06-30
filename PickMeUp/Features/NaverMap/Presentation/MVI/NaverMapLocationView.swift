@@ -64,6 +64,12 @@ final class MapCoordinator: NSObject {
     private var centerPinMarker: NMFMarker?
     private var selectedCoordinate: CLLocationCoordinate2D?
 
+    // ✅ GeoCoding을 위한 주소 저장
+    private var selectedAddress: String = ""
+
+    // ✅ 디바운싱을 위한 타이머
+    private var geocodingTimer: Timer?
+
     init(
         initialLocation: CLLocationCoordinate2D?,
         currentLocation: CLLocationCoordinate2D?,
@@ -132,7 +138,7 @@ final class MapCoordinator: NSObject {
         // 현재 위치 마커 설정
         setupCurrentLocationMarker(mapView)
 
-        // 초기 선택 좌표 설정
+        // 초기 선택 좌표 설정 및 주소 조회
         updateSelectedCoordinate(mapView.cameraPosition.target)
     }
 
@@ -208,9 +214,70 @@ final class MapCoordinator: NSObject {
         mapView.moveCamera(cameraUpdate)
     }
 
+    // ✅ 중앙핀 위치 업데이트 + 디바운싱된 GeoCoding
     private func updateSelectedCoordinate(_ position: NMGLatLng) {
         selectedCoordinate = CLLocationCoordinate2D(latitude: position.lat, longitude: position.lng)
         centerPinMarker?.position = position
+
+        // 기존 타이머 취소
+        geocodingTimer?.invalidate()
+
+        // 1초 후에 GeoCoding 실행 (디바운싱)
+        geocodingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
+            guard let self = self else { return }
+            self.reverseGeocode(coordinate: CLLocationCoordinate2D(latitude: position.lat, longitude: position.lng))
+        }
+
+        print("📍 Position updated: \(position.lat), \(position.lng)")
+    }
+
+    // ✅ 역지오코딩 메서드
+    private func reverseGeocode(coordinate: CLLocationCoordinate2D) {
+        let geocoder = CLGeocoder()
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+
+        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ Geocoding error: \(error.localizedDescription)")
+                    self?.selectedAddress = "주소를 가져올 수 없습니다"
+                    return
+                }
+
+                guard let placemark = placemarks?.first else {
+                    print("❌ No placemark found")
+                    self?.selectedAddress = "주소를 찾을 수 없습니다"
+                    return
+                }
+
+                // 한국 주소 형식으로 조합
+                var addressComponents: [String] = []
+
+                if let country = placemark.country {
+                    addressComponents.append(country)
+                }
+                if let administrativeArea = placemark.administrativeArea {
+                    addressComponents.append(administrativeArea)
+                }
+                if let locality = placemark.locality {
+                    addressComponents.append(locality)
+                }
+                if let subLocality = placemark.subLocality {
+                    addressComponents.append(subLocality)
+                }
+                if let thoroughfare = placemark.thoroughfare {
+                    addressComponents.append(thoroughfare)
+                }
+                if let subThoroughfare = placemark.subThoroughfare {
+                    addressComponents.append(subThoroughfare)
+                }
+
+                let fullAddress = addressComponents.joined(separator: " ")
+                self?.selectedAddress = fullAddress.isEmpty ? "알 수 없는 위치" : fullAddress
+
+                print("✅ Address updated: \(self?.selectedAddress ?? "")")
+            }
+        }
     }
 
     private func createConfirmButton() -> UIButton {
@@ -228,9 +295,11 @@ final class MapCoordinator: NSObject {
     @objc private func confirmButtonTapped() {
         guard let coordinate = selectedCoordinate else { return }
 
-        // TODO: 실제 역지오코딩 구현 필요
-        let address = "선택된 위치의 주소"
-        onLocationSelected(coordinate, address)
+        // 타이머 정리
+        geocodingTimer?.invalidate()
+
+        // ✅ 실제 GeoCoding된 주소 사용
+        onLocationSelected(coordinate, selectedAddress)
     }
 
     private func setupLayout(in containerView: UIView, mapView: NMFMapView, confirmButton: UIButton) {
