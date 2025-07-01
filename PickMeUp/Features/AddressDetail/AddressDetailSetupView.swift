@@ -63,13 +63,6 @@ struct AddressDetailSetupView: View {
                 .foregroundColor(.blackSprout)
 
             Spacer()
-
-//            Button("완료") {
-//                saveAddress()
-//            }
-//            .font(.system(size: 16, weight: .semibold))
-//            .foregroundColor(canSave ? .deepSprout : .gray45)
-//            .disabled(!canSave)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
@@ -226,33 +219,5 @@ struct AddressDetailSetupView: View {
 
         onSave(name, selectedType, detail)
         dismiss()
-    }
-}
-
-// MARK: - 타입 선택 버튼
-struct TypeButton: View {
-    let type: LocationType
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 8) {
-                ZStack {
-                    Circle()
-                        .fill(isSelected ? Color.deepSprout : Color.gray15)
-                        .frame(width: 50, height: 50)
-
-                    Image(systemName: type.icon)
-                        .font(.system(size: 22))
-                        .foregroundColor(isSelected ? .white : .gray60)
-                }
-
-                Text(type.displayName)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(isSelected ? Color.deepSprout : .gray60)
-            }
-        }
-        .buttonStyle(PlainButtonStyle())
     }
 }
