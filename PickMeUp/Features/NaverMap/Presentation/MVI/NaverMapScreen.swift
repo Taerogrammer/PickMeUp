@@ -55,7 +55,7 @@ struct NaverMapScreen: View {
                     .opacity(0)
             }
             .padding(.horizontal, 20)
-            .padding(.top, 60)
+            .padding(.top, 20)
 
             Spacer()
         }
@@ -74,7 +74,7 @@ struct NaverMapScreen: View {
     private func navigationButton(title: String, action: @escaping () -> Void) -> some View {
         Button(title, action: action)
             .font(.system(size: 16))
-            .foregroundColor(.blackSprout)
+            .foregroundColor(.brightForsythia)
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
             .background(Color.white.opacity(0.9))
@@ -94,7 +94,7 @@ struct NaverMapScreen: View {
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
                         .frame(width: 56, height: 56)
-                        .background(Color(red: 0.8, green: 0.6, blue: 0.4)) // 갈색 톤
+                        .background(Color.blackSprout)
                         .clipShape(Circle())
                         .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
                         .rotationEffect(.degrees(locationManager.isLoading ? 360 : 0))
@@ -106,7 +106,7 @@ struct NaverMapScreen: View {
                         )
                 }
                 .padding(.trailing, 20)
-                .padding(.bottom, 200) // 주소 카드와 겹치지 않게 조정
+                .padding(.bottom, 200)
             }
         }
     }

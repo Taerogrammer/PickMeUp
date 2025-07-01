@@ -59,7 +59,7 @@ final class MapCoordinator: NSObject {
     private var currentLocation: CLLocationCoordinate2D?
     private let onLocationSelected: (CLLocationCoordinate2D, String) -> Void
     private let onDismiss: () -> Void
-    private let onCurrentLocationRequested: (() -> Void)? // ✅ 콜백 추가
+    private let onCurrentLocationRequested: (() -> Void)?
 
     // Map components
     private var mapView: NMFMapView?
@@ -78,7 +78,7 @@ final class MapCoordinator: NSObject {
         currentLocation: CLLocationCoordinate2D?,
         onLocationSelected: @escaping (CLLocationCoordinate2D, String) -> Void,
         onDismiss: @escaping () -> Void,
-        onCurrentLocationRequested: (() -> Void)? = nil // ✅ 콜백 파라미터 추가
+        onCurrentLocationRequested: (() -> Void)? = nil
     ) {
         self.initialLocation = initialLocation
         self.currentLocation = currentLocation
@@ -97,11 +97,9 @@ final class MapCoordinator: NSObject {
         let containerView = UIView()
         let mapView = createMapView()
         let addressCard = createAddressCard()
-        // ✅ currentLocationButton 제거 - Screen에서 처리
 
         containerView.addSubview(mapView)
         containerView.addSubview(addressCard)
-        // ✅ currentLocationButton 서브뷰 추가 제거
 
         setupConstraints(containerView: containerView, mapView: mapView, addressCard: addressCard)
         setupMapComponents(mapView)
