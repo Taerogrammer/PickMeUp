@@ -26,12 +26,68 @@ enum MapMarkerType {
     case selectedLocation
 }
 
-struct NaverMapLocationView: UIViewRepresentable {
+struct NaverMapLocationView: View {
     let initialLocation: CLLocationCoordinate2D?
     let currentLocation: CLLocationCoordinate2D?
     let onLocationSelected: (CLLocationCoordinate2D, String) -> Void
     let onDismiss: () -> Void
-    let onCurrentLocationRequested: (() -> Void)? // ✅ 현재 위치 요청 콜백 추가
+    let onCurrentLocationRequested: (() -> Void)?
+
+    @State private var showingAddressDetail = false
+    @State private var selectedCoordinate: CLLocationCoordinate2D?
+    @State private var selectedAddress: String = ""
+
+    var body: some View {
+        NaverMapRepresentable(
+            initialLocation: initialLocation,
+            currentLocation: currentLocation,
+            onLocationConfirmed: { coordinate, address in
+                // '이 위치로 설정' 버튼 클릭 시
+                selectedCoordinate = coordinate
+                selectedAddress = address
+                showingAddressDetail = true
+            },
+            onDismiss: onDismiss,
+            onCurrentLocationRequested: onCurrentLocationRequested
+        )
+        .navigationDestination(isPresented: $showingAddressDetail) {
+            if let coordinate = selectedCoordinate {
+                AddressDetailSetupView(
+                    selectedLocation: Location(
+                        id: UUID().uuidString,
+                        name: nil,
+                        address: selectedAddress,
+                        latitude: coordinate.latitude,
+                        longitude: coordinate.longitude,
+                        type: .custom
+                    ),
+                    onSave: { name, type, detail in
+                        // AddressDetailSetupView에서 저장 완료 시
+                        LocationManager.shared.updateSelectedLocation(
+                            name: name,
+                            type: type,
+                            latitude: coordinate.latitude,
+                            longitude: coordinate.longitude,
+                            address: selectedAddress,
+                            detailAddress: detail.isEmpty ? nil : detail
+                        )
+
+                        // 원래 콜백 호출 (지도 닫기 등)
+                        onLocationSelected(coordinate, selectedAddress)
+                    }
+                )
+            }
+        }
+    }
+}
+
+// MARK: - UIViewRepresentable (기존 코드와 동일, 콜백만 수정)
+struct NaverMapRepresentable: UIViewRepresentable {
+    let initialLocation: CLLocationCoordinate2D?
+    let currentLocation: CLLocationCoordinate2D?
+    let onLocationConfirmed: (CLLocationCoordinate2D, String) -> Void
+    let onDismiss: () -> Void
+    let onCurrentLocationRequested: (() -> Void)?
 
     func makeUIView(context: Context) -> UIView {
         let coordinator = context.coordinator
@@ -46,18 +102,18 @@ struct NaverMapLocationView: UIViewRepresentable {
         MapCoordinator(
             initialLocation: initialLocation,
             currentLocation: currentLocation,
-            onLocationSelected: onLocationSelected,
+            onLocationConfirmed: onLocationConfirmed,
             onDismiss: onDismiss,
-            onCurrentLocationRequested: onCurrentLocationRequested // ✅ 콜백 전달
+            onCurrentLocationRequested: onCurrentLocationRequested
         )
     }
 }
 
-// MARK: - Map Coordinator
+// MARK: - Map Coordinator (confirmButtonTapped만 수정)
 final class MapCoordinator: NSObject {
     private let initialLocation: CLLocationCoordinate2D?
     private var currentLocation: CLLocationCoordinate2D?
-    private let onLocationSelected: (CLLocationCoordinate2D, String) -> Void
+    private let onLocationConfirmed: (CLLocationCoordinate2D, String) -> Void
     private let onDismiss: () -> Void
     private let onCurrentLocationRequested: (() -> Void)?
 
@@ -76,18 +132,19 @@ final class MapCoordinator: NSObject {
     init(
         initialLocation: CLLocationCoordinate2D?,
         currentLocation: CLLocationCoordinate2D?,
-        onLocationSelected: @escaping (CLLocationCoordinate2D, String) -> Void,
+        onLocationConfirmed: @escaping (CLLocationCoordinate2D, String) -> Void,
         onDismiss: @escaping () -> Void,
         onCurrentLocationRequested: (() -> Void)? = nil
     ) {
         self.initialLocation = initialLocation
         self.currentLocation = currentLocation
-        self.onLocationSelected = onLocationSelected
+        self.onLocationConfirmed = onLocationConfirmed
         self.onDismiss = onDismiss
         self.onCurrentLocationRequested = onCurrentLocationRequested
         super.init()
     }
 
+    // MARK: - 기존 메서드들 (변경 없음)
     func createMapContainer() -> UIView {
         guard NaverMapConfiguration.shared.isReady else {
             print("❌ NaverMap not initialized properly")
@@ -242,9 +299,6 @@ final class MapCoordinator: NSObject {
 
                 var addressComponents: [String] = []
 
-                if let country = placemark.country {
-                    addressComponents.append(country)
-                }
                 if let administrativeArea = placemark.administrativeArea {
                     addressComponents.append(administrativeArea)
                 }
@@ -312,6 +366,7 @@ final class MapCoordinator: NSObject {
         detailButton.contentHorizontalAlignment = .leading
         detailButton.translatesAutoresizingMaskIntoConstraints = false
 
+        // ✅ 버튼은 기존과 동일하게 유지
         let confirmButton = UIButton(type: .system)
         confirmButton.setTitle("이 위치로 설정", for: .normal)
         confirmButton.backgroundColor = UIColor(.deepSprout)
@@ -366,21 +421,6 @@ final class MapCoordinator: NSObject {
         return cardView
     }
 
-    private func createCurrentLocationButton() -> UIButton {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "location.fill"), for: .normal)
-        button.tintColor = .white
-        button.backgroundColor = UIColor(red: 0.8, green: 0.6, blue: 0.4, alpha: 1.0)
-        button.layer.cornerRadius = 25
-        button.layer.shadowColor = UIColor.black.cgColor
-        button.layer.shadowOffset = CGSize(width: 0, height: 2)
-        button.layer.shadowRadius = 8
-        button.layer.shadowOpacity = 0.2
-        button.translatesAutoresizingMaskIntoConstraints = false
-
-        return button
-    }
-
     private func updateAddressUI() {
         loadingIndicator?.stopAnimating()
         addressLabel?.text = selectedAddress
@@ -391,10 +431,17 @@ final class MapCoordinator: NSObject {
         addressLabel?.text = "주소를 찾고 있어요..."
     }
 
+    // ✅ 핵심: 여기서 AddressDetailSetupView로 이동
     @objc private func confirmButtonTapped() {
         guard let coordinate = selectedCoordinate else { return }
         geocodingTimer?.invalidate()
-        onLocationSelected(coordinate, selectedAddress)
+
+        print("🗺️ 지도에서 위치 선택:")
+        print("   - 좌표: \(coordinate)")
+        print("   - 주소: \(selectedAddress)")
+
+        // AddressDetailSetupView로 이동하기 위해 콜백 호출
+        onLocationConfirmed(coordinate, selectedAddress)
     }
 
     private func setupConstraints(containerView: UIView, mapView: NMFMapView, addressCard: UIView) {

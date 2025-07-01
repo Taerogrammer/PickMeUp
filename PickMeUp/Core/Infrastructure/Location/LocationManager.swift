@@ -11,12 +11,17 @@ import SwiftUI
 
 // MARK: - Location Manager
 final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+    static let shared = LocationManager() // 싱글톤 추가
+
     private let locationManager = CLLocationManager()
 
     @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
     @Published var currentLocation: CLLocation?
     @Published var isLoading = false
     @Published var errorMessage: String?
+
+    // 추가: 선택된 주소 정보
+    @Published var selectedLocation: SelectedLocationInfo?
 
     var locationUpdateHandler: ((CLLocation) -> Void)?
     var errorHandler: ((String) -> Void)?
@@ -76,6 +81,68 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         UIApplication.shared.open(settingsUrl)
     }
 
+    // MARK: - 추가: 주소 선택 관련 메서드
+
+    /// 사용자가 선택한 주소로 위치를 업데이트합니다
+    func updateSelectedLocation(name: String, type: LocationType, latitude: Double, longitude: Double, address: String, detailAddress: String?) {
+        let newLocation = SelectedLocationInfo(
+            name: name,
+            type: type,
+            latitude: latitude,
+            longitude: longitude,
+            address: address,
+            detailAddress: detailAddress
+        )
+
+        selectedLocation = newLocation
+        currentLocation = CLLocation(latitude: latitude, longitude: longitude)
+
+        print("📍 위치 업데이트됨: \(name) (\(latitude), \(longitude))")
+    }
+
+    /// 현재 GPS 위치를 선택된 위치로 설정합니다
+    func useCurrentLocationAsSelected() {
+        guard let location = currentLocation else {
+            handleError("현재 위치를 찾을 수 없습니다.")
+            return
+        }
+
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
+            DispatchQueue.main.async {
+                if let placemark = placemarks?.first {
+                    let address = self?.formatAddress(from: placemark) ?? "주소를 찾을 수 없습니다"
+
+                    self?.selectedLocation = SelectedLocationInfo(
+                        name: "현재 위치",
+                        type: .custom,
+                        latitude: location.coordinate.latitude,
+                        longitude: location.coordinate.longitude,
+                        address: address,
+                        detailAddress: nil
+                    )
+
+                    print("📍 현재 위치로 설정됨: \(address)")
+                } else {
+                    self?.selectedLocation = SelectedLocationInfo(
+                        name: "현재 위치",
+                        type: .custom,
+                        latitude: location.coordinate.latitude,
+                        longitude: location.coordinate.longitude,
+                        address: "위도: \(String(format: "%.6f", location.coordinate.latitude)), 경도: \(String(format: "%.6f", location.coordinate.longitude))",
+                        detailAddress: nil
+                    )
+                }
+            }
+        }
+    }
+
+    /// 선택된 위치를 초기화합니다
+    func clearSelectedLocation() {
+        selectedLocation = nil
+        print("📍 선택된 위치 초기화됨")
+    }
+
     // MARK: - Private Methods
 
     private func startLocationUpdate() {
@@ -88,6 +155,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         DispatchQueue.main.async { [weak self] in
             self?.errorMessage = message
             self?.errorHandler?(message)
+            self?.isLoading = false
         }
     }
 
@@ -95,6 +163,28 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         DispatchQueue.main.async { [weak self] in
             self?.errorMessage = nil
         }
+    }
+
+    private func formatAddress(from placemark: CLPlacemark) -> String {
+        var addressComponents: [String] = []
+
+        if let administrativeArea = placemark.administrativeArea {
+            addressComponents.append(administrativeArea)
+        }
+        if let locality = placemark.locality {
+            addressComponents.append(locality)
+        }
+        if let subLocality = placemark.subLocality {
+            addressComponents.append(subLocality)
+        }
+        if let thoroughfare = placemark.thoroughfare {
+            addressComponents.append(thoroughfare)
+        }
+        if let subThoroughfare = placemark.subThoroughfare {
+            addressComponents.append(subThoroughfare)
+        }
+
+        return addressComponents.joined(separator: " ")
     }
 
     // MARK: - CLLocationManagerDelegate
@@ -154,3 +244,45 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         handleError(message)
     }
 }
+
+
+
+// MARK: - 선택된 위치 정보 모델
+struct SelectedLocationInfo: Equatable {
+    let name: String
+    let type: LocationType
+    let latitude: Double
+    let longitude: Double
+    let address: String
+    let detailAddress: String?
+
+    var displayName: String {
+        return name
+    }
+
+    var fullAddress: String {
+        if let detail = detailAddress, !detail.isEmpty {
+            return "\(address) \(detail)"
+        }
+        return address
+    }
+
+    var coordinates: (latitude: Double, longitude: Double) {
+        return (latitude, longitude)
+    }
+
+    var clLocation: CLLocation {
+        return CLLocation(latitude: latitude, longitude: longitude)
+    }
+
+    // Equatable 구현
+    static func == (lhs: SelectedLocationInfo, rhs: SelectedLocationInfo) -> Bool {
+        return lhs.name == rhs.name &&
+               lhs.type == rhs.type &&
+               lhs.latitude == rhs.latitude &&
+               lhs.longitude == rhs.longitude &&
+               lhs.address == rhs.address &&
+               lhs.detailAddress == rhs.detailAddress
+    }
+}
+
