@@ -371,7 +371,7 @@ struct AddressSearchEffect {
         }
     }
 
-    // 네이버 지오코딩 API 호출 (현재는 더미 데이터 사용)
+    // 네이버 지오코딩 API 호출
     private func searchAddressFromNaverAPI(query: String, store: AddressSearchStore) async {
         await MainActor.run {
             store.send(.searchStarted)
@@ -387,62 +387,14 @@ struct AddressSearchEffect {
                     store.send(.searchSucceeded(results))
                 }
             }
-        } catch {
+        } catch let error as NaverGeocodingError {
             await MainActor.run {
                 store.send(.searchFailed(error.localizedDescription))
             }
-        }
-    }
-
-    // 더미 검색 결과 생성
-    private func generateMockSearchResults(for query: String) -> [Location] {
-        let mockLocations = [
-            Location(
-                id: UUID().uuidString,
-                name: "롯데월드타워",
-                address: "서울특별시 송파구 올림픽로 300",
-                latitude: 37.5125,
-                longitude: 127.1025,
-                type: .custom
-            ),
-            Location(
-                id: UUID().uuidString,
-                name: "강남역",
-                address: "서울특별시 강남구 강남대로 390",
-                latitude: 37.4979,
-                longitude: 127.0276,
-                type: .custom
-            ),
-            Location(
-                id: UUID().uuidString,
-                name: "선릉역",
-                address: "서울특별시 강남구 테헤란로 427",
-                latitude: 37.5046,
-                longitude: 127.0492,
-                type: .custom
-            ),
-            Location(
-                id: UUID().uuidString,
-                name: "코엑스",
-                address: "서울특별시 강남구 영동대로 513",
-                latitude: 37.5115,
-                longitude: 127.0590,
-                type: .custom
-            ),
-            Location(
-                id: UUID().uuidString,
-                name: nil,
-                address: "서울특별시 강남구 테헤란로 152길 15",
-                latitude: 37.5012,
-                longitude: 127.0396,
-                type: .custom
-            )
-        ]
-
-        // 검색어와 부분 일치하는 결과만 반환
-        return mockLocations.filter { location in
-            location.address.localizedCaseInsensitiveContains(query) ||
-            (location.name?.localizedCaseInsensitiveContains(query) ?? false)
+        } catch {
+            await MainActor.run {
+                store.send(.searchFailed("네트워크 오류가 발생했습니다. 다시 시도해주세요."))
+            }
         }
     }
 }
