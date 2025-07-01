@@ -22,7 +22,7 @@ struct NaverMapScreen: View {
             ZStack {
                 mapView
                 topNavigationBar
-                currentLocationButton // ✅ 갈색 현재 위치 버튼
+                currentLocationButton
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -93,7 +93,7 @@ struct NaverMapScreen: View {
                     Image(systemName: locationManager.isLoading ? "arrow.clockwise" : "location.fill")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
-                        .frame(width: 56, height: 56) // 조금 더 크게
+                        .frame(width: 56, height: 56)
                         .background(Color(red: 0.8, green: 0.6, blue: 0.4)) // 갈색 톤
                         .clipShape(Circle())
                         .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
@@ -106,7 +106,7 @@ struct NaverMapScreen: View {
                         )
                 }
                 .padding(.trailing, 20)
-                .padding(.bottom, 160) // 주소 카드와 겹치지 않게 조정
+                .padding(.bottom, 200) // 주소 카드와 겹치지 않게 조정
             }
         }
     }

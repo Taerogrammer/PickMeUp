@@ -309,14 +309,14 @@ final class MapCoordinator: NSObject {
 
         let detailButton = UIButton(type: .system)
         detailButton.setTitle("상세 주소 입력", for: .normal)
-        detailButton.setTitleColor(UIColor(red: 0.8, green: 0.6, blue: 0.4, alpha: 1.0), for: .normal)
+        detailButton.setTitleColor(UIColor(.deepSprout), for: .normal)
         detailButton.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         detailButton.contentHorizontalAlignment = .leading
         detailButton.translatesAutoresizingMaskIntoConstraints = false
 
         let confirmButton = UIButton(type: .system)
         confirmButton.setTitle("이 위치로 설정", for: .normal)
-        confirmButton.backgroundColor = UIColor(red: 0.2, green: 0.5, blue: 1.0, alpha: 1.0)
+        confirmButton.backgroundColor = UIColor(.deepSprout)
         confirmButton.setTitleColor(.white, for: .normal)
         confirmButton.layer.cornerRadius = 12
         confirmButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
@@ -406,11 +406,9 @@ final class MapCoordinator: NSObject {
             mapView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             mapView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
 
-            // ✅ currentLocationButton 관련 제약 조건 제거
-
             addressCard.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             addressCard.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            addressCard.bottomAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.bottomAnchor)
+            addressCard.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
         ])
     }
 
