@@ -14,6 +14,7 @@ struct LocationManagementView: View {
     @State private var searchText = ""
     @State private var showingNaverMap = false
     @State private var showingLocationAlert = false
+    @State private var showingAddressSearch = false
     @StateObject private var locationManager = LocationManager()
 
     var body: some View {
@@ -26,7 +27,11 @@ struct LocationManagementView: View {
             .background(Color.white)
             .navigationDestination(isPresented: $showingNaverMap) {
                 NaverMapScreen { selectedLocation in
-                    // 지도에서 선택된 위치 처리
+                    onIntent(.selectLocation(selectedLocation))
+                }
+            }
+            .navigationDestination(isPresented: $showingAddressSearch) {
+                AddressSearchView { selectedLocation in
                     onIntent(.selectLocation(selectedLocation))
                 }
             }
@@ -46,12 +51,10 @@ struct LocationManagementView: View {
     }
 
     private func setupLocationManager() {
-        // 위치 업데이트 성공해도 지도는 열지 않음 (단순 로그만)
         locationManager.locationUpdateHandler = { location in
             print("위치 업데이트 완료: \(location)")
         }
 
-        // 오류 발생 시 알림 표시
         locationManager.errorHandler = { error in
             print("위치 오류: \(error)")
         }
@@ -88,28 +91,29 @@ struct LocationManagementView: View {
 
     private var searchSection: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 12) {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 16))
-                    .foregroundColor(.deepSprout)
+            Button(action: {
+                showingAddressSearch = true
+            }) {
+                HStack(spacing: 12) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 16))
+                        .foregroundColor(.deepSprout)
 
-                TextField("도로명, 건물명 또는 지번으로 검색", text: $searchText)
-                    .font(.system(size: 16))
-                    .foregroundColor(.blackSprout)
-                    .onSubmit {
-                        if !searchText.isEmpty {
-                            onIntent(.searchAddress(searchText))
-                        }
-                    }
+                    Text("도로명, 건물명 또는 지번으로 검색")
+                        .font(.system(size: 16))
+                        .foregroundColor(.gray60)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
+                .background(Color.white)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.deepSprout.opacity(0.3), lineWidth: 1.5)
+                )
+                .cornerRadius(12)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
-            .background(Color.white)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.deepSprout.opacity(0.3), lineWidth: 1.5)
-            )
-            .cornerRadius(12)
+            .buttonStyle(PlainButtonStyle())
             .padding(.horizontal, 20)
             .padding(.top, 20)
             .padding(.bottom, 24)
@@ -119,75 +123,12 @@ struct LocationManagementView: View {
 
     private var mainContentSection: some View {
         VStack(spacing: 0) {
-            searchResultsSection
             currentLocationButton
             savedAddressesSection
             errorMessageSection
             Spacer()
         }
         .background(Color.white)
-    }
-
-    private var searchResultsSection: some View {
-        Group {
-            if state.isLoading {
-                HStack {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                        .tint(.deepSprout)
-                    Text("검색 중...")
-                        .font(.system(size: 14))
-                        .foregroundColor(.gray45)
-                }
-                .padding(.vertical, 32)
-            } else if !state.searchResults.isEmpty {
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(state.searchResults, id: \.self) { result in
-                            searchResultRow(result)
-
-                            if result != state.searchResults.last {
-                                Divider()
-                                    .padding(.horizontal, 20)
-                            }
-                        }
-                    }
-                }
-                .frame(maxHeight: 200)
-                .background(Color.white)
-                .cornerRadius(12)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
-            }
-        }
-    }
-
-    private func searchResultRow(_ result: String) -> some View {
-        Button(action: {
-            if let location = LocationDummyData.searchResultLocations.first(where: { $0.address == result }) {
-                onIntent(.selectLocation(location))
-            }
-        }) {
-            HStack {
-                Circle()
-                    .fill(Color.deepSprout.opacity(0.2))
-                    .frame(width: 8, height: 8)
-
-                Text(result)
-                    .font(.system(size: 16))
-                    .foregroundColor(.blackSprout)
-                    .multilineTextAlignment(.leading)
-
-                Spacer()
-
-                Image(systemName: "arrow.up.right")
-                    .font(.system(size: 12))
-                    .foregroundColor(.gray45)
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-        }
-        .buttonStyle(PlainButtonStyle())
     }
 
     private var currentLocationButton: some View {
@@ -216,20 +157,16 @@ struct LocationManagementView: View {
         .buttonStyle(PlainButtonStyle())
         .padding(.horizontal, 20)
         .padding(.top, 32)
-        .padding(.bottom, 32)
+        .padding(.bottom, 16) // ✅ 간격 조정
     }
 
     private func handleCurrentLocationTap() {
-        // 단순히 권한 체크만 하고 지도는 절대 자동으로 열지 않음
         switch locationManager.authorizationStatus {
         case .notDetermined:
-            // 권한 요청
             locationManager.requestLocationPermission()
         case .authorizedWhenInUse, .authorizedAlways:
-            // 권한이 있으면 지도 열기
             showingNaverMap = true
         case .denied, .restricted:
-            // 권한 거부 시 알림
             showingLocationAlert = true
         @unknown default:
             break
