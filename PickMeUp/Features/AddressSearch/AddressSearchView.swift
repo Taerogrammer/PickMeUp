@@ -150,10 +150,13 @@ struct AddressSearchView: View {
                                 AddressDetailSetupView(
                                     selectedLocation: location,
                                     onSave: { name, type, detail in
-                                        print("저장됨:")
+                                        print("📍 저장된 주소 정보:")
                                         print("- 이름: \(name)")
                                         print("- 타입: \(type.displayName)")
                                         print("- 상세주소: \(detail)")
+                                        print("- 위도: \(location.latitude)")
+                                        print("- 경도: \(location.longitude)")
+                                        print("- 전체주소: \(location.address)")
 
                                         // 원래 콜백 호출 (지도에 표시 등)
                                         onAddressSelected(location)
