@@ -11,6 +11,8 @@ import SwiftUI
 struct AddressSearchView: View {
     @StateObject private var searchStore: AddressSearchStore
     @State private var searchText = ""
+    @State private var showingDetailSetup = false
+    @State private var selectedLocationForDetail: Location?
     @Environment(\.dismiss) private var dismiss
 
     let onAddressSelected: (Location) -> Void
@@ -32,6 +34,22 @@ struct AddressSearchView: View {
                 searchInputSection
                 searchResultsSection
                 Spacer()
+            }
+            .sheet(isPresented: $showingDetailSetup) {
+                if let location = selectedLocationForDetail {
+                    AddressDetailSetupView(
+                        selectedLocation: location,
+                        onSave: { name, type, detail in
+                            print("저장됨:")
+                            print("- 이름: \(name)")
+                            print("- 타입: \(type.displayName)")
+                            print("- 상세주소: \(detail)")
+
+                            // 원래 콜백 호출 (지도에 표시 등)
+                            onAddressSelected(location)
+                        }
+                    )
+                }
             }
             .background(Color.white)
             .navigationBarHidden(true)
@@ -128,13 +146,23 @@ struct AddressSearchView: View {
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         ForEach(searchStore.state.searchResults, id: \.id) { location in
-                            AddressResultRow(
-                                location: location,
-                                onTap: {
-                                    onAddressSelected(location)
-                                    dismiss()
-                                }
-                            )
+                            NavigationLink(destination:
+                                AddressDetailSetupView(
+                                    selectedLocation: location,
+                                    onSave: { name, type, detail in
+                                        print("저장됨:")
+                                        print("- 이름: \(name)")
+                                        print("- 타입: \(type.displayName)")
+                                        print("- 상세주소: \(detail)")
+
+                                        // 원래 콜백 호출 (지도에 표시 등)
+                                        onAddressSelected(location)
+                                    }
+                                )
+                            ) {
+                                AddressResultRowContent(location: location)
+                            }
+                            .buttonStyle(PlainButtonStyle())
 
                             if location.id != searchStore.state.searchResults.last?.id {
                                 Divider()
@@ -173,7 +201,7 @@ struct AddressSearchView: View {
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.blackSprout)
 
-                        Text("도로명, 건물명, 지번으로 검색 가능합니다")
+                        Text("건물명, 업체명, 도로명으로 검색 가능합니다")
                             .font(.system(size: 14))
                             .foregroundColor(.gray45)
                     }
@@ -185,9 +213,10 @@ struct AddressSearchView: View {
                             .foregroundColor(.gray60)
 
                         VStack(alignment: .leading, spacing: 4) {
-                            searchExampleRow("강남대로 382")
-                            searchExampleRow("테헤란로 427")
-                            searchExampleRow("선릉역")
+                            searchExampleRow("강남역")
+                            searchExampleRow("롯데월드타워")
+                            searchExampleRow("서울특별시 강남구 테헤란로 427")
+                            searchExampleRow("코엑스")
                         }
                     }
                     .padding(.horizontal, 20)
@@ -234,6 +263,57 @@ struct AddressSearchView: View {
         if !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             searchStore.send(.searchAddress(searchText.trimmingCharacters(in: .whitespacesAndNewlines)))
         }
+    }
+}
+
+// MARK: - 검색 결과 행 (NavigationLink용)
+struct AddressResultRowContent: View {
+    let location: Location
+
+    var body: some View {
+        HStack(spacing: 16) {
+            // 위치 아이콘
+            ZStack {
+                Circle()
+                    .fill(Color.deepSprout.opacity(0.1))
+                    .frame(width: 44, height: 44)
+
+                Image(systemName: "mappin.circle.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(.deepSprout)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                // 주요 주소
+                Text(location.address)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.blackSprout)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(2)
+
+                // 건물명
+                if let name = location.name, !name.isEmpty {
+                    Text(name)
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray60)
+                        .lineLimit(1)
+                }
+
+                // 좌표 정보
+                Text("위도: \(String(format: "%.6f", location.latitude)), 경도: \(String(format: "%.6f", location.longitude))")
+                    .font(.system(size: 12))
+                    .foregroundColor(.gray45)
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14))
+                .foregroundColor(.gray45)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
     }
 }
 
