@@ -16,4 +16,6 @@ enum APIEnvironment {
     var portOneUserCode: String { return Bundle.value(forKey: "PortOne_UserCode") }
     var name: String { return Bundle.value(forKey: "Name") }
     var appScheme: String { return Bundle.value(forKey: "AppScheme") }
+    var naverClientSecret: String { return Bundle.value(forKey: "Naver_Client_Secret") }
+    var naverClientID: String { return Bundle.value(forKey: "NMFNcpKeyId") }
 }

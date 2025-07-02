@@ -12,10 +12,17 @@ struct PickMeUpApp: App {
     @StateObject private var launchState = AppLaunchState()
     let container = DIContainer()
 
+    init() {
+        setupApplication()
+    }
+
     var body: some Scene {
         WindowGroup {
             AppRootView(container: container)
                 .environmentObject(launchState)
         }
+    }
+    private func setupApplication() {
+        NaverMapConfiguration.shared.initialize()
     }
 }

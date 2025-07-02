@@ -13,7 +13,7 @@ struct StoreEstimatedTimeView: View {
     var body: some View {
         HStack {
             Label(
-                "예상 소요시간 \(entity.estimatedPickupTime)분 (\(entity.distance))",
+                "예상 소요시간 \(entity.estimatedPickupTime)분",
                 systemImage: "figure.run"
             )
             .font(.footnote)
