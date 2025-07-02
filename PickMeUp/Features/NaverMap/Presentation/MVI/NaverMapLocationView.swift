@@ -9,7 +9,6 @@ import CoreLocation
 import SwiftUI
 import NMapsMap
 
-
 struct NaverMapLocationView: View {
     let initialLocation: CLLocationCoordinate2D?
     let currentLocation: CLLocationCoordinate2D?
@@ -26,7 +25,6 @@ struct NaverMapLocationView: View {
             initialLocation: initialLocation,
             currentLocation: currentLocation,
             onLocationConfirmed: { coordinate, address in
-                // '이 위치로 설정' 버튼 클릭 시
                 selectedCoordinate = coordinate
                 selectedAddress = address
                 showingAddressDetail = true
@@ -46,7 +44,6 @@ struct NaverMapLocationView: View {
                         type: .custom
                     ),
                     onSave: { name, type, detail in
-                        // AddressDetailSetupView에서 저장 완료 시
                         LocationManager.shared.updateSelectedLocation(
                             name: name,
                             type: type,
@@ -56,7 +53,6 @@ struct NaverMapLocationView: View {
                             detailAddress: detail.isEmpty ? nil : detail
                         )
 
-                        // 원래 콜백 호출 (지도 닫기 등)
                         onLocationSelected(coordinate, selectedAddress)
                     }
                 )
