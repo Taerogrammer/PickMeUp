@@ -47,7 +47,9 @@ PG 연동 결제, 실시간 채팅, 지도 기반 매장 탐색 등 실제 서�
 
 ## 🛠️ 아키텍처 & 디자인 패턴 (Architecture & Design Pattern)
 
-<img src="https://github.com/user-attachments/assets/architecture_diagram" width="600" />
+<img src="https://github.com/user-attachments/assets/aa746aae-3991-40b6-8ae2-c52f130d1e95" width="1000" />
+
+<br>
 
 - **`MVI(Model-View-Intent)`** 기반 아키텍처를 적용하여 단방향 데이터 흐름을 구성  
 - 모든 유저 인터랙션을 `Action(Intent)`으로 정의하여 상태 변화가 명확하고 예측 가능하게 구성  
