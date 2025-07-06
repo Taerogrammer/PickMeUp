@@ -1,9 +1,9 @@
 # 🧁 픽미업 (PickMeUp)  
 > 위치 기반 디저트 픽업 예약 서비스 🍰📍
 
-`픽미업`은 내 주변 디저트 매장을 탐색하고, 간편 결제를 통해 픽업까지 완료할 수 있는 iOS 기반 위치 기반 서비스입니다.
+`픽미업`은 내 주변 디저트 매장을 탐색하고, 간편 결제를 통해 픽업까지 완료할 수 있는 iOS 앱입니다.
 
-PG 연동 결제, 실시간 채팅, 지도 기반 매장 탐색 등 실제 서비스에 필요한 핵심 기능을 구현하여, 매장 탐색부터 주문, 결제, 픽업까지의 전 과정을 하나의 앱 안에서 완성할 수 있습니다.
+PG 연동 결제, 실시간 채팅, 지도 기반 매장 탐색 등 실제 서비스에 필요한 핵심 기능을 구현하여, 매장 탐색부터 주문, 결제, 픽업까지의 전 과정을 구현했습니다.
 
 <br><br>
 
@@ -11,7 +11,7 @@ PG 연동 결제, 실시간 채팅, 지도 기반 매장 탐색 등 실제 서�
 
 | 매장 탐색 | 상품 상세 | 주문 및 결제 | 실시간 채팅 |
 |:--:|:--:|:--:|:--:|
-| <img src="https://github.com/user-attachments/assets/screenshot1" width="300" /> | <img src="https://github.com/user-attachments/assets/screenshot2" width="300" /> | <img src="https://github.com/user-attachments/assets/screenshot3" width="300" /> | <img src="https://github.com/user-attachments/assets/screenshot4" width="300" /> |
+| <img src="https://github.com/user-attachments/assets/8de714c4-7edd-4550-be2d-7888b8e6b875" width="300" /> | <img src="https://github.com/user-attachments/assets/22f100be-90b2-4343-afc4-04689b040fda" width="300" /> | <img src="https://github.com/user-attachments/assets/4d3b7e08-bbc1-4907-950a-7adf1192d020" width="300" /> | <img src="https://github.com/user-attachments/assets/4cac3016-f90b-43d6-89f7-a65c025bc486" width="300" /> |
 
 <br>
 
@@ -28,8 +28,7 @@ PG 연동 결제, 실시간 채팅, 지도 기반 매장 탐색 등 실제 서�
 결제 후 서버 기반 영수증 검증을 통해 보안성과 신뢰성을 강화했습니다.
 
 ### 실시간 채팅  
-`Socket.IO` 기반 실시간 채팅을 통해 매장과 직접 소통할 수 있습니다.  
-주문 문의, 픽업 시간 조율 등 실시간 커뮤니케이션이 가능하며, 채팅 내역은 `CoreData`에 저장되어 오프라인에서도 조회할 수 있습니다.
+`Socket.IO` 기반 실시간 채팅을 통해 다른 사용자와 직접 소통할 수 있으며, 채팅 내역은 `CoreData`에 저장되어 오프라인에서도 조회할 수 있습니다.
 
 <br><br>
 
@@ -50,11 +49,11 @@ PG 연동 결제, 실시간 채팅, 지도 기반 매장 탐색 등 실제 서�
 
 <img src="https://github.com/user-attachments/assets/architecture_diagram" width="600" />
 
-- **MVI (Model-View-Intent)** 기반 아키텍처를 적용하여 단방향 데이터 흐름을 구성  
-- 모든 유저 인터랙션을 `Action`으로 정의하여 상태 변화가 명확하고 예측 가능하게 구성  
-- **Feature 단위 모듈화**를 통해 State, Action, Reducer, Effect 등을 독립적으로 관리하고 결합도 최소화  
-- **의존성 주입(DI)** 및 **SOLID 원칙** 기반의 추상화 설계  
-- `Router Pattern`을 적용해 화면 전환과 객체 생성을 분리하여 구조적 유연성 확보  
+- **`MVI(Model-View-Intent)`** 기반 아키텍처를 적용하여 단방향 데이터 흐름을 구성  
+- 모든 유저 인터랙션을 `Action(Intent)`으로 정의하여 상태 변화가 명확하고 예측 가능하게 구성  
+- **`Feature 단위 모듈화`**를 통해 State, Action, Reducer, Effect 등을 독립적으로 관리하고 결합도 최소화  
+- **`의존성 주입(DI`)** 및 **`SOLID 원칙`** 기반 설계  
+- **`Router Pattern`**을 적용해 화면 전환과 객체 생성을 분리하여 구조적 유연성 확보  
 
 <br><br>
 
